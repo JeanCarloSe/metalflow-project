@@ -1,0 +1,103 @@
+{
+  "name": "Metalflow",
+  "description": "Premium quotation system for Aston Metalúrgica with dashboard, persistence, backup and professional UI",
+  "version": "1.0.0",
+  "author": "Jean Carlos Severino",
+  "license": "MIT",
+  "created": "2026-04-27",
+  "updated": "2026-04-28",
+  "tags": ["react", "quotation", "dashboard", "indexeddb", "recharts", "tailwindcss"],
+
+  "structure": {
+    "root": "/Users/jeancarlosseverino/Documents/metalflow-project",
+    "source": "src/",
+    "components": "src/components/",
+    "services": "src/services/",
+    "build_output": "dist/",
+    "documentation": ["DEPLOY.md", "README.md"]
+  },
+
+  "technology_stack": {
+    "frontend": {
+      "framework": "React 18.2.0",
+      "build_tool": "Vite 5.4.21",
+      "styling": "Tailwind CSS 3.3.5",
+      "charts": "Recharts 3.8.1",
+      "persistence": "IndexedDB",
+      "pdf_generation": "html2pdf.js 0.14.0"
+    },
+    "development": {
+      "language": "JavaScript/JSX",
+      "node_version": "16+",
+      "package_manager": "npm"
+    }
+  },
+
+  "features": {
+    "dashboard": {
+      "description": "Professional dashboard with multiple chart types",
+      "includes": ["Timeline chart", "Pie chart", "Funnel chart", "Status summary", "Top clients list"]
+    },
+    "quotation_system": {
+      "description": "Complete quotation management",
+      "status_types": ["em-andamento", "em-analise", "enviando", "aguardando-retorno", "em-negociacao", "aprovado", "reprovado"]
+    },
+    "persistence": {
+      "description": "Robust data persistence",
+      "includes": ["IndexedDB storage", "Auto-backup every 30 min", "localStorage sync", "Audit logs", "Soft-delete archive"]
+    },
+    "data_management": {
+      "description": "Complete data management panel",
+      "includes": ["Database status validation", "Backup/import", "Archive recovery", "Audit log viewer"]
+    },
+    "pdf_generation": {
+      "description": "Professional PDF quotations",
+      "features": ["Aston branding", "Company details", "Client info", "Quotation summary"]
+    },
+    "admin_panel": {
+      "description": "Administrative tools",
+      "modules": ["Services", "Materials", "Clients", "Users", "Prices", "Data Management"]
+    }
+  },
+
+  "key_files": {
+    "main": "src/main.jsx",
+    "app": "src/App.jsx",
+    "dashboard": "src/components/DashboardPage.jsx",
+    "persistence": "src/services/persistenceService.js",
+    "auto_backup": "src/services/autoBackupService.js",
+    "storage": "src/services/storageService.js",
+    "pdf_service": "src/services/pdfService.js",
+    "auth": "src/services/authService.js"
+  },
+
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+
+  "important_notes": [
+    "All data is stored in IndexedDB (browser local storage)",
+    "Auto-backup runs every 30 minutes to localStorage",
+    "No backend required - fully client-side application",
+    "Data persists across browser sessions and dev server restarts",
+    "Passwords are SHA-256 hashed",
+    "PDF generation happens client-side using html2pdf.js"
+  ],
+
+  "deployment": {
+    "platform": "Vercel (recommended)",
+    "build_command": "npm run build",
+    "output_directory": "dist",
+    "framework": "Vite",
+    "guide": "See DEPLOY.md for detailed instructions"
+  },
+
+  "status": "production-ready",
+  "maintenance": {
+    "last_update": "2026-04-28",
+    "last_backup": "auto-backup enabled",
+    "data_integrity": "verified"
+  }
+}
