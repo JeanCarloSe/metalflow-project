@@ -1,0 +1,296 @@
+import React, { useState, useEffect } from 'react';
+import { ASTON_BRAND, hexToRgba } from '../services/themeService';
+import { getClients, addClient, updateClient, deleteClient } from '../services/storageService';
+import { generateClientCode } from '../services/codeService';
+
+const AdminClientManager = () => {
+  const [clients, setClients] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    name: '', tagline: '', website: '', logoUrl: '', primaryColor: ASTON_BRAND,
+    contact: '', email: '', phone: ''
+  });
+
+  useEffect(() => {
+    loadClients();
+  }, []);
+
+  const loadClients = async () => {
+    try {
+      const cls = await getClients();
+      setClients(cls || []);
+    } catch (err) {
+      console.error('Erro ao carregar clientes:', err);
+      setError('Erro ao carregar clientes');
+    }
+  };
+
+  const inputCls = 'w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg font-mono text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all';
+
+  const resetForm = () => {
+    setFormData({ name: '', tagline: '', website: '', logoUrl: '', primaryColor: ASTON_BRAND, contact: '', email: '', phone: '' });
+    setEditingId(null);
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!formData.name.trim()) {
+      setError('Nome do cliente é obrigatório');
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      setError('Email é obrigatório');
+      return;
+    }
+
+    try {
+      if (editingId) {
+        const client = clients.find(c => c.id === editingId);
+        await updateClient({ ...client, ...formData });
+        setSuccess(`Cliente "${formData.name}" atualizado`);
+      } else {
+        await addClient({
+          id: `client-${Date.now()}`,
+          code: generateClientCode(),
+          ...formData,
+          quotations: [],
+          createdAt: new Date().toISOString(),
+        });
+        setSuccess(`Cliente "${formData.name}" adicionado`);
+      }
+      resetForm();
+      setShowForm(false);
+      await loadClients();
+    } catch (err) {
+      setError('Erro ao salvar cliente');
+    }
+  };
+
+  const handleEdit = (client) => {
+    setFormData({
+      name: client.name,
+      tagline: client.tagline || '',
+      website: client.website || '',
+      logoUrl: client.logoUrl || '',
+      primaryColor: client.primaryColor || ASTON_BRAND,
+      contact: client.contact || '',
+      email: client.email || '',
+      phone: client.phone || '',
+    });
+    setEditingId(client.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Remover cliente "${name}"?\n\nIsso pode afetar orçamentos existentes!`)) return;
+
+    setError('');
+    setSuccess('');
+
+    try {
+      await deleteClient(id);
+      setSuccess(`Cliente "${name}" removido`);
+      await loadClients();
+    } catch (err) {
+      setError('Erro ao remover cliente');
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-bold text-gray-100 mb-2">Gerenciar Clientes</h3>
+          <p className="text-sm text-gray-500">Adicione, edite ou remova clientes</p>
+        </div>
+        <button
+          onClick={() => {
+            resetForm();
+            setShowForm(true);
+          }}
+          className="px-4 py-2 text-sm font-mono font-bold text-white rounded-lg transition-all"
+          style={{ backgroundColor: ASTON_BRAND }}
+          onMouseEnter={e => e.target.style.filter = 'brightness(1.15)'}
+          onMouseLeave={e => e.target.style.filter = ''}
+        >
+          + Novo Cliente
+        </button>
+      </div>
+
+      {/* Formulário */}
+      {showForm && (
+        <div className="bg-gray-900/60 border border-gray-700/40 rounded-xl p-5 space-y-4">
+          <h4 className="font-semibold text-gray-100">{editingId ? '✏️ Editar Cliente' : '➕ Novo Cliente'}</h4>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="text"
+                placeholder="Nome da empresa *"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="email"
+                placeholder="Email *"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="text"
+                placeholder="Tagline / Slogan"
+                value={formData.tagline}
+                onChange={e => setFormData({ ...formData, tagline: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="tel"
+                placeholder="Telefone"
+                value={formData.phone}
+                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="text"
+                placeholder="Website"
+                value={formData.website}
+                onChange={e => setFormData({ ...formData, website: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="text"
+                placeholder="URL do Logo"
+                value={formData.logoUrl}
+                onChange={e => setFormData({ ...formData, logoUrl: e.target.value })}
+                className={inputCls}
+              />
+              <input
+                type="text"
+                placeholder="Contato (nome pessoa)"
+                value={formData.contact}
+                onChange={e => setFormData({ ...formData, contact: e.target.value })}
+                className={inputCls}
+              />
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-mono text-gray-500 uppercase">Cor Primária:</label>
+                <input
+                  type="color"
+                  value={formData.primaryColor}
+                  onChange={e => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="w-20 h-10 rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm font-mono font-bold text-white rounded-lg transition-all"
+                style={{ backgroundColor: ASTON_BRAND }}
+                onMouseEnter={e => e.target.style.filter = 'brightness(1.15)'}
+                onMouseLeave={e => e.target.style.filter = ''}
+              >
+                ✓ Salvar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm();
+                  setShowForm(false);
+                }}
+                className="px-4 py-2 text-sm font-mono text-gray-400 border border-gray-700 rounded-lg hover:text-gray-300 transition-colors"
+              >
+                ✕ Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Mensagens */}
+      {error && (
+        <div className="bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">
+          <p className="text-red-400 text-sm font-mono">✕ {error}</p>
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-950/40 border border-green-700/40 rounded-lg px-4 py-3">
+          <p className="text-green-400 text-sm font-mono">✓ {success}</p>
+        </div>
+      )}
+
+      {/* Lista de Clientes */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {clients.length === 0 ? (
+          <p className="text-gray-500 text-sm font-mono col-span-full">Nenhum cliente cadastrado</p>
+        ) : (
+          clients.map(client => (
+            <div
+              key={client.id}
+              className="bg-gray-900/60 border border-gray-700/40 rounded-xl p-4 space-y-3"
+              style={{ borderColor: hexToRgba(client.primaryColor || ASTON_BRAND, 0.3) }}
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    {client.logoUrl ? (
+                      <img src={client.logoUrl} alt={client.name} className="h-6 object-contain" onError={e => e.target.style.display = 'none'} />
+                    ) : (
+                      <div className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold" style={{ backgroundColor: hexToRgba(client.primaryColor || ASTON_BRAND, 0.3), color: client.primaryColor || ASTON_BRAND }}>
+                        {client.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <h4 className="font-semibold text-gray-100">{client.name}</h4>
+                      <p className="text-xs font-mono text-gray-600 mt-0.5">{client.code || 'S/código'}</p>
+                    </div>
+                  </div>
+                  {client.tagline && <p className="text-xs text-gray-500">{client.tagline}</p>}
+                </div>
+                <div className="w-6 h-6 rounded" style={{ backgroundColor: client.primaryColor || ASTON_BRAND }}></div>
+              </div>
+
+              <div className="space-y-1 text-xs">
+                {client.contact && <p className="text-gray-500">👤 {client.contact}</p>}
+                {client.email && <p className="text-gray-500">📧 {client.email}</p>}
+                {client.phone && <p className="text-gray-500">📞 {client.phone}</p>}
+                {client.website && (
+                  <p className="text-gray-500">
+                    🌐 <a href={client.website} target="_blank" rel="noreferrer" className="text-blue-400 hover:text-blue-300">{client.website}</a>
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-gray-700/20">
+                <button
+                  onClick={() => handleEdit(client)}
+                  className="flex-1 px-2 py-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded hover:bg-blue-950/40 transition-all"
+                >
+                  ✏ Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(client.id, client.name)}
+                  className="flex-1 px-2 py-1.5 text-xs font-mono text-red-400 hover:text-red-300 border border-red-500/40 rounded hover:bg-red-950/40 transition-all"
+                >
+                  ✕ Remover
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AdminClientManager;

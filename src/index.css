@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-primary: #f8f9fb;
+  --color-bg-secondary: #ffffff;
+  --color-accent: #0055d4;
+  --color-accent-light: #ff6633;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+}
+
+* {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 text-slate-900;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
+    font-weight: 400;
+  }
+
+  h1 {
+    @apply text-4xl font-bold tracking-tight;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  h2 {
+    @apply text-3xl font-bold tracking-tight;
+    line-height: 1.3;
+    font-weight: 700;
+  }
+
+  h3 {
+    @apply text-xl font-semibold tracking-tight;
+    line-height: 1.4;
+    font-weight: 600;
+  }
+
+  p {
+    line-height: 1.6;
+  }
+
+  label {
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  input, select, textarea {
+    letter-spacing: 0.2px;
+    line-height: 1.5;
+  }
+}
+
+/* Unificar todas as fontes - remover font-mono */
+code, pre, .font-mono {
+  font-family: inherit;
+}
+
+/* Manter tamanhos em pontos estratégicos */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.5px;
+}
+
+@layer components {
+  .card-premium {
+    @apply bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .btn-premium {
+    @apply px-6 py-3 rounded-xl font-semibold text-base transition-all duration-200 shadow-sm hover:shadow-md active:scale-95;
+    letter-spacing: 0.3px;
+  }
+
+  .input-premium {
+    @apply px-4 py-3 rounded-xl bg-white border border-slate-200 text-base text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all;
+    letter-spacing: 0.2px;
+  }
+}
