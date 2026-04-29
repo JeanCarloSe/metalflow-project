@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ASTON_BRAND, hexToRgba } from '../services/themeService';
+import { ASTON_BRAND, hexToRgba, THEME } from '../services/themeService';
 import AdminServiceManager from './AdminServiceManager';
 import AdminMaterialManager from './AdminMaterialManager';
 import AdminClientManager from './AdminClientManager';
@@ -22,23 +22,28 @@ const AdminPage = ({ currentUser, onLogout }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)' }}>
 
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/50 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-5">
+      <header className="sticky top-0 z-40 backdrop-blur-xl border-b"
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+          borderColor: 'var(--color-border-light)',
+          boxShadow: '0 4px 12px rgba(1, 112, 185, 0.08)'
+        }}>
+        <div className="max-w-7xl mx-auto px-8 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
-              <p className="text-sm text-gray-600 mt-1">
+              <h1 className="text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>⚙️ Painel Administrativo</h1>
+              <p className="text-base mt-2" style={{ color: 'var(--color-text-secondary)' }}>
                 👤 {currentUser.name} · {currentUser.login}
               </p>
             </div>
             <button
               onClick={onLogout}
-              className="px-5 py-2.5 text-base text-slate-600 hover:text-red-600 border border-slate-300/60 hover:border-red-400/60 rounded-xl transition-all font-medium hover:bg-red-50/50"
+              className="btn-danger px-6 py-3 text-base font-medium"
             >
-              Sair
+              🚪 Sair
             </button>
           </div>
         </div>
@@ -48,17 +53,18 @@ const AdminPage = ({ currentUser, onLogout }) => {
       <main className="max-w-7xl mx-auto px-6 py-8">
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto">
+        <div className="flex gap-2 mb-8 overflow-x-auto backdrop-blur-sm rounded-xl p-1"
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: '1px solid var(--color-border-light)' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="px-5 py-2.5 rounded-xl text-base font-medium transition-all duration-200"
+              className="px-5 py-2.5 rounded-lg text-base font-medium transition-all duration-200"
               style={activeTab === tab.id
-                ? { backgroundColor: ASTON_BRAND, color: '#fff', boxShadow: `0 4px 12px ${ASTON_BRAND}30` }
-                : { color: '#64748b' }}
-              onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = '#334155'; }}
-              onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = '#64748b'; }}
+                ? { backgroundColor: ASTON_BRAND, color: '#fff', boxShadow: `0 4px 12px ${hexToRgba(ASTON_BRAND, 0.3)}` }
+                : { color: 'var(--color-text-secondary)' }}
+              onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-primary)'; }}
+              onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
             >
               {tab.label}
             </button>
@@ -66,7 +72,7 @@ const AdminPage = ({ currentUser, onLogout }) => {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
+        <div className="card-premium p-8">
           {activeTab === 'quotations' && <AdminQuotationManager currentUser={currentUser} />}
           {activeTab === 'services' && <AdminServiceManager />}
           {activeTab === 'materials' && <AdminMaterialManager />}

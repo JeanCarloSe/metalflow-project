@@ -1,69 +1,91 @@
-import { getUserByLogin, addUser, updateUser, getAllUsers, deleteUser as dbDeleteUser } from './storageService';
+const SESSION_KEY = 'metalflow_user';
+const TENANT_KEY = 'metalflow_tenant';
 
-const SALT = 'aston_salt_2024';
-const SESSION_KEY = 'aston_auth';
+const API_URL = process.env.REACT_APP_BACKEND_API || 'http://localhost:3000/api';
 
-const hashPassword = async (password) => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + SALT);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-};
-
-export const setSession  = (user) => localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-export const getSession  = ()     => { const r = localStorage.getItem(SESSION_KEY); return r ? JSON.parse(r) : null; };
-export const clearSession = ()    => localStorage.removeItem(SESSION_KEY);
-
-export const loginUser = async (login, password) => {
-  const user = await getUserByLogin(login.trim().toLowerCase());
-  if (!user) return { ok: false, error: 'Usuário não encontrado.' };
-  const hash = await hashPassword(password);
-  if (hash !== user.passwordHash) return { ok: false, error: 'Senha incorreta.' };
-  const sessionUser = { id: user.id, login: user.login, name: user.name, number: user.number, role: user.role };
-  setSession(sessionUser);
-  return { ok: true, user: sessionUser };
-};
-
-export const createUser = async (login, password, name, number, role = 'operator') => {
-  const normalized = login.trim().toLowerCase();
-  const existing = await getUserByLogin(normalized);
-  if (existing) return { ok: false, error: 'Login já está em uso.' };
-  const passwordHash = await hashPassword(password);
-  const user = {
-    id: Date.now().toString(),
-    login: normalized,
-    passwordHash,
-    name: name.trim(),
-    number: number.trim() || `OP-${String(Date.now()).slice(-3)}`,
-    role,
-  };
-  await addUser(user);
-  return { ok: true, user };
-};
-
-export const changePassword = async (userId, currentPassword, newPassword) => {
-  const users = await getAllUsers();
-  const user = users.find(u => u.id === userId);
-  if (!user) return { ok: false, error: 'Usuário não encontrado.' };
-  const currentHash = await hashPassword(currentPassword);
-  if (currentHash !== user.passwordHash) return { ok: false, error: 'Senha atual incorreta.' };
-  const newHash = await hashPassword(newPassword);
-  await updateUser({ ...user, passwordHash: newHash });
-  return { ok: true };
-};
-
-export const hasAnyUser = async () => {
-  const users = await getAllUsers();
-  return users.length > 0;
-};
-
-export const deleteUser = async (userId) => {
+/**
+ * Login via backend seguro (HttpOnly cookies)
+ * Token nunca vem no JSON, apenas em cookie
+ */
+export const loginUser = async (login, password, tenantId) => {
   try {
-    await dbDeleteUser(userId);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: 'Erro ao deletar usuário' };
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      credentials: 'include', // ✅ Envia/recebe HttpOnly cookies
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        login: login.trim().toLowerCase(),
+        password,
+        tenantId: tenantId || localStorage.getItem(TENANT_KEY) || 'default'
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { ok: false, error: error.message || 'Login failed' };
+    }
+
+    const { user } = await response.json();
+
+    // Armazenar dados do usuário (NÃO token!)
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    localStorage.setItem(TENANT_KEY, user.tenantId);
+
+    return { ok: true, user };
+  } catch (error) {
+    return { ok: false, error: error.message };
   }
 };
 
-export { getAllUsers } from './storageService';
+/**
+ * Buscar sessão do usuário salvo
+ */
+export const getSession = () => {
+  const stored = localStorage.getItem(SESSION_KEY);
+  return stored ? JSON.parse(stored) : null;
+};
+
+/**
+ * Logout seguro
+ */
+export const clearSession = async () => {
+  try {
+    // Notificar backend para limpar cookie
+    await fetch(`${API_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (e) {
+    // Continua mesmo se falhar
+  }
+
+  localStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(TENANT_KEY);
+};
+
+export const setSession = (user) => {
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+};
+
+/**
+ * Compatibilidade: localUser para fallback offline
+ */
+export const createLocalUser = async (login, password, name, number, role = 'operator') => {
+  // ❌ Deprecated: usar backend
+  console.warn('createLocalUser deprecated, use backend /auth/register');
+  return { ok: false, error: 'Use backend for registration' };
+};
+
+/**
+ * Compatibilidade: não mais necessário
+ */
+export const hasAnyUser = async () => {
+  const user = getSession();
+  return !!user;
+};
+
+// Fallback: apenas para compatibilidade com código antigo
+export const getAllUsers = async () => {
+  const user = getSession();
+  return user ? [user] : [];
+};

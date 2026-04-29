@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { hexToRgba, ASTON_BRAND } from '../services/themeService';
 import { getServiceNames, getService } from '../services/serviceService';
+import { getSuggestedPrice } from '../services/pricingBackend';
 
 const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }) => {
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
+  const [suggestedPrice, setSuggestedPrice] = useState(null);
+  const [loadingSuggestion, setLoadingSuggestion] = useState(false);
   const selectedMat = materials.find(m => m.id === line.materialId);
 
   const nameRef = React.useRef();
@@ -12,6 +15,29 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
   const widthRef = React.useRef();
   const thicknessRef = React.useRef();
   const qtyRef = React.useRef();
+
+  // Fetch suggested price from backend
+  useEffect(() => {
+    if (!selectedMat || !line.thicknessMm || !line.widthMm || !line.quantity) {
+      setSuggestedPrice(null);
+      return;
+    }
+
+    const fetchSuggestion = async () => {
+      setLoadingSuggestion(true);
+      const price = await getSuggestedPrice(
+        selectedMat.name,
+        line.thicknessMm,
+        line.widthMm,
+        line.quantity
+      );
+      setSuggestedPrice(price);
+      setLoadingSuggestion(false);
+    };
+
+    const timeoutId = setTimeout(fetchSuggestion, 500);
+    return () => clearTimeout(timeoutId);
+  }, [selectedMat, line.thicknessMm, line.widthMm, line.quantity]);
 
   const handleTabPress = (e, nextRef) => {
     if (e.key === 'Tab' && !e.shiftKey) {
@@ -252,7 +278,18 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
         <div className="space-y-4 pt-4 border-t border-gray-200">
           {/* MATERIAL */}
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-gray-900">Material</p>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-gray-900">Material</p>
+              {suggestedPrice && (
+                <div className="flex items-center gap-2 px-3 py-1 bg-blue-50 rounded-lg border border-blue-200">
+                  <span className="text-xs text-blue-600 font-medium">💡 IA sugere:</span>
+                  <span className="text-sm font-bold text-blue-700">R$ {suggestedPrice.toFixed(2)}/kg</span>
+                </div>
+              )}
+              {loadingSuggestion && (
+                <span className="text-xs text-gray-500">⏳ Analisando...</span>
+              )}
+            </div>
             <div className="grid grid-cols-4 gap-2">
               <div className="bg-gray-50 rounded-lg p-3">
                 <p className="text-xs text-gray-600">Custo Real</p>

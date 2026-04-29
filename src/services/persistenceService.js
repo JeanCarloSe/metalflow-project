@@ -12,7 +12,7 @@ export const initPersistence = async () => {
     db = await initDB();
 
     // Criar stores de auditoria e arquivo se não existirem
-    const request = indexedDB.open('AstonDB', 3);
+    const request = indexedDB.open('AstonDB', 2);
 
     return new Promise((resolve, reject) => {
       request.onupgradeneeded = (event) => {

@@ -9,6 +9,10 @@ import QuotationPreviewModal from './components/QuotationPreviewModal';
 import QuotationReport from './components/QuotationReport';
 import ClientDetailModal from './components/ClientDetailModal';
 import DashboardPage from './components/DashboardPage';
+import AnalyticsReport from './components/AnalyticsReport';
+import TenantSelector from './components/TenantSelector';
+import TenantAdmin from './components/TenantAdmin';
+import IntegrationsPanel from './components/IntegrationsPanel';
 import {
   initDB, getMaterials, addMaterial, getClients, getQuotations,
   addQuotation, addClient, cleanDuplicateQuotations, updateQuotation,
@@ -41,6 +45,7 @@ const NAV_ITEMS = [
   { id: 'quotation', label: 'Orçador'   },
   { id: 'materials', label: 'Materiais' },
   { id: 'history',   label: 'Histórico' },
+  { id: 'analytics', label: 'Relatórios' },
 ];
 
 function App() {
@@ -51,8 +56,11 @@ function App() {
   const [quotations,       setQuotations]       = useState([]);
   const [selectedClient,   setSelectedClient]   = useState(null);
   const [currentUser,      setCurrentUser]      = useState(null);
+  const [currentTenant,    setCurrentTenant]    = useState(null);
   const [isFirstAccess,    setIsFirstAccess]    = useState(false);
   const [showReport,       setShowReport]       = useState(false);
+  const [showTenantAdmin,  setShowTenantAdmin]  = useState(false);
+  const [showIntegrations, setShowIntegrations] = useState(false);
   const [editingQuotation,  setEditingQuotation]  = useState(null);
   const [editingClient,     setEditingClient]     = useState(null);
   const [successMessage,    setSuccessMessage]    = useState('');
@@ -216,6 +224,10 @@ function App() {
     );
   }
 
+  if (!currentTenant) {
+    return <TenantSelector onTenantSelected={setCurrentTenant} />;
+  }
+
   if (!currentUser) {
     return <LoginPage onLogin={handleLogin} isFirstAccess={isFirstAccess} />;
   }
@@ -240,7 +252,16 @@ function App() {
 
       {showReport && (
         <ReportPage quotations={quotations} clients={clients} currentOperator={currentUser}
-          onClose={() => setShowReport(false)} />
+          onClose={() => setShowReport(false)}
+          onQuotationClick={(quotationId) => {
+            const quotation = quotations.find(q => q.id === quotationId);
+            if (quotation) {
+              setEditingQuotation(quotation);
+              setCurrentPage('quotation');
+              setShowReport(false);
+            }
+          }}
+        />
       )}
 
       {editingQuotation && (
@@ -269,6 +290,14 @@ function App() {
           onSave={handleClientUpdated}
           onClose={() => setEditingClient(null)}
         />
+      )}
+
+      {showTenantAdmin && (
+        <TenantAdmin onClose={() => setShowTenantAdmin(false)} />
+      )}
+
+      {showIntegrations && (
+        <IntegrationsPanel onClose={() => setShowIntegrations(false)} />
       )}
 
 
@@ -310,6 +339,35 @@ function App() {
                   </span>
                 )}
                 <span className="text-sm" style={{ color: brand }}>{selectedClient.name}</span>
+              </div>
+            )}
+
+            {currentTenant && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowIntegrations(true)}
+                  className="px-4 py-2.5 text-sm text-slate-600 hover:text-purple-600 border border-slate-300/60 hover:border-purple-400/60 rounded-xl transition-all font-medium hover:bg-purple-50/50"
+                  title="Gerenciar integrações"
+                >
+                  🔌
+                </button>
+                <button
+                  onClick={() => setShowTenantAdmin(true)}
+                  className="px-4 py-2.5 text-sm text-slate-600 hover:text-blue-600 border border-slate-300/60 hover:border-blue-400/60 rounded-xl transition-all font-medium hover:bg-blue-50/50"
+                  title="Gerenciar empresas"
+                >
+                  ⚙️
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentTenant(null);
+                    setCurrentUser(null);
+                  }}
+                  className="px-4 py-2.5 text-sm text-slate-600 hover:text-orange-600 border border-slate-300/60 hover:border-orange-400/60 rounded-xl transition-all font-medium hover:bg-orange-50/50"
+                  title="Trocar empresa"
+                >
+                  🏢
+                </button>
               </div>
             )}
 
@@ -506,6 +564,10 @@ function App() {
               </div>
             )}
           </div>
+        )}
+
+        {currentPage === 'analytics' && (
+          <AnalyticsReport quotations={quotations} clients={clients} />
         )}
       </main>
 

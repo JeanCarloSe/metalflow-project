@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { hexToRgba, darken, ASTON_BRAND } from '../services/themeService';
+import { hexToRgba, darken, ASTON_BRAND, THEME } from '../services/themeService';
 import QuotationLineItem from './QuotationLineItem';
 import { SERVICE_PRICES } from '../services/serviceService';
 import { generateQuotationCode } from '../services/codeService';
@@ -124,44 +124,48 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
     <div className="space-y-4">
 
       {/* Aston Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white mb-6 shadow-lg">
+      <div className="rounded-2xl p-8 text-white mb-6 shadow-lg backdrop-blur-lg"
+        style={{
+          background: `linear-gradient(135deg, ${THEME.primary} 0%, ${THEME.primaryDark} 100%)`,
+          boxShadow: `0 10px 30px rgba(1, 112, 185, 0.3)`
+        }}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h2 className="text-3xl font-bold mb-2">ASTON METALÚRGICA</h2>
-            <p className="text-blue-100 mb-3">Sistema de Orçamentos - Premium</p>
-            <div className="flex gap-6 text-sm">
-              <a href="https://astonmetalurgica.com.br" target="_blank" rel="noreferrer" className="text-blue-100 hover:text-white transition-colors">
-                📱 www.astonmetalurgica.com.br
+            <p className="text-blue-100 mb-4 text-lg">Sistema de Orçamentos - Premium</p>
+            <div className="flex gap-8 text-sm">
+              <a href="https://astonmetalurgica.com.br" target="_blank" rel="noreferrer" className="text-blue-100 hover:text-white transition-colors hover:underline">
+                🌐 www.astonmetalurgica.com.br
               </a>
               <span className="text-blue-200">📞 (47) 3436-4569</span>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-blue-100 mb-2">Operador</p>
+          <div className="text-right bg-white/10 backdrop-blur-lg px-6 py-4 rounded-xl border border-white/20">
+            <p className="text-sm text-blue-100 mb-2 font-medium">Operador</p>
             <p className="text-lg font-bold text-white">{currentUser?.name || 'N/A'}</p>
-            <p className="text-xs text-blue-200 mt-1">{currentUser?.number || currentUser?.login || 'Aston'}</p>
+            <p className="text-xs text-blue-200 mt-2">{currentUser?.number || currentUser?.login || 'Aston'}</p>
           </div>
         </div>
       </div>
 
       {/* Quotation number + Status */}
       <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="px-4 py-3 bg-white border border-blue-200 rounded-lg flex-1 shadow-sm">
-          <p className="text-xs text-blue-600 font-medium">Número do Orçamento</p>
-          <p className="text-lg font-bold text-blue-700 font-mono">
+        <div className="card-premium px-6 py-4 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: THEME.primary }}>Número do Orçamento</p>
+          <p className="text-2xl font-bold mt-2 font-mono" style={{ color: THEME.primaryDark }}>
             {quotationNumber || '(será gerado ao salvar)'}
           </p>
         </div>
         <div
-          className="px-6 py-3 rounded-lg font-semibold text-center min-w-fit shadow-sm"
+          className="card-premium px-8 py-4 font-semibold text-center min-w-fit"
           style={{
             backgroundColor: getStatusBg(status),
             color: getStatusColor(status),
             border: `2px solid ${getStatusColor(status)}`,
           }}
         >
-          <p className="text-xs text-gray-500 font-medium mb-1">Status</p>
-          <p className="text-base font-bold">{getStatusLabel(status)}</p>
+          <p className="text-xs uppercase tracking-widest mb-2 opacity-80">Status</p>
+          <p className="text-lg font-bold">{getStatusLabel(status)}</p>
         </div>
       </div>
 

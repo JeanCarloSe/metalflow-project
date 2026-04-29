@@ -1,20 +1,24 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { getStatusLabel, getStatusColor, getStatusBg, QUOTATION_STATUS } from '../services/statusService';
+import { getInsights, getRecommendations } from '../services/pricingBackend';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area
 } from 'recharts';
 
 const COLORS = {
-  primary: '#0f4c81',
-  secondary: '#1a5f96',
-  accent: '#ff6b35',
-  success: '#10b981',
-  warning: '#f59e0b',
-  danger: '#ef4444',
-  gray1: '#f8f9fa',
-  gray2: '#e9ecef',
-  gray3: '#6c757d',
-  gray4: '#495057',
+  primary: '#0170B9',
+  primaryDark: '#0D47A1',
+  primaryLight: '#42A5F5',
+  secondary: '#D4AF37',
+  accent: '#3B82F6',
+  success: '#10B981',
+  warning: '#F59E0B',
+  danger: '#EF4444',
+  info: '#3B82F6',
+  gray1: '#F9FAFB',
+  gray2: '#F3F4F6',
+  gray3: '#6B7280',
+  gray4: '#1F2937',
 };
 
 const formatMoney = (val) => {
@@ -29,15 +33,21 @@ const CustomTooltip = ({ active, payload, label }) => {
     const value = data.value;
 
     return (
-      <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-2xl border border-gray-700">
-        <p className="text-xs uppercase tracking-widest text-gray-300 mb-1">
+      <div className="rounded-lg shadow-lg border p-3" style={{
+        backgroundColor: '#FFFFFF',
+        borderColor: 'var(--color-border-light)',
+        boxShadow: '0 10px 25px rgba(1, 112, 185, 0.15)'
+      }}>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-secondary)' }}>
           {data.payload.name || label}
         </p>
-        <p className="text-lg font-bold" style={{ color: data.color || '#fff' }}>
+        <p className="text-lg font-bold" style={{ color: data.color || 'var(--color-primary)' }}>
           {typeof value === 'number' ? (value > 100 ? formatMoney(value) : value.toFixed(0)) : value}
         </p>
         {data.payload.percent && (
-          <p className="text-xs text-gray-400 mt-1">{data.payload.percent.toFixed(1)}%</p>
+          <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>
+            {data.payload.percent.toFixed(1)}%
+          </p>
         )}
       </div>
     );
@@ -45,10 +55,104 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
+// Modal de Dados
+const DataModal = ({ isOpen, data, title, onClose }) => {
+  if (!isOpen || !data) return null;
+
+  const handleCopy = () => {
+    const csvContent = data.map(row =>
+      Object.values(row).join(',')
+    ).join('\n');
+    navigator.clipboard.writeText(csvContent);
+    alert('Dados copiados para clipboard!');
+  };
+
+  const handleDownload = () => {
+    const csvContent = data.map(row =>
+      Object.values(row).join(',')
+    ).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title}.csv`;
+    a.click();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="card-premium max-w-2xl w-full max-h-[80vh] overflow-auto">
+        <div className="sticky top-0 bg-white/95 backdrop-blur-lg p-6 border-b" style={{ borderColor: 'var(--color-border-light)' }}>
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{title}</h2>
+            <button onClick={onClose} className="text-2xl" style={{ color: 'var(--color-text-secondary)' }}>✕</button>
+          </div>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <div className="flex gap-2">
+            <button onClick={handleCopy} className="btn-secondary text-sm px-4 py-2">
+              📋 Copiar
+            </button>
+            <button onClick={handleDownload} className="btn-premium text-sm px-4 py-2">
+              📥 Baixar CSV
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="table-premium w-full text-sm">
+              <thead>
+                <tr>
+                  {Object.keys(data[0] || {}).map(key => (
+                    <th key={key} style={{ color: 'var(--color-text-primary)' }}>
+                      {key}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row, idx) => (
+                  <tr key={idx}>
+                    {Object.values(row).map((val, i) => (
+                      <td key={i} style={{ color: 'var(--color-text-secondary)' }}>
+                        {typeof val === 'number' && val > 100 ? formatMoney(val) : String(val)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
+  const [dataModal, setDataModal] = useState({ isOpen: false, data: null, title: '' });
+  const [insights, setInsights] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loadingAI, setLoadingAI] = useState(false);
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
+
+  // Fetch insights and recommendations from backend
+  useEffect(() => {
+    const fetchAIData = async () => {
+      setLoadingAI(true);
+      const [insightsData, recommendationsData] = await Promise.all([
+        getInsights(),
+        getRecommendations()
+      ]);
+      setInsights(insightsData);
+      setRecommendations(recommendationsData || []);
+      setLoadingAI(false);
+    };
+
+    fetchAIData();
+  }, [quotations]);
 
   const thisMonthQuotations = useMemo(() => {
     return quotations.filter(q => {
@@ -88,17 +192,55 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
       monthValueByStatus[status] += parseFloat(q.totalPrice || 0);
     });
 
+    // Análise por cliente
     const uniqueClients = new Set(quotations.map(q => q.clientId));
     const clientsData = Array.from(uniqueClients).map(clientId => {
       const client = clients.find(c => c.id === clientId);
       const clientQuotes = quotations.filter(q => q.clientId === clientId);
+      const approved = clientQuotes.filter(q => q.status === 'aprovado').length;
+      const conversionRate = clientQuotes.length > 0 ? (approved / clientQuotes.length) * 100 : 0;
       return {
         id: clientId,
         name: client?.name || 'Cliente desconhecido',
         quotations: clientQuotes.length,
         value: clientQuotes.reduce((sum, q) => sum + parseFloat(q.totalPrice || 0), 0),
+        approved,
+        conversionRate: conversionRate.toFixed(1),
+        avgValue: clientQuotes.length > 0 ? (clientQuotes.reduce((sum, q) => sum + parseFloat(q.totalPrice || 0), 0) / clientQuotes.length).toFixed(2) : 0,
       };
     }).sort((a, b) => b.value - a.value);
+
+    // Análise por material
+    const materialStats = {};
+    quotations.forEach(q => {
+      q.lines?.forEach(line => {
+        const matId = line.materialId;
+        if (!materialStats[matId]) {
+          materialStats[matId] = {
+            name: line.name || matId,
+            count: 0,
+            totalWeight: 0,
+            totalValue: 0,
+            approved: 0,
+          };
+        }
+        materialStats[matId].count++;
+        materialStats[matId].totalWeight += parseFloat(line.weightKg || 0);
+        materialStats[matId].totalValue += parseFloat(line.totalCost || 0);
+        if (q.status === 'aprovado') {
+          materialStats[matId].approved++;
+        }
+      });
+    });
+
+    const topMaterials = Object.values(materialStats)
+      .map(m => ({
+        ...m,
+        valuePerKg: m.totalWeight > 0 ? (m.totalValue / m.totalWeight).toFixed(2) : 0,
+        conversionRate: m.count > 0 ? ((m.approved / m.count) * 100).toFixed(0) : 0,
+      }))
+      .sort((a, b) => b.totalValue - a.totalValue)
+      .slice(0, 5);
 
     const totalQuotations = quotations.length;
     const statusChartData = Object.entries(QUOTATION_STATUS)
@@ -168,6 +310,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
       byStatus,
       valueByStatus,
       clientsData,
+      topMaterials,
       uniqueClients: uniqueClients.size,
       statusChartData,
       valueChartData,
@@ -183,8 +326,8 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard de Orçamentos</h1>
-        <p className="text-base text-gray-600">
+        <h1 className="text-5xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Dashboard de Orçamentos</h1>
+        <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>
           Cartões acima mostram <span className="font-semibold capitalize">{monthName}</span> · Gráficos mostram <span className="font-semibold">TODOS os orçamentos</span>
         </p>
       </div>
@@ -194,7 +337,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
         <button
           onClick={() => onNavigate?.('quotation')}
           className="group relative overflow-hidden rounded-xl p-6 text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
-          style={{ background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)` }}
+          style={{ background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryDark} 100%)` }}
         >
           <div className="relative z-10">
             <div className="text-3xl mb-3">📝</div>
@@ -242,56 +385,56 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="rounded-xl p-6 shadow-sm border border-gray-200 bg-white transition-all hover:shadow-md">
+        <div className="card-premium p-6 transition-all hover:shadow-lg">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Total de Orçamentos (Mês)</p>
-              <p className="text-4xl font-bold text-gray-900 mt-3">{stats.monthTotal}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-primary)' }}>Total de Orçamentos (Mês)</p>
+              <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-primary)' }}>{stats.monthTotal}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${COLORS.primary}20` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(1, 112, 185, 0.1)` }}>
               <span className="text-2xl">📊</span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl p-6 shadow-sm border border-gray-200 bg-white transition-all hover:shadow-md">
+        <div className="card-premium p-6 transition-all hover:shadow-lg">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Valor Total (Mês)</p>
-              <p className="text-3xl font-bold text-gray-900 mt-3">R$ {(stats.monthValue / 1000).toFixed(1)}k</p>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-primary)' }}>Valor Total (Mês)</p>
+              <p className="text-4xl font-bold mt-4" style={{ color: 'var(--color-success)' }}>R$ {(stats.monthValue / 1000).toFixed(1)}k</p>
+              <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>
                 {stats.monthTotal > 0 ? `R$ ${(stats.monthValue / stats.monthTotal).toFixed(2)}/orç` : '—'}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${COLORS.success}20` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(16, 185, 129, 0.1)` }}>
               <span className="text-2xl">💰</span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl p-6 shadow-sm border border-gray-200 bg-white transition-all hover:shadow-md">
+        <div className="card-premium p-6 transition-all hover:shadow-lg">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Peso Total (Mês)</p>
-              <p className="text-4xl font-bold text-gray-900 mt-3">{stats.monthWeight.toFixed(0)}</p>
-              <p className="text-xs text-gray-500 mt-2">kg</p>
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-secondary)' }}>Peso Total (Mês)</p>
+              <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-info)' }}>{stats.monthWeight.toFixed(0)}</p>
+              <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>kg</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `#8b5cf620` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(59, 130, 246, 0.1)` }}>
               <span className="text-2xl">⚖️</span>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl p-6 shadow-sm border border-gray-200 bg-white transition-all hover:shadow-md">
+        <div className="card-premium p-6 transition-all hover:shadow-lg">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider">Clientes Ativos</p>
-              <p className="text-4xl font-bold text-gray-900 mt-3">{stats.uniqueClients}</p>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-secondary)' }}>Clientes Ativos</p>
+              <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-warning)' }}>{stats.uniqueClients}</p>
+              <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>
                 {stats.uniqueClients > 0 ? `${(Object.values(stats.valueByStatus).reduce((a,b) => a+b, 0) / stats.uniqueClients / 1000).toFixed(1)}k/cliente` : '—'}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `#8b5cf620` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(245, 158, 11, 0.1)` }}>
               <span className="text-2xl">👥</span>
             </div>
           </div>
@@ -299,74 +442,139 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
       </div>
 
       {/* Primary Charts - Full Width */}
-      <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm">
-        <h3 className="text-xl font-bold text-gray-900 mb-8">Evolução Mensal de Orçamentos</h3>
+      <div className="card-premium p-7">
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Evolução Mensal de Orçamentos</h3>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Últimos 6 meses: valor total e quantidade de orçamentos</p>
+          </div>
+          <button
+            onClick={() => setDataModal({
+              isOpen: true,
+              data: stats.timelineData.map(d => ({
+                Mês: d.month,
+                'Valor (R$)': formatMoney(d.value),
+                'Quantidade': d.count
+              })),
+              title: 'Evolução Mensal de Orçamentos'
+            })}
+            className="btn-secondary px-3 py-1 text-sm"
+          >
+            📊 Ver dados
+          </button>
+        </div>
         {stats.timelineData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart data={stats.timelineData} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
-              <defs>
-                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
-              <XAxis dataKey="month" stroke={COLORS.gray3} style={{ fontSize: '13px' }} />
-              <YAxis yAxisId="left" stroke={COLORS.gray3} style={{ fontSize: '13px' }} />
-              <YAxis yAxisId="right" orientation="right" stroke={COLORS.gray3} style={{ fontSize: '13px' }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area yAxisId="left" type="monotone" dataKey="value" fill="url(#colorValue)" stroke={COLORS.primary} name="Valor (R$)" strokeWidth={2} />
-              <Bar yAxisId="right" dataKey="count" fill={COLORS.success} name="Quantidade" radius={[8, 8, 0, 0]} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <>
+            <div className="chart-container">
+            <ResponsiveContainer width="100%" height={420}>
+              <ComposedChart data={stats.timelineData} margin={{ top: 30, right: 50, left: 10, bottom: 30 }}>
+                <defs>
+                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.9}/>
+                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="4 4" stroke="var(--color-border-light)" vertical={false} />
+                <XAxis dataKey="month" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 600 }} />
+                <YAxis yAxisId="left" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 600 }} />
+                <YAxis yAxisId="right" orientation="right" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 600 }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(1, 112, 185, 0.1)' }} />
+                <Area yAxisId="left" type="monotone" dataKey="value" fill="url(#colorValue)" stroke={COLORS.primary} name="Valor (R$)" strokeWidth={3} />
+                <Bar yAxisId="right" dataKey="count" fill={COLORS.success} name="Quantidade" radius={[8, 8, 0, 0]} />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <div className="flex justify-center gap-6 mt-6">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: COLORS.primary }}></div>
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Valor Total (R$)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded" style={{ backgroundColor: COLORS.success }}></div>
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Quantidade</span>
+              </div>
+            </div>
+            </div>
+          </>
         ) : (
-          <div className="text-center py-16 text-gray-500">Nenhum dado disponível</div>
+          <div className="text-center py-16" style={{ color: 'var(--color-text-muted)' }}>Nenhum dado disponível</div>
         )}
       </div>
 
       {/* Secondary Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Distribuição por Status */}
-        <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Distribuição por Status (Todos)</h3>
+        <div className="card-premium p-7">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Distribuição por Status</h3>
+            <button
+              onClick={() => setDataModal({
+                isOpen: true,
+                data: stats.statusChartData.map(d => ({
+                  Status: d.name,
+                  Quantidade: d.value,
+                  Percentual: `${d.percent.toFixed(1)}%`
+                })),
+                title: 'Distribuição por Status'
+              })}
+              className="btn-secondary px-3 py-1 text-sm"
+            >
+              📊 Ver dados
+            </button>
+          </div>
           {stats.statusChartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={stats.statusChartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${percent.toFixed(0)}%`}
-                  outerRadius={90}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {stats.statusChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
+            <>
+              <div className="chart-container">
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={stats.statusChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${percent.toFixed(0)}%`}
+                    outerRadius={85}
+                    innerRadius={50}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {stats.statusChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                </PieChart>
+              </ResponsiveContainer>
+              </div>
+              <div className="mt-6 space-y-2">
+                {stats.statusChartData.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                      <span style={{ color: 'var(--color-text-primary)' }}>{item.name}</span>
+                    </div>
+                    <span className="font-semibold" style={{ color: item.color }}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
-            <div className="text-center py-12 text-gray-500">Nenhum dado disponível</div>
+            <div className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>Nenhum dado disponível</div>
           )}
         </div>
 
         {/* Funil */}
-        <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Funil de Conversão (Mês Atual)</h3>
+        <div className="card-premium p-7">
+          <h3 className="text-xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Funil de Conversão (Mês)</h3>
           <div className="space-y-5">
             {stats.funnelData.map((stage, idx) => {
               const percentage = (stage.value / stats.funnelData[0].value) * 100;
               return (
                 <div key={idx} className="group">
                   <div className="flex justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-700">{stage.stage}</span>
-                    <span className="text-sm font-bold text-gray-900">{stage.value} ({percentage.toFixed(0)}%)</span>
+                    <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{stage.stage}</span>
+                    <span className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>{stage.value} ({percentage.toFixed(0)}%)</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden shadow-sm">
+                  <div className="w-full rounded-full h-3 overflow-hidden shadow-sm" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
                     <div
                       className="h-3 rounded-full transition-all group-hover:brightness-110 duration-500"
                       style={{
@@ -383,37 +591,72 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
         </div>
 
         {/* Top Clientes - Gráfico */}
-        <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm">
-          <h3 className="text-lg font-bold text-gray-900 mb-6">Top Clientes</h3>
+        <div className="card-premium p-7">
+          <div className="flex justify-between items-center mb-8">
+            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Top 5 Clientes</h3>
+            <button
+              onClick={() => setDataModal({
+                isOpen: true,
+                data: stats.clientsData.map(c => ({
+                  Cliente: c.name,
+                  'Orçamentos': c.quotations,
+                  'Valor Total': formatMoney(c.value)
+                })),
+                title: 'Dados de Clientes'
+              })}
+              className="btn-secondary px-3 py-1 text-sm"
+            >
+              📊 Ver dados
+            </button>
+          </div>
           {stats.clientsData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart
-                data={stats.clientsData.slice(0, 5)}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 150, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
-                <XAxis type="number" stroke={COLORS.gray3} style={{ fontSize: '12px' }} />
-                <YAxis dataKey="name" type="category" width={140} stroke={COLORS.gray3} style={{ fontSize: '11px' }} />
-                <Tooltip
-                  content={<CustomTooltip />}
-                  formatter={(value) => formatMoney(value)}
-                />
-                <Bar dataKey="value" fill={COLORS.primary} radius={[0, 8, 8, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-3">
+              {stats.clientsData.slice(0, 5).map((client, idx) => {
+                const totalValue = Object.values(stats.valueByStatus).reduce((a, b) => a + b, 0);
+                const clientPercent = (client.value / totalValue) * 100;
+                return (
+                  <div key={idx} className="group">
+                    <div className="flex justify-between mb-2">
+                      <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                        {idx + 1}. {client.name}
+                      </span>
+                      <span className="text-sm font-bold" style={{ color: 'var(--color-primary)' }}>
+                        {formatMoney(client.value)}
+                      </span>
+                    </div>
+                    <div className="w-full rounded-full h-2.5 overflow-hidden" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                      <div
+                        className="h-full rounded-full transition-all group-hover:brightness-110"
+                        style={{
+                          width: `${clientPercent}%`,
+                          background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.primaryLight})`,
+                        }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1">
+                      <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                        {client.quotations} orç
+                      </span>
+                      <span className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>
+                        {clientPercent.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           ) : (
-            <div className="text-center py-8 text-gray-500">Nenhum cliente</div>
+            <div className="text-center py-8" style={{ color: 'var(--color-text-muted)' }}>Nenhum cliente</div>
           )}
         </div>
       </div>
 
       {/* Valor por Status - Full Width */}
-      <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm">
-        <h3 className="text-xl font-bold text-gray-900 mb-8">Análise de Valores por Status (Todos os Orçamentos)</h3>
+      <div className="card-premium p-7">
+        <h3 className="text-2xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Análise de Valores por Status</h3>
         {stats.valueChartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={stats.valueChartData} margin={{ top: 20, right: 30, left: 0, bottom: 80 }}>
+            <BarChart data={stats.valueChartData} margin={{ top: 30, right: 40, left: 10, bottom: 100 }}>
               <defs>
                 {stats.valueChartData.map((entry, idx) => (
                   <linearGradient key={`grad-${idx}`} id={`color-${idx}`} x1="0" y1="0" x2="0" y2="1">
@@ -422,10 +665,10 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
                   </linearGradient>
                 ))}
               </defs>
-              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={90} stroke={COLORS.gray3} style={{ fontSize: '13px' }} />
-              <YAxis stroke={COLORS.gray3} style={{ fontSize: '13px' }} />
-              <Tooltip content={<CustomTooltip />} />
+              <CartesianGrid strokeDasharray="4 4" stroke="var(--color-border-light)" vertical={false} />
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} stroke={COLORS.gray3} style={{ fontSize: '13px', fontWeight: 500 }} />
+              <YAxis stroke={COLORS.gray3} style={{ fontSize: '13px', fontWeight: 500 }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(1, 112, 185, 0.05)' }} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]} strokeWidth={0}>
                 {stats.valueChartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={`url(#color-${index})`} />
@@ -434,34 +677,333 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="text-center py-16 text-gray-500">Nenhum dado disponível</div>
+          <div className="text-center py-16" style={{ color: 'var(--color-text-muted)' }}>Nenhum dado disponível</div>
         )}
       </div>
 
       {/* Status Summary */}
-      <div className="bg-white rounded-xl border border-gray-200 p-7 shadow-sm">
-        <h3 className="text-lg font-bold text-gray-900 mb-6">Resumo de Status</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {Object.entries(QUOTATION_STATUS).map(([key, status]) => (
-            <div
-              key={key}
-              className="p-4 rounded-lg text-center border-2 transition-all hover:shadow-md hover:scale-105 duration-200"
-              style={{
-                backgroundColor: getStatusBg(key),
-                borderColor: getStatusColor(key),
-              }}
-            >
-              <p
-                className="text-xl font-bold mb-1"
-                style={{ color: getStatusColor(key) }}
+      <div className="card-premium p-7">
+        <h3 className="text-xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Resumo de Status - Todos os Orçamentos</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+          {Object.entries(QUOTATION_STATUS).map(([key, status]) => {
+            const count = stats.byStatus[key] || 0;
+            const value = stats.valueByStatus[key] || 0;
+            const isActive = count > 0;
+
+            return (
+              <button
+                key={key}
+                onClick={() => {
+                  if (onNavigate) {
+                    onNavigate('history', { filterStatus: key });
+                  }
+                }}
+                disabled={!isActive}
+                className="group relative p-5 rounded-xl border-2 transition-all duration-300 text-left cursor-pointer"
+                style={{
+                  backgroundColor: isActive ? 'rgba(255, 255, 255, 0.95)' : 'rgba(249, 250, 251, 0.6)',
+                  borderColor: getStatusColor(key),
+                  borderWidth: isActive ? '2px' : '1px',
+                  opacity: isActive ? 1 : 0.5,
+                  boxShadow: isActive ? `0 4px 12px ${getStatusColor(key)}20` : 'none',
+                  backdropFilter: 'blur(10px)',
+                }}
+                onMouseEnter={e => {
+                  if (isActive) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = `0 8px 20px ${getStatusColor(key)}30`;
+                  }
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = isActive ? `0 4px 12px ${getStatusColor(key)}20` : 'none';
+                }}
               >
-                {stats.byStatus[key]}
-              </p>
-              <p className="text-xs font-medium text-gray-700">{status.label}</p>
-            </div>
-          ))}
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-2xl font-bold" style={{ color: getStatusColor(key) }}>
+                      {count}
+                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-wide mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                      {status.label}
+                    </p>
+                  </div>
+                  {isActive && (
+                    <span className="text-lg opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  )}
+                </div>
+                {isActive && (
+                  <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                    {formatMoney(value)}
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* Advanced Analytics Section */}
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold mt-8" style={{ color: 'var(--color-text-primary)' }}>📈 Analytics Avançado</h2>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Top Clientes */}
+          <div className="card-premium p-7">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>🏢 Top Clientes</h3>
+              <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(1, 112, 185, 0.1)', color: COLORS.primary }}>
+                Valor Total
+              </span>
+            </div>
+            <div className="space-y-3">
+              {stats.clientsData.slice(0, 5).map((client, idx) => (
+                <div key={idx} className="p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-gray-900">{idx + 1}. {client.name}</p>
+                    <span className="text-xs font-bold px-2 py-1 rounded" style={{
+                      backgroundColor: parseFloat(client.conversionRate) > 50 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                      color: parseFloat(client.conversionRate) > 50 ? '#10b981' : '#f59e0b'
+                    }}>
+                      {client.conversionRate}% Conv.
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <p className="text-gray-600">Orçamentos</p>
+                      <p className="font-semibold text-gray-900">{client.quotations}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Aprovados</p>
+                      <p className="font-semibold text-green-700">{client.approved}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Valor/Média</p>
+                      <p className="font-semibold text-blue-700">R$ {parseFloat(client.avgValue).toFixed(0)}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                    <p className="text-sm text-gray-600">Valor Total</p>
+                    <p className="font-bold text-lg" style={{ color: COLORS.primary }}>R$ {(client.value / 1000).toFixed(1)}k</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Top Materiais */}
+          <div className="card-premium p-7">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>📦 Top Materiais</h3>
+              <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: COLORS.warning }}>
+                Por Valor
+              </span>
+            </div>
+            <div className="space-y-3">
+              {stats.topMaterials.map((mat, idx) => (
+                <div key={idx} className="p-4 rounded-lg border border-gray-200 hover:border-amber-300 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-semibold text-gray-900">{idx + 1}. {mat.name}</p>
+                    <span className="text-xs font-bold px-2 py-1 rounded bg-purple-100 text-purple-700">
+                      {mat.count} cotações
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs mb-3">
+                    <div>
+                      <p className="text-gray-600">Peso Total</p>
+                      <p className="font-semibold text-gray-900">{mat.totalWeight.toFixed(0)} kg</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">R$/kg</p>
+                      <p className="font-semibold text-blue-700">R$ {mat.valuePerKg}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Conv.</p>
+                      <p className="font-semibold text-green-700">{mat.conversionRate}%</p>
+                    </div>
+                  </div>
+                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
+                    <p className="text-sm text-gray-600">Valor Total</p>
+                    <p className="font-bold text-lg" style={{ color: COLORS.warning }}>R$ {(mat.totalValue / 1000).toFixed(1)}k</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Peso vs Valor Analysis */}
+        <div className="card-premium p-7">
+          <div className="mb-6">
+            <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>⚖️ Análise Peso vs Valor (ROI)</h3>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              Quanto valor você gera por kg de material processado
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {stats.topMaterials.map((mat, idx) => (
+              <div
+                key={idx}
+                className="p-4 rounded-lg border border-gray-200 text-center"
+                style={{
+                  backgroundColor: 'rgba(1, 112, 185, 0.05)',
+                  borderColor: `rgba(1, 112, 185, 0.2)`
+                }}
+              >
+                <p className="text-sm font-semibold text-gray-700 mb-3">{mat.name}</p>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-xs text-gray-600">ROI (R$/kg)</p>
+                    <p className="text-2xl font-bold" style={{ color: COLORS.primary }}>
+                      {mat.valuePerKg}
+                    </p>
+                  </div>
+                  <div className="text-xs">
+                    <p className="text-gray-600">{mat.totalWeight.toFixed(0)} kg</p>
+                    <p className="font-semibold text-gray-700">R$ {(mat.totalValue / 1000).toFixed(1)}k</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* AI Insights & Recommendations */}
+      {insights && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Insights Card */}
+          <div className="card-premium p-7">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                💡 Insights IA
+              </h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Análise automática do seu desempenho
+              </p>
+            </div>
+            <div className="space-y-4">
+              <div className="p-4 rounded-lg" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderLeft: `3px solid ${COLORS.info}` }}>
+                <p className="text-sm text-gray-600 mb-1">Taxa de Conversão</p>
+                <p className="text-2xl font-bold" style={{ color: COLORS.info }}>
+                  {insights.conversionRate}%
+                </p>
+                <p className="text-xs mt-2 text-gray-500">
+                  {insights.approved} de {insights.totalQuotations} orçamentos aprovados
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-lg bg-blue-50">
+                  <p className="text-xs text-gray-600">Em Análise</p>
+                  <p className="text-xl font-bold text-gray-900">{insights.pending}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-green-50">
+                  <p className="text-xs text-gray-600">Aprovados</p>
+                  <p className="text-xl font-bold text-green-700">{insights.approved}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-red-50">
+                  <p className="text-xs text-gray-600">Reprovados</p>
+                  <p className="text-xl font-bold text-red-700">{insights.rejected}</p>
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                <p className="text-sm text-gray-600 mb-2 font-medium">Valor Total</p>
+                <p className="text-2xl font-bold text-gray-900">R$ {parseFloat(insights.totalValue).toFixed(2)}</p>
+                <p className="text-xs mt-2 text-gray-500">
+                  Média: R$ {parseFloat(insights.averageValue).toFixed(2)} por orçamento
+                </p>
+              </div>
+              {insights.topMaterials && insights.topMaterials.length > 0 && (
+                <div className="p-4 rounded-lg bg-purple-50 border border-purple-200">
+                  <p className="text-sm font-medium text-purple-900 mb-3">Top Materiais</p>
+                  <div className="space-y-2">
+                    {insights.topMaterials.map((mat, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <span className="text-gray-700">{mat.material}</span>
+                        <span className="font-semibold text-purple-700">{mat.count}x</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Recommendations Card */}
+          <div className="card-premium p-7">
+            <div className="mb-6">
+              <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                🎯 Recomendações
+              </h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                Ações sugeridas para melhorar resultados
+              </p>
+            </div>
+            {loadingAI ? (
+              <div className="text-center py-8 text-gray-500">
+                ⏳ Analisando dados...
+              </div>
+            ) : recommendations && recommendations.length > 0 ? (
+              <div className="space-y-3">
+                {recommendations.map((rec, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-lg border-l-4 transition-all hover:shadow-md"
+                    style={{
+                      backgroundColor: rec.type === 'low_conversion' ? '#FEF3C7' :
+                                      rec.type === 'pending_follow_up' ? '#DBEAFE' :
+                                      '#F0FDF4',
+                      borderLeftColor: rec.type === 'low_conversion' ? '#F59E0B' :
+                                      rec.type === 'pending_follow_up' ? '#3B82F6' :
+                                      '#10B981'
+                    }}
+                  >
+                    <p className="font-semibold text-sm mb-1" style={{
+                      color: rec.type === 'low_conversion' ? '#92400E' :
+                             rec.type === 'pending_follow_up' ? '#1E40AF' :
+                             '#065F46'
+                    }}>
+                      {rec.title}
+                    </p>
+                    <p className="text-xs mb-3" style={{
+                      color: rec.type === 'low_conversion' ? '#B45309' :
+                             rec.type === 'pending_follow_up' ? '#1E3A8A' :
+                             '#15803D'
+                    }}>
+                      {rec.message}
+                    </p>
+                    <button
+                      className="text-xs font-medium px-3 py-1 rounded transition-all"
+                      style={{
+                        backgroundColor: rec.type === 'low_conversion' ? '#FCD34D' :
+                                        rec.type === 'pending_follow_up' ? '#93C5FD' :
+                                        '#86EFAC',
+                        color: rec.type === 'low_conversion' ? '#92400E' :
+                               rec.type === 'pending_follow_up' ? '#1E40AF' :
+                               '#065F46'
+                      }}
+                    >
+                      {rec.action}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                ✓ Nenhuma recomendação urgente no momento
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Data Modal */}
+      <DataModal
+        isOpen={dataModal.isOpen}
+        data={dataModal.data}
+        title={dataModal.title}
+        onClose={() => setDataModal({ isOpen: false, data: null, title: '' })}
+      />
     </div>
   );
 };
