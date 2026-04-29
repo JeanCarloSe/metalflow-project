@@ -89,3 +89,14 @@ export const getAllUsers = async () => {
   const user = getSession();
   return user ? [user] : [];
 };
+
+// Compatibilidade: funções deprecated (usam fallback local)
+export const createUser = async (login, password, name, number, role) => {
+  console.warn('createUser deprecated, use backend');
+  return { ok: false, error: 'Use backend registration' };
+};
+
+export const deleteUser = async (userId) => {
+  console.warn('deleteUser deprecated, use backend');
+  return { ok: false, error: 'Use backend' };
+};

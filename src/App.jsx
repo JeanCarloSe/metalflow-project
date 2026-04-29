@@ -10,7 +10,6 @@ import QuotationReport from './components/QuotationReport';
 import ClientDetailModal from './components/ClientDetailModal';
 import DashboardPage from './components/DashboardPage';
 import AnalyticsReport from './components/AnalyticsReport';
-import TenantSelector from './components/TenantSelector';
 import TenantAdmin from './components/TenantAdmin';
 import IntegrationsPanel from './components/IntegrationsPanel';
 import {
@@ -222,10 +221,6 @@ function App() {
         </div>
       </div>
     );
-  }
-
-  if (!currentTenant) {
-    return <TenantSelector onTenantSelected={setCurrentTenant} />;
   }
 
   if (!currentUser) {

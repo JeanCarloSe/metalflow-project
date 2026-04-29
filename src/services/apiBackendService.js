@@ -171,4 +171,7 @@ class BackendAPIService {
   }
 }
 
-export default new BackendAPIService();
+const backendApi = new BackendAPIService();
+
+export default backendApi;
+export { backendApi };

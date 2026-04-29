@@ -137,3 +137,25 @@ export async function sendSlackQuotationUpdate(tenantId, quotationId, status) {
     console.error('Slack notification failed:', error);
   }
 }
+
+// ==================== COMPATIBILIDADE (Deprecated) ====================
+
+// Funções antigas que foram migradas para backend
+export async function connectHubSpot(apiKey) {
+  console.warn('connectHubSpot deprecated, use backend');
+  return false;
+}
+
+export async function connectSendGrid(apiKey) {
+  console.warn('connectSendGrid deprecated, use backend');
+  return false;
+}
+
+export async function connectSlack(webhookUrl) {
+  console.warn('connectSlack deprecated, use backend');
+  return false;
+}
+
+export function removeIntegration(type) {
+  console.warn('removeIntegration deprecated, use backend');
+}
