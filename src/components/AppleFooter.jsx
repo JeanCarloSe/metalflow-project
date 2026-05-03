@@ -2,6 +2,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const AppleFooter = () => {
+  const linkMap = {
+    'Orçador': 'quotation',
+    'Dashboard': 'dashboard',
+    'Relatórios': 'analytics',
+    'Integrações': 'integrations',
+  };
+
+  const handleLinkClick = (link) => {
+    const page = linkMap[link];
+    if (page) {
+      window.dispatchEvent(new CustomEvent('navigate', { detail: { page } }));
+    }
+  };
+
   const footerSections = [
     {
       title: 'Produtos',
@@ -41,7 +55,7 @@ const AppleFooter = () => {
   };
 
   return (
-    <footer className="bg-gradient-to-b from-gray-50 to-gray-900 text-gray-600 border-t border-gray-200">
+    <footer className="bg-gradient-to-b from-gray-50 to-gray-900 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 py-16">
         {/* Main Footer Content */}
         <motion.div
@@ -53,13 +67,14 @@ const AppleFooter = () => {
         >
           {footerSections.map((section, idx) => (
             <motion.div key={idx} variants={itemVariants}>
-              <h4 className="text-gray-900 font-semibold mb-4">{section.title}</h4>
+              <h4 className="text-gray-900 font-bold text-lg mb-4">{section.title}</h4>
               <ul className="space-y-3">
                 {section.links.map((link) => (
                   <motion.li
                     key={link}
                     whileHover={{ x: 4 }}
-                    className="cursor-pointer hover:text-gray-900 transition-colors"
+                    onClick={() => handleLinkClick(link)}
+                    className="text-gray-300 hover:text-white cursor-pointer transition-colors duration-200 font-medium"
                   >
                     {link}
                   </motion.li>
@@ -70,7 +85,7 @@ const AppleFooter = () => {
         </motion.div>
 
         {/* Divider */}
-        <div className="border-t border-gray-300 my-12" />
+        <div className="border-t border-gray-700 my-12" />
 
         {/* Bottom Section */}
         <motion.div
@@ -80,14 +95,14 @@ const AppleFooter = () => {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <div className="text-gray-600 text-sm mb-4 md:mb-0">
+          <div className="text-gray-400 text-sm mb-4 md:mb-0">
             © 2026 MetalFlow. Todos os direitos reservados.
           </div>
           <div className="flex gap-6">
-            {['🇧🇷 Português', 'Privacy', 'Terms', 'Cookies'].map((item, idx) => (
+            {['🇧🇷 Português', 'Privacy', 'Terms', 'Cookies'].map((item) => (
               <motion.button
-                key={idx}
-                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                key={item}
+                className="text-sm text-gray-400 hover:text-white transition-colors duration-200"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

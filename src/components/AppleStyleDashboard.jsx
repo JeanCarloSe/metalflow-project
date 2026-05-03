@@ -37,6 +37,14 @@ const AppleStyleDashboard = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  React.useEffect(() => {
+    const handleNavigateEvent = (event) => {
+      handleNavigate(event.detail.page);
+    };
+    window.addEventListener('navigate', handleNavigateEvent);
+    return () => window.removeEventListener('navigate', handleNavigateEvent);
+  }, []);
+
   const pageVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
