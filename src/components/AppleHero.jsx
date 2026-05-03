@@ -74,16 +74,16 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
         {/* Floating Cards Animation */}
         <motion.div
           variants={itemVariants}
-          className="relative h-96 mt-12"
+          className="flex flex-wrap justify-center gap-8 mt-12"
         >
           {[
             { delay: 0, icon: '📊', label: 'Dashboard' },
             { delay: 0.2, icon: '💼', label: 'Clientes' },
             { delay: 0.4, icon: '🎯', label: 'Orçamentos' },
-          ].map((card, i) => (
+          ].map((card) => (
             <motion.div
               key={card.label}
-              className="absolute w-32 h-32 bg-white rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
+              className="w-32 h-32 bg-white rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
               animate={{
                 y: [0, -20, 0],
                 rotate: [0, 5, 0],
@@ -93,10 +93,6 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
                 delay: card.delay,
                 repeat: Infinity,
                 ease: 'easeInOut',
-              }}
-              style={{
-                left: `${i * 120}px`,
-                top: `${i * 20}px`,
               }}
               whileHover={{ scale: 1.1, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)' }}
             >
