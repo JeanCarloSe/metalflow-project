@@ -5,7 +5,8 @@
       "Bash(git commit -m 'Fix: AppleHero.jsx missing index parameter in .map\\(\\) *)",
       "Bash(git commit -m 'Fix: AppleHero cards responsiveness - use flexbox instead of absolute positioning *)",
       "Bash(git commit -m 'Remove '\\\\''Lista'\\\\'' icon from header navigation *)",
-      "Bash(git commit -m 'Improve AppleFooter: better text contrast + add link navigation *)"
+      "Bash(git commit -m 'Improve AppleFooter: better text contrast + add link navigation *)",
+      "Bash(git commit -m 'Improve DashboardPage stats boxes interactivity *)"
     ]
   }
 }

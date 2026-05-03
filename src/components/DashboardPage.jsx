@@ -385,19 +385,19 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card-premium p-6 transition-all hover:shadow-lg">
+        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-primary)' }}>Total de Orçamentos (Mês)</p>
               <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-primary)' }}>{stats.monthTotal}</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(1, 112, 185, 0.1)` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110" style={{ backgroundColor: `rgba(1, 112, 185, 0.1)` }}>
               <span className="text-2xl">📊</span>
             </div>
           </div>
         </div>
 
-        <div className="card-premium p-6 transition-all hover:shadow-lg">
+        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-primary)' }}>Valor Total (Mês)</p>
@@ -406,26 +406,26 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
                 {stats.monthTotal > 0 ? `R$ ${(stats.monthValue / stats.monthTotal).toFixed(2)}/orç` : '—'}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(16, 185, 129, 0.1)` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200" style={{ backgroundColor: `rgba(16, 185, 129, 0.1)` }}>
               <span className="text-2xl">💰</span>
             </div>
           </div>
         </div>
 
-        <div className="card-premium p-6 transition-all hover:shadow-lg">
+        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-secondary)' }}>Peso Total (Mês)</p>
               <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-info)' }}>{stats.monthWeight.toFixed(0)}</p>
               <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>kg</p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(59, 130, 246, 0.1)` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200" style={{ backgroundColor: `rgba(59, 130, 246, 0.1)` }}>
               <span className="text-2xl">⚖️</span>
             </div>
           </div>
         </div>
 
-        <div className="card-premium p-6 transition-all hover:shadow-lg">
+        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-secondary)' }}>Clientes Ativos</p>
@@ -434,7 +434,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
                 {stats.uniqueClients > 0 ? `${(Object.values(stats.valueByStatus).reduce((a,b) => a+b, 0) / stats.uniqueClients / 1000).toFixed(1)}k/cliente` : '—'}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: `rgba(245, 158, 11, 0.1)` }}>
+            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200" style={{ backgroundColor: `rgba(245, 158, 11, 0.1)` }}>
               <span className="text-2xl">👥</span>
             </div>
           </div>
