@@ -4,6 +4,7 @@ import QuotationLineItem from './QuotationLineItem';
 import { SERVICE_PRICES } from '../services/serviceService';
 import { generateQuotationCode } from '../services/codeService';
 import { QUOTATION_STATUS, getStatusLabel, getStatusBg, getStatusColor } from '../services/statusService';
+import DxfImportDialog from './DxfImportDialog';
 
 const emptyLine = (index) => {
   const steelId = 'aço-carbono'; // ID do aço carbono por padrão
@@ -24,6 +25,7 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
   const [lines, setLines] = useState(initialQuotation?.lines || [emptyLine()]);
   const [quotationNumber, setQuotationNumber] = useState(initialQuotation?.number || null);
   const [status, setStatus] = useState(initialQuotation?.status || 'em-andamento');
+  const [showDxfImport, setShowDxfImport] = useState(false);
   const brand = selectedClient?.primaryColor || ASTON_BRAND;
 
   useEffect(() => {
@@ -44,6 +46,11 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
 
   const addLine = () => {
     setLines(prev => [...prev, emptyLine(prev.length + 1)]);
+  };
+
+  const handleDxfImport = (importedItems) => {
+    // Adicionar items importados à lista
+    setLines(prev => [...prev, ...importedItems]);
   };
 
   // Calcular totais
@@ -213,10 +220,16 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       {/* Lines header */}
       <div className="flex items-center justify-between mt-8">
         <h3 className="font-semibold text-gray-900 text-lg">Peças do Orçamento</h3>
-        <button onClick={addLine}
-          className="text-sm px-4 py-2 border border-dashed border-gray-400 text-gray-700 hover:text-gray-900 hover:border-gray-600 rounded-lg transition-all font-medium">
-          + Adicionar peça
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => setShowDxfImport(true)}
+            className="text-sm px-4 py-2 border border-dashed border-blue-400 text-blue-700 hover:text-blue-900 hover:border-blue-600 rounded-lg transition-all font-medium">
+            📁 Importar DXF/DWG
+          </button>
+          <button onClick={addLine}
+            className="text-sm px-4 py-2 border border-dashed border-gray-400 text-gray-700 hover:text-gray-900 hover:border-gray-600 rounded-lg transition-all font-medium">
+            + Adicionar peça
+          </button>
+        </div>
       </div>
 
       {/* Lines */}
@@ -299,6 +312,15 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
           </p>
         </div>
       )}
+
+      {/* DXF Import Dialog */}
+      <DxfImportDialog
+        isOpen={showDxfImport}
+        onClose={() => setShowDxfImport(false)}
+        onImport={handleDxfImport}
+        materials={materials}
+        defaultServices={[]}
+      />
     </div>
   );
 };
