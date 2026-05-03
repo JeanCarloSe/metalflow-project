@@ -37,47 +37,6 @@ export const initDB = async () => {
     console.error('❌ Failed to initialize database:', error);
     throw error;
   }
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => { db = request.result; resolve(db); };
-
-    request.onupgradeneeded = (event) => {
-      const database  = event.target.result;
-      const oldVersion = event.oldVersion;
-
-      if (!database.objectStoreNames.contains(STORES.MATERIALS)) {
-        const s = database.createObjectStore(STORES.MATERIALS, { keyPath: 'id' });
-        s.createIndex('name', 'name', { unique: true });
-      }
-      if (!database.objectStoreNames.contains(STORES.CLIENTS)) {
-        const s = database.createObjectStore(STORES.CLIENTS, { keyPath: 'id' });
-        s.createIndex('name', 'name', { unique: false });
-      }
-      if (!database.objectStoreNames.contains(STORES.QUOTATIONS)) {
-        const s = database.createObjectStore(STORES.QUOTATIONS, { keyPath: 'id' });
-        s.createIndex('clientId', 'clientId', { unique: false });
-        s.createIndex('date',     'date',     { unique: false });
-      }
-      if (!database.objectStoreNames.contains(STORES.PARTS)) {
-        database.createObjectStore(STORES.PARTS, { keyPath: 'id' });
-      }
-      // v2: users
-      if (oldVersion < 2 && !database.objectStoreNames.contains(STORES.USERS)) {
-        const s = database.createObjectStore(STORES.USERS, { keyPath: 'id' });
-        s.createIndex('login', 'login', { unique: true });
-      }
-      // v3: cadFiles
-      if (oldVersion < 3 && !database.objectStoreNames.contains(STORES.CAD_FILES)) {
-        const s = database.createObjectStore(STORES.CAD_FILES, { keyPath: 'id' });
-        s.createIndex('clientId', 'clientId', { unique: false });
-        s.createIndex('quotationId', 'quotationId', { unique: false });
-        s.createIndex('createdAt', 'createdAt', { unique: false });
-      }
-    };
-  });
 };
 
 // ── helpers ────────────────────────────────────────────────────────────────
