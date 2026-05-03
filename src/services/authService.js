@@ -1,7 +1,7 @@
 const SESSION_KEY = 'metalflow_user';
 const TENANT_KEY = 'metalflow_tenant';
 
-const API_URL = process.env.REACT_APP_BACKEND_API || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_BACKEND_API || 'http://localhost:3000/api';
 
 /**
  * Login via backend seguro (HttpOnly cookies)
