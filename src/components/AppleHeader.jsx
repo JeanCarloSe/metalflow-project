@@ -28,14 +28,20 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
       transition={{ duration: 0.6 }}
     >
       <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-        {/* Logo */}
-        <motion.div
-          className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent"
+        {/* Logo - Home Button */}
+        <motion.button
+          onClick={() => onNavigate('home')}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ⚙️ MetalFlow
-        </motion.div>
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-lg">
+            📋
+          </div>
+          <span className="hidden sm:block text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            MetalFlow
+          </span>
+        </motion.button>
 
         {/* Nav Items */}
         <div className="hidden md:flex items-center gap-8">
