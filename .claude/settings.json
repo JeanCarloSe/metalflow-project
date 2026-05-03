@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m 'Fix: Add missing CAD file functions \\(getCadFileHistory, archiveCadFile\\) *)"
+    ]
+  }
+}

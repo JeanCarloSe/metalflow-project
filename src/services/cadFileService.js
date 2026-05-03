@@ -265,3 +265,30 @@ export const getAllCadFiles = async () => {
     return [];
   }
 };
+
+/**
+ * Obter histórico de CAD files (para exibição)
+ */
+export const getCadFileHistory = async (cadFileId) => {
+  try {
+    const cadFile = await getCadFileContent(cadFileId);
+    if (!cadFile) return [];
+
+    return [{
+      date: cadFile.createdAt,
+      action: 'imported',
+      user: cadFile.importedBy,
+      fileName: cadFile.fileName
+    }];
+  } catch (error) {
+    console.error('❌ Error getting CAD file history:', error);
+    return [];
+  }
+};
+
+/**
+ * Arquivar arquivo CAD (marcar como inativo)
+ */
+export const archiveCadFile = async (cadFileId) => {
+  return updateCadFileStatus(cadFileId, 'archived');
+};
