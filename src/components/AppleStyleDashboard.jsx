@@ -95,6 +95,7 @@ const AppleStyleDashboard = ({
               quotations={quotations}
               clients={clients}
               currentOperator={currentUser}
+              onNavigate={handleNavigate}
               onQuotationClick={(q) => {
                 setEditingQuotation(q);
                 const client = clients.find(c => c.id === q.clientId);
