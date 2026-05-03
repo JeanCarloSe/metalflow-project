@@ -235,7 +235,7 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       </div>
 
       {/* Summary */}
-      <div className="rounded-xl border p-6 space-y-4 bg-white" style={{
+      <div className="rounded-xl border p-6 space-y-4 gradient-quotation-summary card-premium" style={{
         borderColor: hexToRgba(brand, 0.2),
       }}>
         <h3 className="font-semibold text-gray-900 text-lg">Resumo do Orçamento</h3>
@@ -246,7 +246,7 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
             { label: 'Custo material', value: `R$ ${totals.totalMaterial}` },
             { label: 'Custo serviço', value: `R$ ${totals.totalService}` },
           ].map(item => (
-            <div key={item.label} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div key={item.label} className="metric-box">
               <p className="text-sm text-gray-600">{item.label}</p>
               <p className="text-xl font-semibold text-gray-900 mt-2">{item.value}</p>
             </div>
@@ -254,7 +254,7 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
         </div>
 
         {/* Status Selection */}
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+        <div className="metric-box">
           <p className="text-sm text-gray-600 mb-2 font-medium">Status do Orçamento</p>
           <select
             value={status}

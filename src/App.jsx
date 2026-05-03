@@ -244,8 +244,8 @@ function App() {
       onAddQuotation={addQuotation}
       onUpdateQuotation={updateQuotation}
       onAddClient={addClient}
-      onUpdateClient={updateClientData}
-      onDeleteClient={deleteClient}
+      onUpdateClient={handleClientUpdated}
+      onDeleteClient={() => {}}
       onAddMaterial={addMaterial}
     />
   );

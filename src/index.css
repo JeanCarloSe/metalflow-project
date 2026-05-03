@@ -648,3 +648,126 @@ h1, h2, h3, h4, h5, h6 {
     border-color: rgba(239, 68, 68, 0.2);
   }
 }
+
+/* ============================================
+   ENHANCED GRADIENTS & VISUAL IMPROVEMENTS
+   ============================================ */
+
+/* Quotation Light Theme - Gradient summaries */
+.gradient-quotation-summary {
+  background: linear-gradient(135deg, rgba(1, 112, 185, 0.08) 0%, rgba(65, 165, 245, 0.04) 100%);
+  border: 1px solid rgba(1, 112, 185, 0.12);
+}
+
+/* Admin Dark Theme - Gradient cards */
+.gradient-admin-dark {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.3) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+/* Admin Dark Card - Left accent border */
+.card-admin-dark {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.2) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-left: 4px solid rgba(1, 112, 185, 0.6);
+  transition: all 0.3s ease;
+}
+
+.card-admin-dark:hover {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.35) 100%);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+/* Admin Dark Input - Enhanced focus */
+.input-admin-dark {
+  @apply w-full px-4 py-2.5 bg-slate-800/50 border border-blue-500/25 rounded-lg font-mono text-sm text-gray-100;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.4) 100%);
+  transition: all 0.3s ease;
+}
+
+.input-admin-dark:focus {
+  @apply outline-none border-blue-500/50;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.5) 100%);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), inset 0 0 20px rgba(59, 130, 246, 0.05);
+}
+
+/* Quotation section highlight */
+.section-highlight {
+  background: linear-gradient(135deg, rgba(1, 112, 185, 0.06) 0%, rgba(65, 165, 245, 0.02) 100%);
+  border-left: 3px solid rgba(1, 112, 185, 0.4);
+  border-radius: 0.5rem;
+}
+
+/* Premium gradient button - Enhanced */
+.btn-premium-gradient {
+  background: linear-gradient(135deg, #0170B9 0%, #0D47A1 100%);
+  box-shadow: 0 8px 24px rgba(1, 112, 185, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-premium-gradient:hover {
+  box-shadow: 0 12px 32px rgba(1, 112, 185, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-premium-gradient:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(1, 112, 185, 0.3);
+}
+
+/* Status indicator box */
+.status-indicator {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.status-indicator.success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-indicator.error {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+  color: #DC2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-indicator.warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+  color: #B45309;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* Data cell with subtle background */
+.data-cell {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.2) 0%, rgba(30, 41, 59, 0.1) 100%);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  font-family: 'Segoe UI Mono', monospace;
+}
+
+/* Metric display box */
+.metric-box {
+  background: linear-gradient(135deg, rgba(1, 112, 185, 0.05) 0%, rgba(65, 165, 245, 0.02) 100%);
+  border: 1px solid rgba(1, 112, 185, 0.1);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.metric-box:hover {
+  background: linear-gradient(135deg, rgba(1, 112, 185, 0.08) 0%, rgba(65, 165, 245, 0.04) 100%);
+  border-color: rgba(1, 112, 185, 0.2);
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+

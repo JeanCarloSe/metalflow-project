@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ASTON_BRAND, hexToRgba, THEME } from '../services/themeService';
+import { ASTON_BRAND, hexToRgba } from '../services/themeService';
+import AppLayout from './AppLayout';
 import AdminServiceManager from './AdminServiceManager';
 import AdminMaterialManager from './AdminMaterialManager';
 import AdminClientManager from './AdminClientManager';
@@ -21,47 +22,37 @@ const AdminPage = ({ currentUser, onLogout }) => {
     { id: 'data', label: '🗄️ Dados', icon: '🗄️' },
   ];
 
+  const tabContent = {
+    quotations: <AdminQuotationManager currentUser={currentUser} />,
+    services: <AdminServiceManager />,
+    materials: <AdminMaterialManager />,
+    clients: <AdminClientManager />,
+    users: <AdminUserManager />,
+    prices: <AdminPriceManager />,
+    data: <DataManagementPanel currentUser={currentUser} />
+  };
+
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #FFFFFF 0%, #F9FAFB 100%)' }}>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl border-b"
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          borderColor: 'var(--color-border-light)',
-          boxShadow: '0 4px 12px rgba(1, 112, 185, 0.08)'
-        }}>
-        <div className="max-w-7xl mx-auto px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold" style={{ color: 'var(--color-text-primary)' }}>⚙️ Painel Administrativo</h1>
-              <p className="text-base mt-2" style={{ color: 'var(--color-text-secondary)' }}>
-                👤 {currentUser.name} · {currentUser.login}
-              </p>
-            </div>
-            <button
-              onClick={onLogout}
-              className="btn-danger px-6 py-3 text-base font-medium"
-            >
-              🚪 Sair
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto backdrop-blur-sm rounded-xl p-1"
+    <AppLayout
+      title="⚙️ Painel Administrativo"
+      currentUser={currentUser}
+      onLogout={onLogout}
+    >
+      {/* Tabs Navigation */}
+      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 -mx-4 px-4" style={{ scrollBehavior: 'smooth' }}>
+        <div className="flex gap-2 backdrop-blur-sm rounded-xl p-2 inline-flex"
           style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: '1px solid var(--color-border-light)' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="px-5 py-2.5 rounded-lg text-base font-medium transition-all duration-200"
+              className="px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 whitespace-nowrap"
               style={activeTab === tab.id
-                ? { backgroundColor: ASTON_BRAND, color: '#fff', boxShadow: `0 4px 12px ${hexToRgba(ASTON_BRAND, 0.3)}` }
+                ? {
+                    backgroundColor: ASTON_BRAND,
+                    color: '#fff',
+                    boxShadow: `0 4px 12px ${hexToRgba(ASTON_BRAND, 0.3)}`
+                  }
                 : { color: 'var(--color-text-secondary)' }}
               onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-primary)'; }}
               onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
@@ -70,19 +61,20 @@ const AdminPage = ({ currentUser, onLogout }) => {
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Tab Content */}
-        <div className="card-premium p-8">
-          {activeTab === 'quotations' && <AdminQuotationManager currentUser={currentUser} />}
-          {activeTab === 'services' && <AdminServiceManager />}
-          {activeTab === 'materials' && <AdminMaterialManager />}
-          {activeTab === 'clients' && <AdminClientManager />}
-          {activeTab === 'users' && <AdminUserManager />}
-          {activeTab === 'prices' && <AdminPriceManager />}
-          {activeTab === 'data' && <DataManagementPanel currentUser={currentUser} />}
-        </div>
-      </main>
-    </div>
+      {/* Tab Content Card */}
+      <div className="card-premium p-8">
+        {tabContent[activeTab]}
+      </div>
+
+      {/* Admin Info */}
+      <div className="mt-8 card-premium p-6" style={{ backgroundColor: 'rgba(1, 112, 185, 0.05)' }}>
+        <p style={{ color: 'var(--color-text-secondary)' }}>
+          👤 <strong>{currentUser.name}</strong> · {currentUser.login} · Admin
+        </p>
+      </div>
+    </AppLayout>
   );
 };
 
