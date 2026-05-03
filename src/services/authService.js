@@ -4,33 +4,57 @@ const TENANT_KEY = 'metalflow_tenant';
 const API_URL = import.meta.env.VITE_BACKEND_API || 'http://localhost:3000/api';
 
 /**
- * Login via backend seguro (HttpOnly cookies)
- * Token nunca vem no JSON, apenas em cookie
+ * Login: tenta backend primeiro, fallback para local
  */
 export const loginUser = async (login, password, tenantId) => {
+  const loginLower = login.trim().toLowerCase();
+
+  // Tentar backend
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
-      credentials: 'include', // ✅ Envia/recebe HttpOnly cookies
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        login: login.trim().toLowerCase(),
+        login: loginLower,
         password,
         tenantId: tenantId || localStorage.getItem(TENANT_KEY) || 'default'
       })
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      return { ok: false, error: error.message || 'Login failed' };
+    if (response.ok) {
+      const { user } = await response.json();
+      localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+      localStorage.setItem(TENANT_KEY, user.tenantId);
+      return { ok: true, user };
+    }
+  } catch (err) {
+    // Continua para login local
+  }
+
+  // Fallback: login local via IndexedDB
+  try {
+    const db = await new Promise((resolve, reject) => {
+      const req = indexedDB.open('metalflow');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+
+    const users = await new Promise((resolve, reject) => {
+      const tx = db.transaction('users', 'readonly');
+      const store = tx.objectStore('users');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+
+    const user = users.find(u => u.login === loginLower && u.password === password);
+
+    if (!user) {
+      return { ok: false, error: 'Usuário ou senha inválidos' };
     }
 
-    const { user } = await response.json();
-
-    // Armazenar dados do usuário (NÃO token!)
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    localStorage.setItem(TENANT_KEY, user.tenantId);
-
     return { ok: true, user };
   } catch (error) {
     return { ok: false, error: error.message };
@@ -68,32 +92,93 @@ export const setSession = (user) => {
 };
 
 /**
- * Compatibilidade: localUser para fallback offline
+ * Criar usuário local (IndexedDB)
  */
 export const createLocalUser = async (login, password, name, number, role = 'operator') => {
-  // ❌ Deprecated: usar backend
-  console.warn('createLocalUser deprecated, use backend /auth/register');
-  return { ok: false, error: 'Use backend for registration' };
+  try {
+    const db = await new Promise((resolve, reject) => {
+      const req = indexedDB.open('metalflow');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+
+    const user = {
+      id: `user-${Date.now()}`,
+      login: login.toLowerCase(),
+      password,
+      name,
+      number,
+      role,
+      createdAt: new Date().toISOString()
+    };
+
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction('users', 'readwrite');
+      const store = tx.objectStore('users');
+      const req = store.add(user);
+      req.onerror = () => reject(req.error);
+      tx.oncomplete = () => resolve();
+    });
+
+    return { ok: true, user };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 };
 
 /**
- * Compatibilidade: não mais necessário
+ * Verificar se há usuários
  */
 export const hasAnyUser = async () => {
-  const user = getSession();
-  return !!user;
+  try {
+    const db = await new Promise((resolve, reject) => {
+      const req = indexedDB.open('metalflow');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+
+    const users = await new Promise((resolve, reject) => {
+      const tx = db.transaction('users', 'readonly');
+      const store = tx.objectStore('users');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+
+    return users.length > 0;
+  } catch {
+    return false;
+  }
 };
 
-// Fallback: apenas para compatibilidade com código antigo
+/**
+ * Obter todos os usuários
+ */
 export const getAllUsers = async () => {
-  const user = getSession();
-  return user ? [user] : [];
+  try {
+    const db = await new Promise((resolve, reject) => {
+      const req = indexedDB.open('metalflow');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction('users', 'readonly');
+      const store = tx.objectStore('users');
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    return [];
+  }
 };
 
-// Compatibilidade: funções deprecated (usam fallback local)
+/**
+ * Criar usuário (alias para createLocalUser)
+ */
 export const createUser = async (login, password, name, number, role) => {
-  console.warn('createUser deprecated, use backend');
-  return { ok: false, error: 'Use backend registration' };
+  return createLocalUser(login, password, name, number, role);
 };
 
 export const deleteUser = async (userId) => {

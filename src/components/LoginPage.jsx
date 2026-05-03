@@ -61,8 +61,19 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
           setError('Credenciais inválidas (login: admin, senha: 123456)');
         }
       } else {
-        console.error('Backend registration not yet implemented');
-        setError('Registro via backend em desenvolvimento');
+        // Criar novo usuário
+        const result = await createUser(login, password, name, number, role);
+        if (result.ok) {
+          // Login automático após registro
+          const loginResult = await loginUser(login, password, tenantId);
+          if (loginResult.ok) {
+            onLogin(loginResult.user);
+          } else {
+            setError('Registro realizado, mas houve erro ao fazer login: ' + loginResult.error);
+          }
+        } else {
+          setError('Erro ao criar usuário: ' + result.error);
+        }
       }
     } finally {
       setLoading(false);
