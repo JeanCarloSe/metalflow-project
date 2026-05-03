@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { parseDxfFile, extractLayers, convertToQuotationItems } from '../services/dxfParserService';
-import { saveCadFile } from '../services/cadFileService';
+import { saveCadFile, getCadFilesByClient } from '../services/cadFileService';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
+import CadFilePreview from './CadFilePreview';
 
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -130,13 +131,27 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-      <div className="card-premium rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)' }}>
+      <div className="card-premium rounded-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col" style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)' }}>
+        {/* Header */}
         <div className="sticky top-0 p-6 border-b" style={{ borderColor: 'rgba(1, 112, 185, 0.1)' }}>
-          <h2 className="text-2xl font-bold" style={{ color: ASTON_BRAND }}>📁 Importar DXF/DWG</h2>
-          <p className="text-gray-600 text-sm mt-1">Selecione um arquivo para extrair layers e dimensões</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-2xl font-bold" style={{ color: ASTON_BRAND }}>📁 Importar DXF/DWG</h2>
+              <p className="text-gray-600 text-sm mt-1">Selecione um arquivo para extrair layers e dimensões</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        {/* Main Content - Two Columns */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* Coluna Esquerda - Formulário de Importação */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 border-r" style={{ borderColor: 'var(--color-border-light)' }}>
           {/* File Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Arquivo DXF/DWG</label>
@@ -275,7 +290,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
           )}
 
           {/* Buttons */}
-          <div className="flex gap-4 justify-end pt-4 border-t" style={{ borderColor: 'var(--color-border-light)' }}>
+          <div className="flex gap-4 justify-end pt-4 border-t sticky bottom-0 bg-white" style={{ borderColor: 'var(--color-border-light)' }}>
             <button
               onClick={onClose}
               disabled={status === 'importing'}
@@ -295,6 +310,19 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
             >
               {status === 'importing' ? '⏳ Importando...' : '✅ Importar Selecionados'}
             </button>
+          </div>
+          </div>
+
+          {/* Coluna Direita - Preview de CADs Importados */}
+          <div className="w-80 overflow-y-auto p-6 bg-gray-50" style={{ backgroundColor: 'rgba(1, 112, 185, 0.02)' }}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">📂 CADs Importados</h3>
+            {selectedClient ? (
+              <CadFilePreview selectedClientId={selectedClient.id} />
+            ) : (
+              <div className="p-4 text-center text-gray-500 text-sm">
+                <p>Selecione um cliente para ver CADs importados</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

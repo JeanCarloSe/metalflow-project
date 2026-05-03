@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCadFilesByClient, getCadFileHistory, archiveCadFile } from '../services/cadFileService';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
+import CadFilePreview from './CadFilePreview';
 
 const CadHistoryPanel = ({ selectedClientId }) => {
   const [cadFiles, setCadFiles] = useState([]);
@@ -74,13 +75,20 @@ const CadHistoryPanel = ({ selectedClientId }) => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900">Histórico de CADs Importados</h3>
-        <span className="text-sm text-gray-600">{cadFiles.length} arquivo(s)</span>
+    <div className="space-y-8">
+      {/* Preview em Grid */}
+      <div>
+        <CadFilePreview selectedClientId={selectedClientId} />
       </div>
 
-      <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'var(--color-border-light)' }}>
+      {/* Histórico em Tabela */}
+      <div className="space-y-4 pt-6 border-t" style={{ borderColor: 'var(--color-border-light)' }}>
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Histórico Detalhado</h3>
+          <span className="text-sm text-gray-600">{cadFiles.length} arquivo(s)</span>
+        </div>
+
+        <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'var(--color-border-light)' }}>
         <table className="w-full">
           <thead style={{ backgroundColor: 'rgba(1, 112, 185, 0.05)' }}>
             <tr>
@@ -118,11 +126,12 @@ const CadHistoryPanel = ({ selectedClientId }) => {
         </table>
       </div>
 
-      {cadFiles.length > 0 && (
-        <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600" style={{ backgroundColor: 'rgba(1, 112, 185, 0.03)' }}>
-          <p>💡 Total: {cadFiles.reduce((sum, f) => sum + (f.layers?.length || 0), 0)} layers | {(cadFiles.reduce((sum, f) => sum + (f.fileSize || 0), 0) / 1024).toFixed(1)} KB</p>
-        </div>
-      )}
+        {cadFiles.length > 0 && (
+          <div className="p-4 bg-gray-50 rounded-lg text-sm text-gray-600" style={{ backgroundColor: 'rgba(1, 112, 185, 0.03)' }}>
+            <p>💡 Total: {cadFiles.reduce((sum, f) => sum + (f.layers?.length || 0), 0)} layers | {(cadFiles.reduce((sum, f) => sum + (f.fileSize || 0), 0) / 1024).toFixed(1)} KB</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
