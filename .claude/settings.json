@@ -10,7 +10,8 @@
       "Bash(git commit -m 'Add CadFilePreview component with thumbnails and viewer *)",
       "Bash(git commit -m 'Integrate CadFilePreview in import dialog and history panel *)",
       "Bash(git commit -m 'Redesign: Modern and minimal quotation report \\(Apple-style\\) *)",
-      "Bash(git commit -m 'Improve home icon: modern design + navigate to home on click *)"
+      "Bash(git commit -m 'Improve home icon: modern design + navigate to home on click *)",
+      "Bash(git commit -m 'Design: Premium Logo + Icon System \\(Modern & Strong\\) *)"
     ]
   }
 }

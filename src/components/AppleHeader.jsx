@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import Logo from './Logo';
+import { PageIcon } from './PageIcons';
 
 const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
   const [scrolled, setScrolled] = useState(false);
@@ -31,28 +33,30 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
         {/* Logo - Home Button */}
         <motion.button
           onClick={() => onNavigate('home')}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-lg">
-            📋
+          <Logo size="md" />
+          <div className="hidden sm:flex flex-col">
+            <span className="text-sm font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-none">
+              MetalFlow
+            </span>
+            <span className="text-xs text-gray-500">Orçamentos</span>
           </div>
-          <span className="hidden sm:block text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            MetalFlow
-          </span>
         </motion.button>
 
         {/* Nav Items */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => (
             <motion.button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className="text-sm text-gray-700 hover:text-black transition-colors relative group"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-100 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
+              <PageIcon page={item.id} className="w-4 h-4" />
               {item.label}
               <motion.span
                 className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300"
