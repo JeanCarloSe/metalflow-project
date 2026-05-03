@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git commit -m 'Fix: Add missing CAD file functions \\(getCadFileHistory, archiveCadFile\\) *)",
       "Bash(git commit -m 'Fix: AppleHero.jsx missing index parameter in .map\\(\\) *)",
-      "Bash(git commit -m 'Fix: AppleHero cards responsiveness - use flexbox instead of absolute positioning *)"
+      "Bash(git commit -m 'Fix: AppleHero cards responsiveness - use flexbox instead of absolute positioning *)",
+      "Bash(git commit -m 'Remove '\\\\''Lista'\\\\'' icon from header navigation *)"
     ]
   }
 }

@@ -14,7 +14,6 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'quotation', label: 'Orçador' },
     { id: 'clients', label: 'Clientes' },
-    { id: 'clients-list', label: '📋 Lista' },
     { id: 'materials', label: 'Materiais' },
     { id: 'analytics', label: 'Relatórios' },
   ];
