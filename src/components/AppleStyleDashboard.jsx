@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import AppleHeader from './AppleHeader';
 import AppleHero from './AppleHero';
@@ -8,6 +8,9 @@ import DashboardPage from './DashboardPage';
 import QuotationBuilder from './QuotationBuilder';
 import ClientsPage from './ClientsPage';
 import ReportPage from './ReportPage';
+
+const AdminPage = lazy(() => import('./AdminPage'));
+const ClientsListReport = lazy(() => import('./ClientsListReport'));
 
 const AppleStyleDashboard = ({
   currentUser,
@@ -21,10 +24,13 @@ const AppleStyleDashboard = ({
   onUpdateClient,
   onDeleteClient,
   onAddMaterial,
+  onAdminClick,
 }) => {
   const [currentPage, setCurrentPage] = useState('home');
   const [editingQuotation, setEditingQuotation] = useState(null);
   const [showReport, setShowReport] = useState(false);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [showAdmin, setShowAdmin] = useState(false);
 
   const handleNavigate = (page) => {
     setCurrentPage(page);
@@ -51,6 +57,7 @@ const AppleStyleDashboard = ({
         currentUser={currentUser}
         onLogout={onLogout}
         onNavigate={handleNavigate}
+        onAdminClick={() => setShowAdmin(true)}
       />
 
       {/* Main Content */}
@@ -63,7 +70,13 @@ const AppleStyleDashboard = ({
       >
         {currentPage === 'home' && (
           <>
-            <AppleHero />
+            <AppleHero
+              onStartClick={() => {
+                setSelectedClient(null);
+                setCurrentPage('quotation');
+              }}
+              onDemoClick={() => setCurrentPage('dashboard')}
+            />
             <AppleFeatures />
           </>
         )}
@@ -76,6 +89,13 @@ const AppleStyleDashboard = ({
               currentOperator={currentUser}
               onQuotationClick={(q) => {
                 setEditingQuotation(q);
+                const client = clients.find(c => c.id === q.clientId);
+                setSelectedClient(client || null);
+                setCurrentPage('quotation');
+              }}
+              onNewQuotation={(client) => {
+                setSelectedClient(client);
+                setEditingQuotation(null);
                 setCurrentPage('quotation');
               }}
             />
@@ -83,22 +103,26 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'quotation' && (
-          <section className="py-8">
+          <section className="py-8 max-w-6xl mx-auto px-4">
             <QuotationBuilder
-              quotations={quotations}
-              clients={clients}
               materials={materials}
-              editingQuotation={editingQuotation}
-              onSave={(q) => {
+              selectedClient={selectedClient}
+              onSubmit={(q) => {
                 if (editingQuotation) {
                   onUpdateQuotation(q);
                 } else {
                   onAddQuotation(q);
                 }
                 setEditingQuotation(null);
+                setSelectedClient(null);
+                setCurrentPage('dashboard');
               }}
-              onCancel={() => {
+              onChangeClient={() => setCurrentPage('clients')}
+              currentUser={currentUser}
+              initialQuotation={editingQuotation}
+              onEditComplete={() => {
                 setEditingQuotation(null);
+                setSelectedClient(null);
                 setCurrentPage('dashboard');
               }}
             />
@@ -109,9 +133,15 @@ const AppleStyleDashboard = ({
           <section className="py-8">
             <ClientsPage
               clients={clients}
-              onAdd={onAddClient}
-              onUpdate={onUpdateClient}
-              onDelete={onDeleteClient}
+              materials={materials}
+              onNewQuotation={(client) => {
+                setSelectedClient(client);
+                setCurrentPage('quotation');
+              }}
+              onClientAdded={onAddClient}
+              onEditClient={onUpdateClient}
+              onDeleteClient={onDeleteClient}
+              currentUser={currentUser}
             />
           </section>
         )}
@@ -132,6 +162,14 @@ const AppleStyleDashboard = ({
                 Ver Relatório Detalhado
               </button>
             </motion.div>
+          </section>
+        )}
+
+        {currentPage === 'clients-list' && (
+          <section className="py-8">
+            <Suspense fallback={<div className="text-center p-8">Carregando...</div>}>
+              <ClientsListReport />
+            </Suspense>
           </section>
         )}
 
@@ -177,6 +215,20 @@ const AppleStyleDashboard = ({
             }
           }}
         />
+      )}
+
+      {showAdmin && currentUser?.role === 'admin' && (
+        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+          <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Painel Administrativo</h2>
+            <button onClick={() => setShowAdmin(false)} className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 font-medium">Voltar</button>
+          </div>
+          <div className="p-4">
+            <Suspense fallback={<div className="text-center p-8">Carregando painel admin...</div>}>
+              <AdminPage currentUser={currentUser} onLogout={onLogout} />
+            </Suspense>
+          </div>
+        </div>
       )}
 
       <AppleFooter />

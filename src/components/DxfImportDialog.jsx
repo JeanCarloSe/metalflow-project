@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
 import { parseDxfFile, extractLayers, convertToQuotationItems } from '../services/dxfParserService';
+import { saveCadFile } from '../services/cadFileService';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
 
-const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices }) => {
+const fileToBase64 = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+const DEFAULT_MATERIALS = [
+  { id: 'aço-carbono', name: 'Aço Carbono', density: 7850 },
+  { id: 'inox', name: 'Inox 304', density: 8000 },
+  { id: 'aluminio', name: 'Alumínio 1050', density: 2700 },
+];
+
+const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices, currentUser, selectedClient, quotationId }) => {
   const [file, setFile] = useState(null);
   const [layers, setLayers] = useState([]);
   const [selectedMaterialId, setSelectedMaterialId] = useState('');
   const [selectedServices, setSelectedServices] = useState(defaultServices || []);
-  const [status, setStatus] = useState('idle'); // idle, parsing, ready, importing
+  const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
+
+  const availableMaterials = (materials && materials.length > 0) ? materials : DEFAULT_MATERIALS;
 
   const handleFileChange = async (e) => {
     const f = e.target.files?.[0];
@@ -20,10 +38,17 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
 
     try {
       const dxfData = await parseDxfFile(f);
+
+      // Debug
+      console.log('[DxfImportDialog] dxfData keys:', Object.keys(dxfData || {}));
+      console.log('[DxfImportDialog] dxfData.entities:', dxfData?.entities?.length || 'undefined');
+      console.log('[DxfImportDialog] dxfData.tables:', !!dxfData?.tables);
+
       const extractedLayers = extractLayers(dxfData);
+      console.log('[DxfImportDialog] extracted layers:', extractedLayers.length);
 
       if (extractedLayers.length === 0) {
-        setError('Nenhuma layer encontrada no arquivo DXF');
+        setError('Nenhuma layer encontrada. Verifique se o arquivo DXF é válido.');
         setStatus('idle');
         return;
       }
@@ -31,6 +56,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
       setLayers(extractedLayers);
       setStatus('ready');
     } catch (err) {
+      console.error('[DxfImportDialog] Error:', err);
       setError(`Erro ao fazer parse: ${err.message}`);
       setStatus('idle');
     }
@@ -59,7 +85,33 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
 
     try {
       const items = convertToQuotationItems(selectedLayers, selectedMaterialId, selectedServices);
-      onImport(items);
+
+      // Salvar arquivo CAD no banco de dados
+      if (selectedClient || quotationId) {
+        setStatus('saving');
+        const base64Content = await fileToBase64(file);
+
+        const cadFile = await saveCadFile({
+          fileName: file.name,
+          fileContent: base64Content,
+          fileSize: file.size,
+          clientId: selectedClient?.id || null,
+          quotationId: quotationId || null,
+          layers: selectedLayers,
+          importedBy: currentUser?.id || 'anonymous',
+          description: `Importado - Peças: ${selectedLayers.map(l => l.name).join(', ')}`
+        });
+
+        // Adicionar ID do CAD aos items
+        const itemsWithCadRef = items.map(i => ({
+          ...i,
+          sourceCAD: cadFile.id
+        }));
+
+        onImport(itemsWithCadRef, cadFile.id);
+      } else {
+        onImport(items);
+      }
 
       // Resetar estado
       setFile(null);
@@ -115,6 +167,12 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
             </div>
           )}
 
+          {status === 'saving' && (
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+              ⏳ Salvando arquivo no banco de dados...
+            </div>
+          )}
+
           {layers.length > 0 && (
             <>
               {/* Layers Table */}
@@ -163,7 +221,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
                   style={{ borderColor: 'var(--color-border-light)' }}
                 >
                   <option value="">Selecione um material...</option>
-                  {materials.map(m => (
+                  {availableMaterials.map(m => (
                     <option key={m.id} value={m.id}>{m.name} ({m.density} kg/m³)</option>
                   ))}
                 </select>

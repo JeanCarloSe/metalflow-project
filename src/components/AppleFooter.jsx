@@ -55,9 +55,9 @@ const AppleFooter = () => {
             <motion.div key={idx} variants={itemVariants}>
               <h4 className="text-gray-900 font-semibold mb-4">{section.title}</h4>
               <ul className="space-y-3">
-                {section.links.map((link, i) => (
+                {section.links.map((link) => (
                   <motion.li
-                    key={i}
+                    key={link}
                     whileHover={{ x: 4 }}
                     className="cursor-pointer hover:text-gray-900 transition-colors"
                   >

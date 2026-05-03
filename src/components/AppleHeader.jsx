@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-const AppleHeader = ({ currentUser, onLogout, onNavigate }) => {
+const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -14,6 +14,7 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate }) => {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'quotation', label: 'Orçador' },
     { id: 'clients', label: 'Clientes' },
+    { id: 'clients-list', label: '📋 Lista' },
     { id: 'materials', label: 'Materiais' },
     { id: 'analytics', label: 'Relatórios' },
   ];
@@ -62,6 +63,16 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate }) => {
             <p className="text-sm font-semibold text-gray-900">{currentUser?.name || 'Admin'}</p>
             <p className="text-xs text-gray-500">{currentUser?.role}</p>
           </div>
+          {currentUser?.role === 'admin' && onAdminClick && (
+            <motion.button
+              onClick={onAdminClick}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold hover:shadow-lg transition-shadow"
+              whileHover={{ scale: 1.05, boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.3)' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              ⚙️ Admin
+            </motion.button>
+          )}
           <motion.button
             onClick={onLogout}
             className="px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-semibold hover:shadow-lg transition-shadow"

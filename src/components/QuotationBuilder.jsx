@@ -26,6 +26,8 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
   const [quotationNumber, setQuotationNumber] = useState(initialQuotation?.number || null);
   const [status, setStatus] = useState(initialQuotation?.status || 'em-andamento');
   const [showDxfImport, setShowDxfImport] = useState(false);
+  const [cadFileId, setCadFileId] = useState(initialQuotation?.cadFileId || null);
+  const [cadFileName, setCadFileName] = useState(initialQuotation?.cadFileName || null);
   const brand = selectedClient?.primaryColor || ASTON_BRAND;
 
   useEffect(() => {
@@ -48,9 +50,15 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
     setLines(prev => [...prev, emptyLine(prev.length + 1)]);
   };
 
-  const handleDxfImport = (importedItems) => {
+  const handleDxfImport = (importedItems, importedCadFileId) => {
     // Adicionar items importados à lista
     setLines(prev => [...prev, ...importedItems]);
+    // Associar cadFileId ao orçamento
+    if (importedCadFileId) {
+      setCadFileId(importedCadFileId);
+      // Extrair nome do arquivo dos items se disponível
+      setCadFileName(`CAD-${new Date().toLocaleDateString('pt-BR')}`);
+    }
   };
 
   // Calcular totais
@@ -121,6 +129,8 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       totalWeight: totals.totalWeight,
       number: number,
       status: status,
+      cadFileId: cadFileId || null,
+      cadFileName: cadFileName || null,
     };
 
     onSubmit?.(result);
@@ -155,7 +165,7 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
         </div>
       </div>
 
-      {/* Quotation number + Status */}
+      {/* Quotation number + Status + CAD */}
       <div className="flex items-center justify-between gap-4 mb-4">
         <div className="card-premium px-6 py-4 flex-1">
           <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: THEME.primary }}>Número do Orçamento</p>
@@ -174,6 +184,12 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
           <p className="text-xs uppercase tracking-widest mb-2 opacity-80">Status</p>
           <p className="text-lg font-bold">{getStatusLabel(status)}</p>
         </div>
+        {cadFileId && (
+          <div className="card-premium px-6 py-4 bg-green-50 min-w-fit" style={{ borderColor: 'rgba(34, 197, 94, 0.3)' }}>
+            <p className="text-xs font-semibold text-green-700 uppercase tracking-widest">📁 CAD Associado</p>
+            <p className="text-sm font-bold text-green-800 mt-1">{cadFileName}</p>
+          </div>
+        )}
       </div>
 
       {/* Client banner */}
@@ -320,6 +336,9 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
         onImport={handleDxfImport}
         materials={materials}
         defaultServices={[]}
+        currentUser={currentUser}
+        selectedClient={selectedClient}
+        quotationId={quotationNumber}
       />
     </div>
   );

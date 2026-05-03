@@ -211,8 +211,8 @@ const AdminPriceManager = () => {
                       📊 Ver histórico ({history.length - 1} updates)
                     </summary>
                     <div className="mt-2 space-y-1">
-                      {history.slice(1, 6).map((entry, i) => (
-                        <div key={i} className="font-mono text-gray-600 text-xs">
+                      {history.slice(1, 6).map((entry) => (
+                        <div key={`${entry.date}-${entry.source}`} className="font-mono text-gray-600 text-xs">
                           {new Date(entry.date).toLocaleDateString('pt-BR')}: R$ {entry.price.toFixed(2)} ({entry.source})
                         </div>
                       ))}

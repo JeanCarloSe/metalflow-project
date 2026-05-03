@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND } from '../services/themeService';
-import { getAllUsers, createUser, deleteUser } from '../services/authService';
+import { getAllUsers, createLocalUser } from '../services/authService';
+import { deleteUser } from '../services/storageService';
 
 const AdminUserManager = () => {
   const [users, setUsers] = useState([]);
@@ -59,7 +60,7 @@ const AdminUserManager = () => {
     }
 
     try {
-      const result = await createUser(formData.login, formData.password, formData.name, formData.number, formData.role);
+      const result = await createLocalUser(formData.login, formData.password, formData.name, formData.number, formData.role);
       if (!result.ok) {
         setError(result.error);
         return;

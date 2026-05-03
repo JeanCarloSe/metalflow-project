@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import QuotationBuilder from './components/QuotationBuilder';
 import ClientsPage from './components/ClientsPage';
 import ClientHomePage from './components/ClientHomePage';
@@ -6,6 +6,7 @@ import ReportPage from './components/ReportPage';
 import LoginPage from './components/LoginPage';
 import AdminPage from './components/AdminPage';
 import AppleStyleDashboard from './components/AppleStyleDashboard';
+import SavingIndicator from './components/SavingIndicator';
 import QuotationPreviewModal from './components/QuotationPreviewModal';
 import QuotationReport from './components/QuotationReport';
 import ClientDetailModal from './components/ClientDetailModal';
@@ -15,15 +16,16 @@ import TenantAdmin from './components/TenantAdmin';
 import IntegrationsPanel from './components/IntegrationsPanel';
 import {
   initDB, getMaterials, addMaterial, getClients, getQuotations,
-  addQuotation, addClient, cleanDuplicateQuotations, updateQuotation,
+  addQuotation, addClient, cleanDuplicateQuotations, updateQuotation, updateClient,
 } from './services/storageService';
 import { initPersistence, enableTabSync, validateDatabase } from './services/persistenceService';
 import { initAutoBackup, stopAutoBackup, getBackupSummary } from './services/autoBackupService';
 import { downloadQuotationPDF } from './services/pdfService';
-import { getSession, clearSession, hasAnyUser, createUser } from './services/authService';
+import { getSession, clearSession, hasAnyUser, createLocalUser } from './services/authService';
 import { ASTON_BRAND } from './services/themeService';
 import { generateQuotationCode } from './services/codeService';
 import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusService';
+import { PerformanceMonitor } from './utils/performanceMonitor';
 
 const ASTON_LOGO = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
 
@@ -51,6 +53,7 @@ const NAV_ITEMS = [
 function App() {
   const [materials,        setMaterials]        = useState([]);
   const [loading,          setLoading]          = useState(true);
+  const [loadingMessage,   setLoadingMessage]   = useState('Carregando...');
   const [currentPage,      setCurrentPage]      = useState('dashboard');
   const [clients,          setClients]          = useState([]);
   const [quotations,       setQuotations]       = useState([]);
@@ -65,12 +68,22 @@ function App() {
   const [editingClient,     setEditingClient]     = useState(null);
   const [successMessage,    setSuccessMessage]    = useState('');
   const [viewingClientHome, setViewingClientHome] = useState(null);
+  const [isSaving,          setIsSaving]          = useState(false);
 
   useEffect(() => {
+    // Inicializar Performance Monitor
+    const perfMonitor = PerformanceMonitor.getInstance();
+
     const bootstrap = async () => {
       try {
+        setLoadingMessage('Abrindo banco de dados...');
+        const dbOpId = perfMonitor.startOperation('initDB');
         await initDB();
+        perfMonitor.endOperation(dbOpId);
+
+        const persistOpId = perfMonitor.startOperation('initPersistence');
         await initPersistence();
+        perfMonitor.endOperation(persistOpId);
 
         // Validar saúde do banco
         const validation = await validateDatabase();
@@ -78,11 +91,12 @@ function App() {
           console.warn('⚠️ Banco de dados com avisos:', validation.issues);
         }
 
+        setLoadingMessage('Verificando autenticação...');
         let anyUser = await hasAnyUser();
 
         // Criar usuário padrão se não houver nenhum
         if (!anyUser) {
-          const result = await createUser('adm', 'adm', 'Administrador', 'ADM-001', 'admin');
+          const result = await createLocalUser('adm', 'adm', 'Administrador', 'ADM-001', 'admin');
           if (result.ok) {
             anyUser = true;
           }
@@ -93,18 +107,23 @@ function App() {
         const session = getSession();
         if (session) setCurrentUser(session);
 
+        setLoadingMessage('Carregando materiais...');
         let loadedMaterials = await getMaterials();
         if (loadedMaterials.length === 0) {
           for (const m of DEFAULT_MATERIALS) await addMaterial(m);
           loadedMaterials = await getMaterials();
         }
         setMaterials(loadedMaterials);
+
+        setLoadingMessage('Carregando clientes...');
         setClients(await getClients());
 
+        setLoadingMessage('Carregando orçamentos...');
         // Remove duplicatas
         await cleanDuplicateQuotations();
         setQuotations(await getQuotations());
 
+        setLoadingMessage('Finalizando...');
         // Habilitar sincronização entre abas
         const unsubscribeSync = enableTabSync(async () => {
           setMaterials(await getMaterials());
@@ -150,16 +169,61 @@ function App() {
 
   const handleClientAdded = async (data) => {
     try {
-      await addClient(data);
-      setClients(await getClients());
+      setIsSaving(true);
+      console.log('📝 Salvando novo cliente...');
+      const start = performance.now();
+
+      // Adicionar cliente com ID automático
+      const clientWithId = {
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        ...data
+      };
+
+      await addClient(clientWithId);
+      const saveDuration = performance.now() - start;
+      console.log(`✅ Cliente salvo em ${Math.round(saveDuration)}ms`);
+
+      // Atualizar lista LOCALMENTE (não recarregar tudo)
+      const updateStart = performance.now();
+      setClients(prev => [clientWithId, ...prev]);
+      const updateDuration = performance.now() - updateStart;
+      console.log(`✅ UI atualizada em ${Math.round(updateDuration)}ms`);
+
+      setSuccessMessage(`✓ Cliente ${data.name} adicionado com sucesso!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
-      console.error('Erro ao salvar cliente:', error);
+      console.error('❌ Erro ao salvar cliente:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  const handleClientUpdated = (updatedClient) => {
-    setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
-    setEditingClient(null);
+  const handleClientUpdated = async (updatedClient) => {
+    try {
+      setIsSaving(true);
+      console.log('📝 Atualizando cliente...');
+      const start = performance.now();
+
+      // Salvar no BD
+      await updateClient(updatedClient);
+      const saveDuration = performance.now() - start;
+      console.log(`✅ Cliente atualizado em ${Math.round(saveDuration)}ms`);
+
+      // Atualizar lista LOCALMENTE
+      const updateStart = performance.now();
+      setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
+      const updateDuration = performance.now() - updateStart;
+      console.log(`✅ UI atualizada em ${Math.round(updateDuration)}ms`);
+
+      setEditingClient(null);
+      setSuccessMessage(`✓ Cliente ${updatedClient.name} atualizado!`);
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Erro ao atualizar cliente:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleQuotationSubmit = async (quotation) => {
@@ -212,13 +276,24 @@ function App() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center space-y-4">
-          <img src={ASTON_LOGO} alt="Aston Metalúrgica" className="h-20 object-contain mx-auto animate-pulse"
-            style={{ imageRendering: 'crisp-edges' }}
-            onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
-          <p className="hidden text-2xl font-bold" style={{ color: ASTON_BRAND }}>ASTON</p>
-          <p className="text-gray-500 text-sm">Inicializando...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center space-y-6">
+          <div>
+            <img src={ASTON_LOGO} alt="Aston Metalúrgica" className="h-24 object-contain mx-auto animate-pulse"
+              style={{ imageRendering: 'crisp-edges' }}
+              onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
+            <p className="hidden text-3xl font-bold mt-3" style={{ color: ASTON_BRAND }}>ASTON</p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+            </div>
+            <p className="text-gray-600 font-medium">{loadingMessage}</p>
+            <p className="text-gray-400 text-xs">Esto pode levar alguns segundos...</p>
+          </div>
         </div>
       </div>
     );
@@ -228,26 +303,24 @@ function App() {
     return <LoginPage onLogin={handleLogin} isFirstAccess={isFirstAccess} />;
   }
 
-  // Se for admin, mostra painel administrativo
-  if (currentUser.role === 'admin') {
-    return <AdminPage currentUser={currentUser} onLogout={handleLogout} />;
-  }
-
-  // Layout estilo Apple para operadores
+  // Layout estilo Apple para operadores e admins
   return (
-    <AppleStyleDashboard
-      currentUser={currentUser}
-      quotations={quotations}
-      clients={clients}
-      materials={materials}
-      onLogout={handleLogout}
-      onAddQuotation={addQuotation}
-      onUpdateQuotation={updateQuotation}
-      onAddClient={addClient}
-      onUpdateClient={handleClientUpdated}
-      onDeleteClient={() => {}}
-      onAddMaterial={addMaterial}
-    />
+    <>
+      <AppleStyleDashboard
+        currentUser={currentUser}
+        quotations={quotations}
+        clients={clients}
+        materials={materials}
+        onLogout={handleLogout}
+        onAddQuotation={handleQuotationSubmit}
+        onUpdateQuotation={handleQuotationSubmit}
+        onAddClient={handleClientAdded}
+        onUpdateClient={handleClientUpdated}
+        onDeleteClient={() => {}}
+        onAddMaterial={addMaterial}
+      />
+      <SavingIndicator isVisible={isSaving} />
+    </>
   );
 }
 

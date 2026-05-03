@@ -191,8 +191,8 @@ const IntegrationsPanel = ({ onClose }) => {
             <div className="space-y-2">
               <p className="text-xs font-semibold text-gray-900">Dicas de Segurança</p>
               <ul className="space-y-1">
-                {SECURITY_TIPS.slice(0, 2).map((tip, i) => (
-                  <li key={i} className="text-xs text-gray-600 flex gap-2">
+                {SECURITY_TIPS.slice(0, 2).map((tip) => (
+                  <li key={tip} className="text-xs text-gray-600 flex gap-2">
                     <span className="flex-shrink-0">🔒</span>
                     <span>{tip}</span>
                   </li>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug - Aston</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+    pre { background: white; padding: 10px; border: 1px solid #ccc; }
+    .error { color: red; }
+    .success { color: green; }
+  </style>
+</head>
+<body>
+  <h1>🔧 Debug Console</h1>
+  <p>Verificando aplicação...</p>
+
+  <h2>IndexedDB Status</h2>
+  <pre id="db-status">Carregando...</pre>
+
+  <h2>Console Errors</h2>
+  <pre id="errors">Nenhum erro capturado</pre>
+
+  <h2>Application State</h2>
+  <pre id="state">Esperando aplicação...</pre>
+
+  <script>
+    // Capturar erros
+    window.errors = [];
+    window.addEventListener('error', (e) => {
+      window.errors.push(`${e.message} (${e.filename}:${e.lineno})`);
+      document.getElementById('errors').textContent = window.errors.join('\n');
+    });
+
+    // Verificar IndexedDB
+    const checkDB = async () => {
+      try {
+        const dbs = await indexedDB.databases();
+        document.getElementById('db-status').innerHTML = `<span class="success">✅ IndexedDB disponível</span>\n${JSON.stringify(dbs, null, 2)}`;
+      } catch(e) {
+        document.getElementById('db-status').innerHTML = `<span class="error">❌ Erro: ${e.message}</span>`;
+      }
+    };
+
+    checkDB();
+
+    // Monitorar state
+    setTimeout(() => {
+      const root = document.getElementById('root');
+      if (root && root.children.length > 0) {
+        document.getElementById('state').innerHTML = '<span class="success">✅ Aplicação renderizada</span>';
+      } else {
+        document.getElementById('state').innerHTML = '<span class="error">❌ Aplicação não renderizou</span>';
+      }
+    }, 3000);
+  </script>
+</body>
+</html>

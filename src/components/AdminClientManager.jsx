@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
 import { getClients, addClient, updateClient, deleteClient } from '../services/storageService';
 import { generateClientCode } from '../services/codeService';
+import { DetailedProfiler } from '../utils/detailedProfiler';
 
-const AdminClientManager = () => {
+const AdminClientManager = ({ onClientSelect }) => {
   const [clients, setClients] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -41,40 +42,67 @@ const AdminClientManager = () => {
     setError('');
     setSuccess('');
 
+    // Iniciar profiling
+    DetailedProfiler.startSession('create-client');
+    DetailedProfiler.mark('create-client', 'validation-start');
+
     if (!formData.name.trim()) {
       setError('Nome do cliente é obrigatório');
+      DetailedProfiler.endSession('create-client');
       return;
     }
 
     if (!formData.email.trim()) {
       setError('Email é obrigatório');
+      DetailedProfiler.endSession('create-client');
       return;
     }
 
+    DetailedProfiler.mark('create-client', 'validation-complete');
+
     try {
+      DetailedProfiler.mark('create-client', 'db-operation-start');
+
       if (editingId) {
         const client = clients.find(c => c.id === editingId);
         await updateClient({ ...client, ...formData });
         setSuccess(`Cliente "${formData.name}" atualizado`);
       } else {
-        await addClient({
+        const newClient = {
           id: `client-${Date.now()}`,
           code: generateClientCode(),
           ...formData,
           quotations: [],
           createdAt: new Date().toISOString(),
-        });
+        };
+        await addClient(newClient);
+
+        DetailedProfiler.mark('create-client', 'db-operation-complete');
+        DetailedProfiler.mark('create-client', 'ui-update-start');
+
+        // ✅ OTIMIZADO: Adiciona localmente em vez de recarregar tudo
+        setClients(prev => [newClient, ...prev]);
+
+        DetailedProfiler.mark('create-client', 'ui-update-complete');
         setSuccess(`Cliente "${formData.name}" adicionado`);
       }
+
       resetForm();
       setShowForm(false);
-      await loadClients();
+
+      DetailedProfiler.mark('create-client', 'form-reset-complete');
+      DetailedProfiler.endSession('create-client');
     } catch (err) {
+      console.error('❌ Erro ao salvar cliente:', err);
       setError('Erro ao salvar cliente');
+      DetailedProfiler.endSession('create-client');
     }
   };
 
   const handleEdit = (client) => {
+    DetailedProfiler.startSession('edit-client');
+    DetailedProfiler.mark('edit-client', 'form-load-start');
+
     setFormData({
       name: client.name,
       tagline: client.tagline || '',
@@ -85,8 +113,12 @@ const AdminClientManager = () => {
       email: client.email || '',
       phone: client.phone || '',
     });
+
+    DetailedProfiler.mark('edit-client', 'form-load-complete');
     setEditingId(client.id);
     setShowForm(true);
+    DetailedProfiler.mark('edit-client', 'form-display-complete');
+    DetailedProfiler.endSession('edit-client');
   };
 
   const handleDelete = async (id, name) => {
@@ -95,12 +127,25 @@ const AdminClientManager = () => {
     setError('');
     setSuccess('');
 
+    DetailedProfiler.startSession('delete-client');
+    DetailedProfiler.mark('delete-client', 'confirmation');
+
     try {
+      DetailedProfiler.mark('delete-client', 'db-delete-start');
       await deleteClient(id);
+      DetailedProfiler.mark('delete-client', 'db-delete-complete');
+
+      // ✅ OTIMIZADO: Remove localmente
+      DetailedProfiler.mark('delete-client', 'ui-update-start');
+      setClients(prev => prev.filter(c => c.id !== id));
+      DetailedProfiler.mark('delete-client', 'ui-update-complete');
+
       setSuccess(`Cliente "${name}" removido`);
-      await loadClients();
+      DetailedProfiler.endSession('delete-client');
     } catch (err) {
+      console.error('❌ Erro ao deletar cliente:', err);
       setError('Erro ao remover cliente');
+      DetailedProfiler.endSession('delete-client');
     }
   };
 
@@ -273,10 +318,21 @@ const AdminClientManager = () => {
 
               <div className="flex gap-2 pt-2 border-t border-gray-700/20">
                 <button
-                  onClick={() => handleEdit(client)}
+                  onClick={() => {
+                    handleEdit(client);
+                    onClientSelect?.(client.id);
+                  }}
                   className="flex-1 px-2 py-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded hover:bg-blue-950/40 transition-all"
                 >
                   ✏ Editar
+                </button>
+                <button
+                  onClick={() => {
+                    onClientSelect?.(client.id);
+                  }}
+                  className="flex-1 px-2 py-1.5 text-xs font-mono text-green-400 hover:text-green-300 border border-green-500/40 rounded hover:bg-green-950/40 transition-all"
+                >
+                  📁 CADs
                 </button>
                 <button
                   onClick={() => handleDelete(client.id, client.name)}

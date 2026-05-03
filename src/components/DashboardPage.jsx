@@ -113,8 +113,8 @@ const DataModal = ({ isOpen, data, title, onClose }) => {
               <tbody>
                 {data.map((row, idx) => (
                   <tr key={idx}>
-                    {Object.values(row).map((val, i) => (
-                      <td key={i} style={{ color: 'var(--color-text-secondary)' }}>
+                    {Object.entries(row).map(([colKey, val]) => (
+                      <td key={colKey} style={{ color: 'var(--color-text-secondary)' }}>
                         {typeof val === 'number' && val > 100 ? formatMoney(val) : String(val)}
                       </td>
                     ))}
@@ -129,7 +129,7 @@ const DataModal = ({ isOpen, data, title, onClose }) => {
   );
 };
 
-const DashboardPage = ({ quotations, clients, onNavigate, currentUser }) => {
+const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotationClick, onNewQuotation }) => {
   const [dataModal, setDataModal] = useState({ isOpen: false, data: null, title: '' });
   const [insights, setInsights] = useState(null);
   const [recommendations, setRecommendations] = useState([]);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loginUser, createUser } from '../services/authService';
+import { loginUser, createLocalUser } from '../services/authService';
 import { ASTON_BRAND } from '../services/themeService';
 
 const ASTON_LOGO = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
@@ -12,8 +12,29 @@ const ASTON_CONTACT = {
 
 const LoginPage = ({ onLogin, isFirstAccess }) => {
   const [mode,     setMode]     = useState(isFirstAccess ? 'create' : 'login');
-  const [login,    setLogin]    = useState('');
-  const [password, setPassword] = useState('');
+  const [login,    setLogin]    = useState(() => {
+    try {
+      const saved = localStorage.getItem('metalflow_login');
+      return saved || '';
+    } catch {
+      return '';
+    }
+  });
+  const [password, setPassword] = useState(() => {
+    try {
+      const saved = localStorage.getItem('metalflow_password');
+      return saved || '';
+    } catch {
+      return '';
+    }
+  });
+  const [rememberMe, setRememberMe] = useState(() => {
+    try {
+      return localStorage.getItem('metalflow_remember') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [name,     setName]     = useState('');
   const [number,   setNumber]   = useState('');
   const [role,     setRole]     = useState('operator');
@@ -38,6 +59,15 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
         try {
           const result = await loginUser(login, password, tenantId);
           if (result.ok) {
+            if (rememberMe) {
+              localStorage.setItem('metalflow_login', login);
+              localStorage.setItem('metalflow_password', password);
+              localStorage.setItem('metalflow_remember', 'true');
+            } else {
+              localStorage.removeItem('metalflow_login');
+              localStorage.removeItem('metalflow_password');
+              localStorage.removeItem('metalflow_remember');
+            }
             onLogin(result.user);
             return;
           }
@@ -56,13 +86,25 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
             tenantId
           };
           localStorage.setItem('metalflow_user', JSON.stringify(user));
+
+          // Salvar credenciais se marcado
+          if (rememberMe) {
+            localStorage.setItem('metalflow_login', login);
+            localStorage.setItem('metalflow_password', password);
+            localStorage.setItem('metalflow_remember', 'true');
+          } else {
+            localStorage.removeItem('metalflow_login');
+            localStorage.removeItem('metalflow_password');
+            localStorage.removeItem('metalflow_remember');
+          }
+
           onLogin(user);
         } else {
           setError('Credenciais inválidas (login: admin, senha: 123456)');
         }
       } else {
         // Criar novo usuário
-        const result = await createUser(login, password, name, number, role);
+        const result = await createLocalUser(login, password, name, number, role);
         if (result.ok) {
           // Login automático após registro
           const loginResult = await loginUser(login, password, tenantId);
@@ -153,6 +195,18 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
               <input type="password" value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••" className={inputCls} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} />
             </div>
+
+            {mode === 'login' && (
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={e => setRememberMe(e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Lembrar-me neste navegador</span>
+              </label>
+            )}
 
             {error && (
               <div className="badge-error bg-opacity-10 border p-4 rounded-lg">

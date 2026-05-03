@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐛 Error Report Dashboard - Issue Tracking</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Courier New', 'Monaco', monospace;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a4b 100%);
+      color: #e0e0e0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, rgba(248, 81, 73, 0.1), rgba(216, 128, 33, 0.1));
+      border: 1px solid rgba(248, 81, 73, 0.3);
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #f85149;
+    }
+
+    .header-info {
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.8;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      background: rgba(88, 166, 255, 0.1);
+      color: #58a6ff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: rgba(88, 166, 255, 0.2);
+      border-color: rgba(88, 166, 255, 0.5);
+    }
+
+    .btn.danger {
+      background: rgba(248, 81, 73, 0.1);
+      border-color: rgba(248, 81, 73, 0.3);
+      color: #f85149;
+    }
+
+    .btn.success {
+      background: rgba(63, 185, 80, 0.1);
+      border-color: rgba(63, 185, 80, 0.3);
+      color: #3fb950;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .filter-item label {
+      font-size: 12px;
+      color: #8b949e;
+      text-transform: uppercase;
+    }
+
+    .filter-item select, .filter-item input {
+      padding: 6px 12px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      color: #e0e0e0;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(13, 17, 23, 0.6);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #8b949e;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      font-family: 'Monaco', monospace;
+    }
+
+    .stat-value.critical { color: #f85149; }
+    .stat-value.high { color: #d88021; }
+    .stat-value.medium { color: #ffd700; }
+    .stat-value.success { color: #3fb950; }
+
+    .issues-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(13, 17, 23, 0.6);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .issues-table thead {
+      background: rgba(88, 166, 255, 0.1);
+      border-bottom: 1px solid rgba(88, 166, 255, 0.2);
+    }
+
+    .issues-table th {
+      padding: 12px;
+      text-align: left;
+      font-size: 11px;
+      color: #58a6ff;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .issues-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(88, 166, 255, 0.1);
+      font-size: 12px;
+    }
+
+    .issues-table tbody tr:hover {
+      background: rgba(88, 166, 255, 0.05);
+    }
+
+    .severity-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .severity-badge.critical {
+      background: rgba(248, 81, 73, 0.2);
+      color: #f85149;
+    }
+
+    .severity-badge.high {
+      background: rgba(216, 128, 33, 0.2);
+      color: #d88021;
+    }
+
+    .severity-badge.medium {
+      background: rgba(255, 215, 0, 0.2);
+      color: #ffd700;
+    }
+
+    .severity-badge.low {
+      background: rgba(63, 185, 80, 0.2);
+      color: #3fb950;
+    }
+
+    .component-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      color: #58a6ff;
+      border-radius: 3px;
+      font-size: 10px;
+    }
+
+    .message-cell {
+      max-width: 350px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #b1bac4;
+    }
+
+    .action-btn {
+      padding: 4px 8px;
+      margin-right: 4px;
+      font-size: 10px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      background: rgba(88, 166, 255, 0.2);
+      color: #58a6ff;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: rgba(88, 166, 255, 0.3);
+    }
+
+    .action-btn.resolve {
+      background: rgba(63, 185, 80, 0.2);
+      color: #3fb950;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pagination button {
+      padding: 6px 12px;
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      background: rgba(88, 166, 255, 0.1);
+      color: #58a6ff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .pagination button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #8b949e;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a4b 100%);
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      color: #58a6ff;
+      margin-bottom: 15px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      color: #8b949e;
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .modal-field {
+      margin-bottom: 15px;
+    }
+
+    .modal-field label {
+      display: block;
+      font-size: 11px;
+      color: #8b949e;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .modal-field input, .modal-field textarea {
+      width: 100%;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      color: #e0e0e0;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .modal-field textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .export-options {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .scroll-hint {
+      color: #6e7681;
+      font-size: 10px;
+      margin-top: 5px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(88, 166, 255, 0.2);
+    }
+
+    .tab {
+      padding: 10px 15px;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: #8b949e;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: #58a6ff;
+      border-bottom-color: #58a6ff;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+      <h1>🐛 Error Report Dashboard</h1>
+      <div class="header-info">
+        Relatório centralizado de erros e falhas capturadas durante o uso da aplicação.
+        Use este painel para revisar, classificar e atribuir correções.
+      </div>
+      <div class="controls">
+        <button class="btn" onclick="refreshData()">🔄 Atualizar</button>
+        <button class="btn success" onclick="showExportModal()">📊 Exportar</button>
+        <button class="btn danger" onclick="clearAllErrors()">🗑️ Limpar</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('full')">📋 Relatório Completo</button>
+      <button class="tab" onclick="switchTab('frontend')">🎨 Frontend Issues</button>
+      <button class="tab" onclick="switchTab('backend')">⚙️ Backend Issues</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">🔴 Total de Erros</div>
+        <div class="stat-value critical" id="statTotal">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🔴 Críticos</div>
+        <div class="stat-value critical" id="statCritical">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🟠 Altos</div>
+        <div class="stat-value high" id="statHigh">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🟡 Médios</div>
+        <div class="stat-value medium" id="statMedium">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">🟢 Resolvidos</div>
+        <div class="stat-value success" id="statResolved">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">⏳ Não Resolvidos</div>
+        <div class="stat-value high" id="statUnresolved">0</div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-group">
+      <div class="filter-item">
+        <label>Severidade</label>
+        <select id="filterSeverity" onchange="updateTable()">
+          <option value="">Todas</option>
+          <option value="CRITICAL">Crítico</option>
+          <option value="HIGH">Alto</option>
+          <option value="MEDIUM">Médio</option>
+          <option value="LOW">Baixo</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Categoria</label>
+        <select id="filterCategory" onchange="updateTable()">
+          <option value="">Todas</option>
+          <option value="AUTHENTICATION">Autenticação</option>
+          <option value="DATABASE">Banco de Dados</option>
+          <option value="NETWORK">Rede/Requisição</option>
+          <option value="PERFORMANCE">Performance</option>
+          <option value="UI_RENDERING">Renderização UI</option>
+          <option value="VALIDATION">Validação</option>
+          <option value="BUSINESS_LOGIC">Lógica de Negócio</option>
+          <option value="THIRD_PARTY">Serviço Terceiro</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <label>Status</label>
+        <select id="filterStatus" onchange="updateTable()">
+          <option value="">Todos</option>
+          <option value="unresolved">Não Resolvido</option>
+          <option value="resolved">Resolvido</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="full" class="tab-content active">
+      <table class="issues-table">
+        <thead>
+          <tr>
+            <th style="width: 120px;">ID</th>
+            <th style="width: 80px;">Severidade</th>
+            <th style="width: 120px;">Categoria</th>
+            <th style="width: 120px;">Componente</th>
+            <th style="width: 350px;">Mensagem</th>
+            <th style="width: 100px;">Contagem</th>
+            <th style="width: 100px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="issuesTableBody">
+          <tr><td colspan="7" class="empty-state">Carregando...</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <button id="prevBtn" onclick="previousPage()" disabled>← Anterior</button>
+        <span id="pageInfo">Página 1</span>
+        <button id="nextBtn" onclick="nextPage()">Próxima →</button>
+      </div>
+    </div>
+
+    <div id="frontend" class="tab-content">
+      <table class="issues-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Severidade</th>
+            <th style="width: 120px;">Categoria</th>
+            <th style="width: 120px;">Componente</th>
+            <th style="width: 400px;">Mensagem</th>
+            <th style="width: 100px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="frontendTableBody">
+          <tr><td colspan="5" class="empty-state">Nenhum erro de frontend</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="backend" class="tab-content">
+      <table class="issues-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Severidade</th>
+            <th style="width: 120px;">Categoria</th>
+            <th style="width: 120px;">Componente</th>
+            <th style="width: 400px;">Mensagem</th>
+            <th style="width: 100px;">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="backendTableBody">
+          <tr><td colspan="5" class="empty-state">Nenhum erro de backend</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Export Modal -->
+  <div id="exportModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <h2>📊 Exportar Relatório</h2>
+
+      <div class="modal-field">
+        <label>Tipo de Relatório</label>
+        <select id="exportType">
+          <option value="full">Relatório Completo</option>
+          <option value="frontend">Apenas Frontend</option>
+          <option value="backend">Apenas Backend</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label>Formato</label>
+        <div class="export-options">
+          <button class="btn" onclick="exportAsJSON()">JSON</button>
+          <button class="btn" onclick="exportAsCSV()">CSV</button>
+        </div>
+      </div>
+
+      <div class="modal-field">
+        <label>Informações</label>
+        <p style="font-size: 12px; color: #8b949e; line-height: 1.6;">
+          O arquivo será baixado com os dados atuais do relatório.
+          JSON é ideal para análise de dados, CSV para planilhas.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <h2 id="detailTitle">Detalhes do Erro</h2>
+
+      <div style="margin-bottom: 20px;">
+        <p style="font-size: 11px; color: #8b949e; margin-bottom: 5px;">ID</p>
+        <p id="detailId" style="font-family: monospace; color: #e0e0e0;">-</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <p style="font-size: 11px; color: #8b949e; margin-bottom: 5px;">MENSAGEM</p>
+        <p id="detailMessage" style="font-family: monospace; color: #b1bac4; word-break: break-word;">-</p>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <p style="font-size: 11px; color: #8b949e; margin-bottom: 5px;">STACK TRACE</p>
+        <pre id="detailStack" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 4px; font-size: 11px; overflow-x: auto; max-height: 200px;">-</pre>
+      </div>
+
+      <div class="modal-field">
+        <label>Anotações</label>
+        <textarea id="detailNotes" placeholder="Adicionar notas sobre este erro..."></textarea>
+      </div>
+
+      <div class="modal-field">
+        <label>Atribuir Para</label>
+        <input type="text" id="detailAssignee" placeholder="Nome da pessoa responsável">
+      </div>
+
+      <button class="btn success" onclick="saveErrorNotes()">💾 Salvar</button>
+      <button class="btn" onclick="markAsResolved()">✅ Marcar como Resolvido</button>
+    </div>
+  </div>
+
+  <script>
+    let allIssues = [];
+    let currentTab = 'full';
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let currentDetailId = null;
+
+    function getErrorMapper() {
+      const appWindow = window.opener || window.parent || window;
+      return appWindow.ErrorMapper?.getInstance?.();
+    }
+
+    function refreshData() {
+      const mapper = getErrorMapper();
+      if (!mapper) {
+        alert('❌ ErrorMapper não encontrado. Abra a aplicação primeiro.');
+        return;
+      }
+
+      allIssues = mapper.issues || [];
+      updateStats();
+      updateTable();
+    }
+
+    function updateStats() {
+      const mapper = getErrorMapper();
+      if (!mapper) return;
+
+      const stats = mapper.getStats();
+      document.getElementById('statTotal').textContent = stats.total;
+      document.getElementById('statCritical').textContent = stats.critical;
+      document.getElementById('statHigh').textContent = stats.high;
+      document.getElementById('statMedium').textContent = stats.medium;
+      document.getElementById('statResolved').textContent =
+        allIssues.filter(i => i.resolved).length;
+      document.getElementById('statUnresolved').textContent = stats.unresolved;
+    }
+
+    function updateTable() {
+      let filtered = allIssues;
+
+      const severity = document.getElementById('filterSeverity').value;
+      if (severity) filtered = filtered.filter(i => i.severity === severity);
+
+      const category = document.getElementById('filterCategory').value;
+      if (category) filtered = filtered.filter(i => i.category === category);
+
+      const status = document.getElementById('filterStatus').value;
+      if (status === 'resolved') filtered = filtered.filter(i => i.resolved);
+      if (status === 'unresolved') filtered = filtered.filter(i => !i.resolved);
+
+      const start = (currentPage - 1) * itemsPerPage;
+      const paginated = filtered.slice(start, start + itemsPerPage);
+
+      const table = currentTab === 'full' ? 'issuesTableBody' :
+                    currentTab === 'frontend' ? 'frontendTableBody' : 'backendTableBody';
+
+      const tbody = document.getElementById(table);
+
+      if (paginated.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum erro encontrado</td></tr>';
+        document.getElementById('nextBtn').disabled = true;
+        document.getElementById('prevBtn').disabled = true;
+        return;
+      }
+
+      tbody.innerHTML = paginated.map(issue => `
+        <tr>
+          <td><code style="font-size: 10px; color: #6e7681;">${issue.id.slice(0, 8)}</code></td>
+          <td><span class="severity-badge ${issue.severity.toLowerCase()}">${issue.severity}</span></td>
+          <td>${issue.category}</td>
+          <td><span class="component-badge">${issue.component}</span></td>
+          <td class="message-cell" title="${issue.message}">${issue.message}</td>
+          <td>${issue.count}</td>
+          <td>
+            <button class="action-btn" onclick="showDetail('${issue.id}')">👁️ Ver</button>
+            <button class="action-btn resolve" onclick="quickResolve('${issue.id}')">✓</button>
+          </td>
+        </tr>
+      `).join('');
+
+      const totalPages = Math.ceil(filtered.length / itemsPerPage);
+      document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+      document.getElementById('nextBtn').disabled = currentPage >= totalPages;
+      document.getElementById('prevBtn').disabled = currentPage <= 1;
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      currentPage = 1;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tab).classList.add('active');
+      updateTable();
+    }
+
+    function showDetail(issueId) {
+      const mapper = getErrorMapper();
+      const issue = mapper.issues.find(i => i.id === issueId);
+      if (!issue) return;
+
+      currentDetailId = issueId;
+      document.getElementById('detailTitle').textContent = `${issue.category} - ${issue.severity}`;
+      document.getElementById('detailId').textContent = issue.id;
+      document.getElementById('detailMessage').textContent = issue.message;
+      document.getElementById('detailStack').textContent = issue.stack || '(sem stack trace)';
+      document.getElementById('detailNotes').value = issue.notes || '';
+      document.getElementById('detailAssignee').value = issue.assignee || '';
+
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function showExportModal() {
+      document.getElementById('exportModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('exportModal').classList.remove('active');
+      document.getElementById('detailModal').classList.remove('active');
+    }
+
+    function saveErrorNotes() {
+      const mapper = getErrorMapper();
+      const notes = document.getElementById('detailNotes').value;
+      const assignee = document.getElementById('detailAssignee').value;
+
+      mapper.addNote(currentDetailId, notes);
+      mapper.assignTo(currentDetailId, assignee);
+
+      alert('✅ Anotações salvas');
+      refreshData();
+      closeModal();
+    }
+
+    function quickResolve(issueId) {
+      const mapper = getErrorMapper();
+      mapper.markAsResolved(issueId);
+      refreshData();
+    }
+
+    function markAsResolved() {
+      const mapper = getErrorMapper();
+      mapper.markAsResolved(currentDetailId);
+      alert('✅ Erro marcado como resolvido');
+      refreshData();
+      closeModal();
+    }
+
+    function exportAsJSON() {
+      const mapper = getErrorMapper();
+      const type = document.getElementById('exportType').value;
+      mapper.exportJSON(type);
+      alert('✅ JSON exportado');
+    }
+
+    function exportAsCSV() {
+      const mapper = getErrorMapper();
+      const type = document.getElementById('exportType').value;
+      mapper.exportCSV(type);
+      alert('✅ CSV exportado');
+    }
+
+    function clearAllErrors() {
+      if (!confirm('⚠️ Tem certeza que deseja limpar todos os erros?')) return;
+      const mapper = getErrorMapper();
+      mapper.clear();
+      refreshData();
+      alert('✅ Todos os erros foram removidos');
+    }
+
+    function nextPage() {
+      currentPage++;
+      updateTable();
+      window.scrollTo(0, 0);
+    }
+
+    function previousPage() {
+      if (currentPage > 1) currentPage--;
+      updateTable();
+      window.scrollTo(0, 0);
+    }
+
+    // Auto-refresh a cada 2 segundos
+    setInterval(refreshData, 2000);
+
+    // Carregar dados inicialmente
+    refreshData();
+
+    // Fechar modal ao clicar fora
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    });
+  </script>
+</body>
+</html>

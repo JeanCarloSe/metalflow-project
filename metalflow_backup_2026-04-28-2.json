@@ -1,0 +1,560 @@
+{
+  "exportedAt": "2026-04-28T23:58:20.682Z",
+  "version": "1.0",
+  "data": {
+    "quotations": [
+      {
+        "clientId": "1777251038596",
+        "clientName": "TESTES",
+        "lines": [
+          {
+            "id": 1777332594350,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 500,
+            "widthMm": 500,
+            "thicknessMm": 3,
+            "quantity": 1,
+            "services": [
+              "Corte Plasma"
+            ],
+            "priceAdjustmentPercent": 30
+          }
+        ],
+        "totalMaterial": "32.53",
+        "totalService": "176.63",
+        "totalPrice": "209.15",
+        "totalWeight": "5.888",
+        "number": "ORC-2026-0001",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777332640402",
+        "date": "2026-04-27T23:30:40.402Z",
+        "editHistory": []
+      },
+      {
+        "clientId": "1777332347056",
+        "clientName": "TESTES1",
+        "lines": [
+          {
+            "id": 1777333753118,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 500,
+            "widthMm": 500,
+            "thicknessMm": 1,
+            "quantity": 1,
+            "services": [
+              {
+                "name": "Corte Laser",
+                "priceAdjustmentPercent": 10
+              }
+            ],
+            "priceAdjustmentPercent": 10
+          }
+        ],
+        "totalMaterial": "9.17",
+        "totalService": "161.91",
+        "totalPrice": "171.08",
+        "totalWeight": "1.963",
+        "number": "ORC-0426-0003",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777333774582",
+        "date": "2026-04-27T23:49:34.582Z",
+        "editHistory": [],
+        "status": "em-negociacao"
+      },
+      {
+        "clientId": "1777251038596",
+        "clientName": "TESTES",
+        "lines": [
+          {
+            "id": 1777333903982,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 500,
+            "widthMm": 500,
+            "thicknessMm": 2,
+            "quantity": 10,
+            "services": [
+              {
+                "name": "Corte Plasma",
+                "priceAdjustmentPercent": 10
+              }
+            ],
+            "priceAdjustmentPercent": 20
+          }
+        ],
+        "totalMaterial": "200.17",
+        "totalService": "1942.88",
+        "totalPrice": "2143.05",
+        "totalWeight": "39.250",
+        "number": "ORC-0426-0005",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777333921469",
+        "date": "2026-04-27T23:52:01.469Z",
+        "editHistory": []
+      },
+      {
+        "clientId": "1777332347056",
+        "clientName": "TESTES1",
+        "lines": [
+          {
+            "id": 1777333961300,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 500,
+            "widthMm": 500,
+            "thicknessMm": 2,
+            "quantity": 10,
+            "services": [
+              {
+                "name": "Corte Plasma",
+                "priceAdjustmentPercent": 10
+              }
+            ],
+            "priceAdjustmentPercent": 10
+          }
+        ],
+        "totalMaterial": "183.49",
+        "totalService": "1942.88",
+        "totalPrice": "2126.37",
+        "totalWeight": "39.250",
+        "number": "ORC-0426-0007",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777333992821",
+        "date": "2026-04-27T23:53:12.821Z",
+        "editHistory": [],
+        "status": "aprovado"
+      },
+      {
+        "clientId": "1777251038596",
+        "clientName": "TESTES",
+        "lines": [
+          {
+            "id": 1777335091898,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 500,
+            "widthMm": 500,
+            "thicknessMm": 2,
+            "quantity": 10,
+            "services": [
+              "Corte Plasma"
+            ],
+            "priceAdjustmentPercent": 20
+          }
+        ],
+        "totalMaterial": "200.17",
+        "totalService": "1766.25",
+        "totalPrice": "1966.42",
+        "totalWeight": "39.250",
+        "number": "ORC-0426-0014",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777335138206",
+        "date": "2026-04-28T00:12:18.206Z",
+        "editHistory": []
+      },
+      {
+        "clientId": "1777251038596",
+        "clientName": "TESTES",
+        "lines": [
+          {
+            "id": 1777335818542,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 1000,
+            "widthMm": 1000,
+            "thicknessMm": 10,
+            "quantity": 10,
+            "services": [
+              "Guilhotina"
+            ],
+            "priceAdjustmentPercent": 10
+          }
+        ],
+        "totalMaterial": "3669.88",
+        "totalService": "17662.50",
+        "totalPrice": "21332.38",
+        "totalWeight": "785.000",
+        "number": "ORC-0426-0015",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777335843021",
+        "date": "2026-04-28T00:24:03.021Z",
+        "editHistory": [],
+        "status": "aprovado"
+      },
+      {
+        "clientId": "1777335915791",
+        "clientName": "NIDO",
+        "lines": [
+          {
+            "id": 1777336581820,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 100,
+            "widthMm": 200,
+            "thicknessMm": 1,
+            "quantity": 10,
+            "services": [
+              {
+                "name": "Corte Laser",
+                "priceAdjustmentPercent": 20
+              }
+            ],
+            "priceAdjustmentPercent": 20
+          }
+        ],
+        "totalMaterial": "8.01",
+        "totalService": "141.30",
+        "totalPrice": "149.31",
+        "totalWeight": "1.570",
+        "number": "ORC-0426-0016",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777336610409",
+        "date": "2026-04-28T00:36:50.409Z",
+        "editHistory": []
+      },
+      {
+        "clientId": "1777335915791",
+        "clientName": "NIDO",
+        "lines": [
+          {
+            "id": 1777336717885,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 100,
+            "widthMm": 100,
+            "thicknessMm": 10,
+            "quantity": 10,
+            "services": [
+              "Corte Plasma"
+            ],
+            "priceAdjustmentPercent": 10
+          }
+        ],
+        "totalMaterial": "36.70",
+        "totalService": "353.25",
+        "totalPrice": "389.95",
+        "totalWeight": "7.850",
+        "number": "ORC-0426-0017",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777336735888",
+        "date": "2026-04-28T00:38:55.888Z",
+        "editHistory": [],
+        "status": "reprovado"
+      },
+      {
+        "clientId": "1777335915791",
+        "clientName": "NIDO",
+        "lines": [
+          {
+            "id": 1777336717885,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 100,
+            "widthMm": 100,
+            "thicknessMm": 10,
+            "quantity": 10,
+            "services": [
+              "Corte Plasma"
+            ],
+            "priceAdjustmentPercent": 10
+          }
+        ],
+        "totalMaterial": "36.70",
+        "totalService": "353.25",
+        "totalPrice": "389.95",
+        "totalWeight": "7.850",
+        "number": "ORC-0426-0018",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777336810568",
+        "date": "2026-04-28T00:40:10.568Z",
+        "editHistory": [],
+        "status": "aprovado"
+      },
+      {
+        "clientId": "1777335915791",
+        "clientName": "NIDO",
+        "lines": [
+          {
+            "id": 1777336717885,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 100,
+            "widthMm": 100,
+            "thicknessMm": 10,
+            "quantity": 10,
+            "services": [
+              {
+                "name": "Corte Plasma",
+                "priceAdjustmentPercent": 10
+              }
+            ],
+            "priceAdjustmentPercent": 10
+          }
+        ],
+        "totalMaterial": "36.70",
+        "totalService": "388.58",
+        "totalPrice": "425.27",
+        "totalWeight": "7.850",
+        "number": "ORC-0426-0019",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777337043450",
+        "date": "2026-04-28T00:44:03.450Z",
+        "editHistory": [],
+        "status": "aprovado"
+      },
+      {
+        "clientId": "1777335915791",
+        "clientName": "NIDO",
+        "lines": [
+          {
+            "id": 1777336717885,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 100,
+            "widthMm": 100,
+            "thicknessMm": 10,
+            "quantity": 10,
+            "services": [
+              {
+                "name": "Corte Plasma",
+                "priceAdjustmentPercent": 10
+              }
+            ],
+            "priceAdjustmentPercent": 10
+          },
+          {
+            "id": 1777337071562,
+            "name": "Peça 2",
+            "materialId": "aço-carbono",
+            "lengthMm": 100,
+            "widthMm": 1000,
+            "thicknessMm": 1,
+            "quantity": 110,
+            "services": [
+              {
+                "name": "Guilhotina",
+                "priceAdjustmentPercent": 10
+              }
+            ],
+            "priceAdjustmentPercent": 5
+          }
+        ],
+        "totalMaterial": "422.04",
+        "totalService": "2525.74",
+        "totalPrice": "2947.77",
+        "totalWeight": "94.200",
+        "number": "ORC-0426-0020",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "id": "1777337091661",
+        "date": "2026-04-28T00:44:51.661Z",
+        "editHistory": [],
+        "status": "enviando"
+      },
+      {
+        "id": "1777337534053",
+        "clientId": "1777335915791",
+        "clientName": "NIDO",
+        "lines": [
+          {
+            "id": 1777337504618,
+            "name": "Peça 1",
+            "materialId": "aço-carbono",
+            "lengthMm": 500,
+            "widthMm": 500,
+            "thicknessMm": 2,
+            "quantity": 10,
+            "services": [
+              "Corte Laser"
+            ],
+            "priceAdjustmentPercent": 20
+          }
+        ],
+        "totalMaterial": "200.17",
+        "totalService": "2943.75",
+        "totalPrice": "3143.93",
+        "totalWeight": "39.250",
+        "number": "ORC-0426-0021",
+        "status": "em-andamento",
+        "operator": {
+          "id": "1777330778179",
+          "login": "op",
+          "name": "op",
+          "number": "OP-179",
+          "role": "operator"
+        },
+        "date": "2026-04-28T00:52:14.053Z",
+        "editHistory": []
+      }
+    ],
+    "clients": [
+      {
+        "id": "1777251038596",
+        "name": "TESTES",
+        "contact": "",
+        "email": "",
+        "website": "",
+        "primaryColor": "#ff9300",
+        "logoUrl": "",
+        "tagline": "",
+        "contacts": [
+          {
+            "id": "1777251043696",
+            "name": "JEAN",
+            "email": "JEANCARLOS.SEVEN@GMAIL.COM",
+            "phone": "47992311044",
+            "role": "Comprador"
+          }
+        ],
+        "code": "123"
+      },
+      {
+        "id": "1777332347056",
+        "name": "TESTES1",
+        "contact": "",
+        "email": "",
+        "website": "",
+        "primaryColor": "#00f900",
+        "logoUrl": "",
+        "tagline": "",
+        "code": "333",
+        "contacts": []
+      },
+      {
+        "id": "1777335915791",
+        "name": "NIDO",
+        "code": "33333",
+        "contact": "",
+        "email": "",
+        "website": "",
+        "primaryColor": "#ff40ff",
+        "logoUrl": "",
+        "tagline": "",
+        "contacts": [
+          {
+            "id": "1777336691136",
+            "name": "JEAN",
+            "email": "JEANCARLOS.SEVEN@GMAIL.COM",
+            "phone": "47992311044",
+            "role": "Comprador"
+          }
+        ]
+      }
+    ],
+    "materials": [
+      {
+        "id": "aluminio",
+        "name": "Alumínio 1050",
+        "density": 2700,
+        "basePrice": 6,
+        "lastPriceUpdate": null
+      },
+      {
+        "id": "aço-carbono",
+        "name": "Aço Carbono",
+        "density": 7850,
+        "basePrice": 4.25,
+        "lastPriceUpdate": null
+      },
+      {
+        "id": "inox",
+        "name": "Inox 304",
+        "density": 8000,
+        "basePrice": 5.3,
+        "lastPriceUpdate": null
+      }
+    ],
+    "users": [
+      {
+        "id": "1777330778179",
+        "login": "op",
+        "passwordHash": "8d9fdf338c13fe40234aa0dd2f95a55df37551ab3de5f21e9137d729cca3438c",
+        "name": "op",
+        "number": "OP-179",
+        "role": "operator"
+      },
+      {
+        "id": "1777335502827",
+        "login": "adm1",
+        "passwordHash": "2faf29846f6f160567ddd02c0316064aefbfb3d4dbb74db551b2851885335a0e",
+        "name": "adm1",
+        "number": "OP-827",
+        "role": "admin"
+      }
+    ]
+  },
+  "metadata": {
+    "auditLogs": [],
+    "archived": [],
+    "totalQuotations": 12,
+    "totalClients": 3,
+    "totalMaterials": 3
+  }
+}

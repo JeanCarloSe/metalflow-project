@@ -1,3 +1,4 @@
+import DatabasePool from './databasePool.js';
 import { initDB, addQuotation, updateQuotation, getQuotations, addClient, updateClient, getClients, addMaterial, updateMaterial, getMaterials, addUser, updateUser, getAllUsers } from './storageService';
 
 const AUDIT_STORE = 'auditLogs';
@@ -9,37 +10,10 @@ let db = null;
 
 export const initPersistence = async () => {
   try {
-    db = await initDB();
-
-    // Criar stores de auditoria e arquivo se não existirem
-    const request = indexedDB.open('AstonDB', 2);
-
-    return new Promise((resolve, reject) => {
-      request.onupgradeneeded = (event) => {
-        const database = event.target.result;
-
-        if (!database.objectStoreNames.contains(AUDIT_STORE)) {
-          const auditStore = database.createObjectStore(AUDIT_STORE, { keyPath: 'id', autoIncrement: true });
-          auditStore.createIndex('timestamp', 'timestamp', { unique: false });
-          auditStore.createIndex('entityType', 'entityType', { unique: false });
-          auditStore.createIndex('entityId', 'entityId', { unique: false });
-          auditStore.createIndex('userId', 'userId', { unique: false });
-        }
-
-        if (!database.objectStoreNames.contains(ARCHIVE_STORE)) {
-          const archiveStore = database.createObjectStore(ARCHIVE_STORE, { keyPath: 'id' });
-          archiveStore.createIndex('archivedAt', 'archivedAt', { unique: false });
-          archiveStore.createIndex('entityType', 'entityType', { unique: false });
-        }
-      };
-
-      request.onsuccess = () => {
-        db = request.result;
-        resolve(db);
-      };
-
-      request.onerror = () => reject(request.error);
-    });
+    // Use DatabasePool instead of direct open (v3 already configured)
+    db = await DatabasePool.getInstance().getDB();
+    console.log('✅ Persistence initialized via DatabasePool');
+    return db;
   } catch (error) {
     console.error('❌ Erro ao inicializar persistência:', error);
     throw error;
@@ -133,10 +107,12 @@ export const createQuotationWithAudit = async (quotation, userId = 'system') => 
 };
 
 export const updateQuotationWithAudit = async (quotation, userId = 'system', changes = {}) => {
-  const oldQuotation = await new Promise((resolve) => {
+  const oldQuotation = await new Promise((resolve, reject) => {
     const transaction = db.transaction(['quotations'], 'readonly');
     const request = transaction.objectStore('quotations').get(quotation.id);
     request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(new Error(`Failed to get quotation: ${request.error}`));
+    transaction.onerror = () => reject(new Error(`Transaction error: ${transaction.error}`));
   });
 
   const updatedQuotation = {

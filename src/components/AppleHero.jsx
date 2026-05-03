@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const AppleHero = () => {
+const AppleHero = ({ onStartClick, onDemoClick }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -54,16 +54,18 @@ const AppleHero = () => {
         {/* CTA Buttons */}
         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <motion.button
+            onClick={onStartClick}
             whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)' }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-full hover:shadow-lg transition-shadow"
+            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-full hover:shadow-lg transition-shadow cursor-pointer"
           >
             Começar Agora
           </motion.button>
           <motion.button
+            onClick={onDemoClick}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 border-2 border-gray-300 text-gray-900 font-semibold rounded-full hover:border-gray-400 transition-colors"
+            className="px-8 py-4 border-2 border-gray-300 text-gray-900 font-semibold rounded-full hover:border-gray-400 transition-colors cursor-pointer"
           >
             Ver Demo
           </motion.button>
@@ -78,9 +80,9 @@ const AppleHero = () => {
             { delay: 0, icon: '📊', label: 'Dashboard' },
             { delay: 0.2, icon: '💼', label: 'Clientes' },
             { delay: 0.4, icon: '🎯', label: 'Orçamentos' },
-          ].map((card, i) => (
+          ].map((card) => (
             <motion.div
-              key={i}
+              key={card.label}
               className="absolute w-32 h-32 bg-white rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
               animate={{
                 y: [0, -20, 0],

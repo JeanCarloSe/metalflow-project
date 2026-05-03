@@ -2,6 +2,34 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
+import { PerformanceMonitor } from './utils/performanceMonitor'
+import { ErrorMapper } from './utils/errorMapper'
+
+// Inicializar sistemas de monitoramento PRIMEIRO
+console.log('🔧 Inicializando sistemas de monitoramento...');
+
+try {
+  const perfMonitor = PerformanceMonitor.getInstance();
+  window.perfMonitor = perfMonitor;
+  window.PerformanceMonitor = PerformanceMonitor;
+  console.log('✅ PerformanceMonitor inicializado:', window.perfMonitor);
+} catch (e) {
+  console.error('❌ Erro ao inicializar PerformanceMonitor:', e);
+}
+
+try {
+  const errorMapper = ErrorMapper.getInstance();
+  window.errorMapper = errorMapper;
+  window.ErrorMapper = ErrorMapper;
+  console.log('✅ ErrorMapper inicializado:', window.errorMapper);
+} catch (e) {
+  console.error('❌ Erro ao inicializar ErrorMapper:', e);
+}
+
+// Garantir que estão acessíveis
+console.log('📍 Verificação final:');
+console.log('  - window.perfMonitor:', !!window.perfMonitor);
+console.log('  - window.errorMapper:', !!window.errorMapper);
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

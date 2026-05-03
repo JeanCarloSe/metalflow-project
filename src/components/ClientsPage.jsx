@@ -3,7 +3,7 @@ import { hexToRgba } from '../services/themeService';
 
 const EMPTY_FORM = { name: '', code: '', contact: '', email: '', website: '', primaryColor: '#3b82f6', logoUrl: '', tagline: '' };
 
-const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onViewClientHome }) => {
+const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onViewClientHome, onSelect, onAdd, onUpdate, onDelete }) => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);

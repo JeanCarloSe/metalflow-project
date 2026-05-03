@@ -1,3 +1,5 @@
+import DatabasePool from './databasePool.js';
+
 const SESSION_KEY = 'metalflow_user';
 const TENANT_KEY = 'metalflow_tenant';
 
@@ -34,11 +36,7 @@ export const loginUser = async (login, password, tenantId) => {
 
   // Fallback: login local via IndexedDB
   try {
-    const db = await new Promise((resolve, reject) => {
-      const req = indexedDB.open('metalflow');
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    const db = await DatabasePool.getInstance().getDB();
 
     const users = await new Promise((resolve, reject) => {
       const tx = db.transaction('users', 'readonly');
@@ -96,11 +94,7 @@ export const setSession = (user) => {
  */
 export const createLocalUser = async (login, password, name, number, role = 'operator') => {
   try {
-    const db = await new Promise((resolve, reject) => {
-      const req = indexedDB.open('metalflow');
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    const db = await DatabasePool.getInstance().getDB();
 
     const user = {
       id: `user-${Date.now()}`,
@@ -131,11 +125,7 @@ export const createLocalUser = async (login, password, name, number, role = 'ope
  */
 export const hasAnyUser = async () => {
   try {
-    const db = await new Promise((resolve, reject) => {
-      const req = indexedDB.open('metalflow');
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    const db = await DatabasePool.getInstance().getDB();
 
     const users = await new Promise((resolve, reject) => {
       const tx = db.transaction('users', 'readonly');
@@ -156,11 +146,7 @@ export const hasAnyUser = async () => {
  */
 export const getAllUsers = async () => {
   try {
-    const db = await new Promise((resolve, reject) => {
-      const req = indexedDB.open('metalflow');
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+    const db = await DatabasePool.getInstance().getDB();
 
     return await new Promise((resolve, reject) => {
       const tx = db.transaction('users', 'readonly');
@@ -174,14 +160,5 @@ export const getAllUsers = async () => {
   }
 };
 
-/**
- * Criar usuário (alias para createLocalUser)
- */
-export const createUser = async (login, password, name, number, role) => {
-  return createLocalUser(login, password, name, number, role);
-};
-
-export const deleteUser = async (userId) => {
-  console.warn('deleteUser deprecated, use backend');
-  return { ok: false, error: 'Use backend' };
-};
+// createUser was a wrapper for createLocalUser - use createLocalUser directly instead
+// deleteUser is handled by storageService.deleteUser instead

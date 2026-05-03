@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📊 Performance Dashboard - Real-time Monitor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Courier New', 'Monaco', monospace;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a4b 100%);
+      color: #e0e0e0;
+      padding: 20px;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: auto 1fr 1fr;
+      gap: 15px;
+      height: 100%;
+    }
+
+    .header {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(63, 185, 80, 0.1));
+      border: 1px solid rgba(88, 166, 255, 0.3);
+      padding: 20px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      color: #58a6ff;
+    }
+
+    .header-info {
+      font-size: 12px;
+      color: #8b949e;
+      line-height: 1.6;
+    }
+
+    .panel {
+      background: rgba(13, 17, 23, 0.6);
+      border: 1px solid rgba(88, 166, 255, 0.2);
+      border-radius: 12px;
+      padding: 15px;
+      overflow-y: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #58a6ff;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .metric {
+      margin-bottom: 12px;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      border-left: 3px solid #58a6ff;
+    }
+
+    .metric-label {
+      font-size: 11px;
+      color: #8b949e;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #3fb950;
+      margin-top: 5px;
+      font-family: 'Monaco', monospace;
+    }
+
+    .metric-value.warn {
+      color: #d88021;
+    }
+
+    .metric-value.error {
+      color: #f85149;
+    }
+
+    .list-item {
+      padding: 8px;
+      font-size: 11px;
+      border-bottom: 1px solid rgba(88, 166, 255, 0.1);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .list-item:last-child {
+      border-bottom: none;
+    }
+
+    .list-item.error {
+      color: #f85149;
+      background: rgba(248, 81, 73, 0.05);
+    }
+
+    .list-item.warn {
+      color: #d88021;
+      background: rgba(216, 128, 33, 0.05);
+    }
+
+    .list-item.success {
+      color: #3fb950;
+      background: rgba(63, 185, 80, 0.05);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #58a6ff, #3fb950);
+      transition: width 0.3s ease;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-right: 5px;
+    }
+
+    .status-badge.ok {
+      background: rgba(63, 185, 80, 0.2);
+      color: #3fb950;
+    }
+
+    .status-badge.warn {
+      background: rgba(216, 128, 33, 0.2);
+      color: #d88021;
+    }
+
+    .status-badge.error {
+      background: rgba(248, 81, 73, 0.2);
+      color: #f85149;
+    }
+
+    .grid-2 {
+      grid-column: span 2;
+    }
+
+    .grid-full {
+      grid-column: 1 / -1;
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(88, 166, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(88, 166, 255, 0.5);
+    }
+
+    .time {
+      color: #6e7681;
+      font-size: 10px;
+    }
+
+    .alert {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 11px;
+      border-left: 3px solid;
+    }
+
+    .alert.error {
+      border-left-color: #f85149;
+      background: rgba(248, 81, 73, 0.1);
+      color: #f85149;
+    }
+
+    .alert.warn {
+      border-left-color: #d88021;
+      background: rgba(216, 128, 33, 0.1);
+      color: #d88021;
+    }
+
+    .alert.info {
+      border-left-color: #58a6ff;
+      background: rgba(88, 166, 255, 0.1);
+      color: #58a6ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Header -->
+    <div class="header">
+      <h1>📊 Performance Dashboard - Real-time Monitor</h1>
+      <div class="header-info">
+        Use a aplicação normalmente enquanto este painel monitora em tempo real.
+        Erros, timeouts, lentidão e problemas serão capturados automaticamente.
+      </div>
+    </div>
+
+    <!-- 1. Core Metrics -->
+    <div class="panel">
+      <div class="panel-title">⚡ Core Metrics</div>
+      <div class="metric">
+        <div class="metric-label">Page Load Time</div>
+        <div class="metric-value" id="pageLoadTime">-</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">FCP (First Contentful Paint)</div>
+        <div class="metric-value" id="fcp">-</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">LCP (Largest Contentful Paint)</div>
+        <div class="metric-value" id="lcp">-</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">CLS (Layout Shift)</div>
+        <div class="metric-value" id="cls">-</div>
+      </div>
+    </div>
+
+    <!-- 2. Real-time Stats -->
+    <div class="panel">
+      <div class="panel-title">📈 Real-time Stats</div>
+      <div class="metric">
+        <div class="metric-label">Current FPS</div>
+        <div class="metric-value" id="fps">60</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="fpsBar" style="width: 100%"></div>
+        </div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Memory Used</div>
+        <div class="metric-value" id="memory">0</div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="memoryBar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Uptime</div>
+        <div class="metric-value" id="uptime">0s</div>
+      </div>
+    </div>
+
+    <!-- 3. Counters -->
+    <div class="panel">
+      <div class="panel-title">📊 Counters</div>
+      <div class="metric">
+        <div class="metric-label">Total Clicks</div>
+        <div class="metric-value" id="clicksCount">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Total Requests</div>
+        <div class="metric-value" id="requestsCount">0</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">Navigations</div>
+        <div class="metric-value" id="navCount">0</div>
+      </div>
+    </div>
+
+    <!-- 4. Alerts -->
+    <div class="panel">
+      <div class="panel-title">🚨 Alerts</div>
+      <div id="alertsList"></div>
+    </div>
+
+    <!-- 5. Recent Errors -->
+    <div class="panel grid-2">
+      <div class="panel-title">❌ Recent Errors <span id="errorCount" class="status-badge error">0</span></div>
+      <div id="errorsList"></div>
+    </div>
+
+    <!-- 6. Recent Warnings -->
+    <div class="panel grid-2">
+      <div class="panel-title">⚠️ Recent Warnings <span id="warningCount" class="status-badge warn">0</span></div>
+      <div id="warningsList"></div>
+    </div>
+
+    <!-- 7. Slow Requests -->
+    <div class="panel grid-2">
+      <div class="panel-title">🐢 Slow Requests <span id="slowCount" class="status-badge warn">0</span></div>
+      <div id="slowList"></div>
+    </div>
+
+    <!-- 8. Recent Activity -->
+    <div class="panel grid-2">
+      <div class="panel-title">📝 Recent Activity</div>
+      <div id="activityList"></div>
+    </div>
+
+    <!-- 9. Failed Requests -->
+    <div class="panel grid-2">
+      <div class="panel-title">❌ Failed Requests <span id="failedCount" class="status-badge error">0</span></div>
+      <div id="failedList"></div>
+    </div>
+
+    <!-- 10. Timeout Operations -->
+    <div class="panel grid-2">
+      <div class="panel-title">⏱️ Timeout Operations <span id="timeoutCount" class="status-badge error">0</span></div>
+      <div id="timeoutList"></div>
+    </div>
+
+    <!-- 11. Error Mapper - Categorized Issues -->
+    <div class="panel grid-full">
+      <div class="panel-title">🐛 Error Mapper - Issues Categorizadas</div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border-left: 3px solid #f85149;">
+          <div style="font-size: 11px; color: #8b949e; text-transform: uppercase;">CRÍTICAS</div>
+          <div style="font-size: 18px; font-weight: 700; color: #f85149; margin-top: 5px;" id="mapperCritical">0</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border-left: 3px solid #d88021;">
+          <div style="font-size: 11px; color: #8b949e; text-transform: uppercase;">ALTAS</div>
+          <div style="font-size: 18px; font-weight: 700; color: #d88021; margin-top: 5px;" id="mapperHigh">0</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border-left: 3px solid #ffd700;">
+          <div style="font-size: 11px; color: #8b949e; text-transform: uppercase;">MÉDIAS</div>
+          <div style="font-size: 18px; font-weight: 700; color: #ffd700; margin-top: 5px;" id="mapperMedium">0</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border-left: 3px solid #3fb950;">
+          <div style="font-size: 11px; color: #8b949e; text-transform: uppercase;">TOTAIS MAPEADAS</div>
+          <div style="font-size: 18px; font-weight: 700; color: #3fb950; margin-top: 5px;" id="mapperTotal">0</div>
+        </div>
+      </div>
+      <div style="margin-top: 15px;">
+        <div style="font-size: 11px; color: #8b949e; text-transform: uppercase; margin-bottom: 10px;">ÚLTIMAS ISSUES</div>
+        <div id="mapperList"></div>
+      </div>
+      <div style="margin-top: 10px; text-align: right;">
+        <a href="error-report-dashboard.html" target="_blank" style="color: #58a6ff; text-decoration: none; font-size: 11px;">
+          → Abrir Painel Completo de Erros
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const perfWindow = window.opener || window;
+    let lastUpdate = Date.now();
+    const startTime = Date.now();
+
+    function getData() {
+      return perfWindow.perfMonitor?.getData() || {
+        errors: [],
+        warnings: [],
+        clicks: [],
+        requests: [],
+        navigation: [],
+        metrics: {},
+        actions: [],
+        timeouts: []
+      };
+    }
+
+    function getErrorMapperData() {
+      try {
+        const mapper = perfWindow.ErrorMapper?.getInstance?.();
+        return mapper?.getStats?.() || {
+          total: 0,
+          critical: 0,
+          high: 0,
+          medium: 0,
+          low: 0,
+          unresolved: 0
+        };
+      } catch (e) {
+        return {
+          total: 0,
+          critical: 0,
+          high: 0,
+          medium: 0,
+          low: 0,
+          unresolved: 0
+        };
+      }
+    }
+
+    function getMapperIssues() {
+      try {
+        const mapper = perfWindow.ErrorMapper?.getInstance?.();
+        return mapper?.issues || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function updateDashboard() {
+      const data = getData();
+      const metrics = data.metrics || {};
+
+      // Core Metrics
+      document.getElementById('pageLoadTime').textContent =
+        metrics.pageLoadTime ? `${metrics.pageLoadTime}ms` : '-';
+      document.getElementById('fcp').textContent =
+        metrics.firstContentfulPaint ? `${metrics.firstContentfulPaint}ms` : '-';
+      document.getElementById('lcp').textContent =
+        metrics.largestContentfulPaint ? `${metrics.largestContentfulPaint}ms` : '-';
+      document.getElementById('cls').textContent =
+        metrics.layoutShifts !== undefined ? metrics.layoutShifts : '-';
+
+      // Real-time
+      const fps = metrics.fps || 60;
+      const fpsColor = fps < 30 ? 'error' : fps < 50 ? 'warn' : 'success';
+      document.getElementById('fps').textContent = fps;
+      document.getElementById('fps').className = `metric-value ${fpsColor}`;
+      document.getElementById('fpsBar').style.width = `${Math.min(100, (fps / 60) * 100)}%`;
+
+      const memory = metrics.memory?.usedJSHeapSize || 0;
+      const memoryPercent = Math.min(100, (memory / 300) * 100);
+      const memColor = memory > 200 ? 'error' : memory > 150 ? 'warn' : 'success';
+      document.getElementById('memory').textContent = `${memory}MB`;
+      document.getElementById('memory').className = `metric-value ${memColor}`;
+      document.getElementById('memoryBar').style.width = `${memoryPercent}%`;
+
+      const uptime = Math.round((Date.now() - startTime) / 1000);
+      document.getElementById('uptime').textContent = `${uptime}s`;
+
+      // Counters
+      document.getElementById('clicksCount').textContent = data.clicks?.length || 0;
+      document.getElementById('requestsCount').textContent = data.requests?.length || 0;
+      document.getElementById('navCount').textContent = data.navigation?.length || 0;
+
+      // Errors
+      document.getElementById('errorCount').textContent = data.errors?.length || 0;
+      document.getElementById('errorsList').innerHTML =
+        (data.errors || []).slice(-5).map(e =>
+          `<div class="list-item error">${(e.message || e).slice(0, 80)}</div>`
+        ).join('') || '<div class="list-item">Nenhum erro</div>';
+
+      // Warnings
+      document.getElementById('warningCount').textContent = data.warnings?.length || 0;
+      document.getElementById('warningsList').innerHTML =
+        (data.warnings || []).slice(-5).map(w =>
+          `<div class="list-item warn">${(w.message || w).slice(0, 80)}</div>`
+        ).join('') || '<div class="list-item">Nenhum aviso</div>';
+
+      // Slow Requests
+      const slowRequests = (data.requests || []).filter(r => r.duration > 1000);
+      document.getElementById('slowCount').textContent = slowRequests.length;
+      document.getElementById('slowList').innerHTML =
+        slowRequests.slice(-5).map(r =>
+          `<div class="list-item warn">${r.url.slice(0, 60)} (${r.duration}ms)</div>`
+        ).join('') || '<div class="list-item">Nenhuma requisição lenta</div>';
+
+      // Failed Requests
+      const failedRequests = (data.requests || []).filter(r => r.status >= 400);
+      document.getElementById('failedCount').textContent = failedRequests.length;
+      document.getElementById('failedList').innerHTML =
+        failedRequests.slice(-5).map(r =>
+          `<div class="list-item error">${r.url.slice(0, 60)} (${r.status})</div>`
+        ).join('') || '<div class="list-item">Nenhuma requisição falhada</div>';
+
+      // Timeouts
+      document.getElementById('timeoutCount').textContent = data.timeouts?.length || 0;
+      document.getElementById('timeoutList').innerHTML =
+        (data.timeouts || []).slice(-5).map(t =>
+          `<div class="list-item error">${t.operation} (${t.duration}ms)</div>`
+        ).join('') || '<div class="list-item">Nenhuma operação com timeout</div>';
+
+      // Alerts
+      const alerts = [];
+      if (memory > 200) alerts.push({ type: 'error', msg: `⚠️ Memory Alto: ${memory}MB` });
+      if (fps < 30) alerts.push({ type: 'error', msg: `⚠️ FPS Baixo: ${fps}fps` });
+      if (slowRequests.length > 0) alerts.push({ type: 'warn', msg: `${slowRequests.length} requisições lentas` });
+      if (failedRequests.length > 0) alerts.push({ type: 'error', msg: `${failedRequests.length} requisições falhadas` });
+      if (data.errors?.length > 5) alerts.push({ type: 'error', msg: `${data.errors.length} erros detectados` });
+
+      document.getElementById('alertsList').innerHTML =
+        alerts.map(a => `<div class="alert ${a.type}">${a.msg}</div>`).join('') ||
+        '<div class="alert info">✅ Tudo OK</div>';
+
+      // Activity
+      document.getElementById('activityList').innerHTML =
+        (data.actions || []).slice(-10).map(a =>
+          `<div class="list-item success">${a.message.slice(0, 70)}</div>`
+        ).join('');
+
+      // Error Mapper Data
+      const mapperStats = getErrorMapperData();
+      document.getElementById('mapperCritical').textContent = mapperStats.critical;
+      document.getElementById('mapperHigh').textContent = mapperStats.high;
+      document.getElementById('mapperMedium').textContent = mapperStats.medium;
+      document.getElementById('mapperTotal').textContent = mapperStats.total;
+
+      const issues = getMapperIssues();
+      document.getElementById('mapperList').innerHTML =
+        issues.slice(-5).map(i =>
+          `<div class="list-item ${i.severity === 'CRITICAL' ? 'error' : i.severity === 'HIGH' ? 'warn' : ''}"
+                style="font-size: 10px; display: flex; gap: 10px; align-items: center;">
+            <span>[${i.severity}]</span>
+            <span style="flex: 1;">${i.category}</span>
+            <span style="color: #6e7681;">${i.message.slice(0, 40)}</span>
+          </div>`
+        ).join('') || '<div class="list-item">Nenhuma issue mapeada</div>';
+    }
+
+    // Update every 500ms
+    setInterval(updateDashboard, 500);
+    updateDashboard();
+  </script>
+</body>
+</html>

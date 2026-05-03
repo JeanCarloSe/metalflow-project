@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✅ QA Checklist - Aston Metalflow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+    .stats-bar {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9em;
+    }
+    .content {
+      padding: 30px;
+    }
+    .category {
+      margin-bottom: 40px;
+    }
+    .category-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #333;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #667eea;
+    }
+    .test-item {
+      display: flex;
+      align-items: flex-start;
+      padding: 12px;
+      margin-bottom: 10px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      border-left: 4px solid #ddd;
+      gap: 15px;
+    }
+    .test-item.critical {
+      border-left-color: #f44336;
+      background: #ffebee;
+    }
+    .test-item.normal {
+      border-left-color: #ff9800;
+      background: #fff3e0;
+    }
+    .test-item.low {
+      border-left-color: #2196f3;
+      background: #e3f2fd;
+    }
+    .test-checkbox {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      margin-top: 3px;
+    }
+    .test-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .test-id {
+      font-weight: bold;
+      color: #333;
+      font-size: 0.95em;
+    }
+    .test-description {
+      color: #666;
+      font-size: 0.9em;
+      margin-top: 5px;
+      line-height: 1.4;
+    }
+    .severity {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75em;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .severity.critical {
+      background: #f44336;
+      color: white;
+    }
+    .severity.normal {
+      background: #ff9800;
+      color: white;
+    }
+    .severity.low {
+      background: #2196f3;
+      color: white;
+    }
+    .summary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      text-align: center;
+    }
+    .summary-item {
+      padding: 15px;
+    }
+    .summary-value {
+      font-size: 1.8em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .summary-label {
+      font-size: 0.85em;
+      opacity: 0.9;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4caf50 0%, #45a049 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .actions {
+      text-align: center;
+      margin-top: 30px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.9em;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+    button.success {
+      background: #4caf50;
+    }
+    button.success:hover {
+      background: #45a049;
+    }
+    .footer {
+      background: #f9f9f9;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #eee;
+      color: #666;
+      font-size: 0.85em;
+    }
+    .export-area {
+      background: #f9f9f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.8em;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✅ QA Checklist</h1>
+      <p>Aston Metalflow - 53 testes de qualidade</p>
+      <div class="stats-bar">
+        <div class="stat">Total: <span id="total-count">53</span> testes</div>
+        <div class="stat">Críticos: <span id="critical-count">23</span></div>
+        <div class="stat">Normais: <span id="normal-count">18</span></div>
+        <div class="stat">Baixos: <span id="low-count">12</span></div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="categories-container"></div>
+
+      <div class="summary">
+        <div class="summary-item">
+          <div class="summary-value" id="passed-count">0</div>
+          <div class="summary-label">Testados</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="pass-percent">0%</div>
+          <div class="summary-label">Taxa de Sucesso</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="status-text">Pendente</div>
+          <div class="summary-label">Status Geral</div>
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="actions">
+        <button onclick="selectAll(true)">✓ Selecionar Todos</button>
+        <button onclick="selectAll(false)">✗ Desselecionar Todos</button>
+        <button class="success" onclick="exportResults()">📋 Exportar Resultados</button>
+        <button onclick="printChecklist()">🖨️ Imprimir</button>
+      </div>
+
+      <div class="export-area" id="export-area" style="display:none;"></div>
+    </div>
+
+    <div class="footer">
+      <p>Checklist de QA - Últimas mudanças salvas automaticamente em localStorage</p>
+      <p style="margin-top: 10px; font-size: 0.8em;">
+        <strong>Critério de aprovação:</strong> 100% testes críticos + ≥90% normais
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const tests = {
+      'Autenticação': {
+        critical: [
+          { id: 'T001', desc: 'Login com credenciais válidas (admin/123456)' },
+          { id: 'T002', desc: 'Login com credenciais inválidas - erro exibido' },
+          { id: 'T003', desc: 'Logout funciona - session limpo' },
+        ],
+        normal: [
+          { id: 'T004', desc: 'Remember me - credenciais salvas (sem senha)' },
+          { id: 'T005', desc: 'Criar novo usuário (first access)' },
+        ],
+      },
+      'Dados - CRUD': {
+        critical: [
+          { id: 'T006', desc: 'Criar cliente - validações obrigatórias' },
+          { id: 'T007', desc: 'Editar cliente - mudanças salvam' },
+          { id: 'T008', desc: 'Deletar cliente - removed from BD' },
+          { id: 'T009', desc: 'Listar clientes - todos aparecem' },
+          { id: 'T014', desc: 'Criar orçamento - validação completa' },
+          { id: 'T015', desc: 'Editar orçamento - totais recalculam' },
+          { id: 'T016', desc: 'Deletar orçamento - removed from BD' },
+          { id: 'T017', desc: 'Listar orçamentos - todos aparecem' },
+        ],
+        normal: [
+          { id: 'T010', desc: 'Criar material - densidade/preços > 0' },
+          { id: 'T011', desc: 'Editar material - preço atualiza' },
+          { id: 'T012', desc: 'Deletar material - removed from BD' },
+        ],
+        low: [
+          { id: 'T013', desc: 'Listar materiais - sem duplicatas' },
+        ],
+      },
+      'Cálculos': {
+        critical: [
+          { id: 'T018', desc: 'Cálculo peso: volume × densidade × qty' },
+          { id: 'T019', desc: 'Cálculo material: peso × preço/kg' },
+          { id: 'T020', desc: 'Cálculo serviço: peso × preço serviço' },
+          { id: 'T021', desc: 'Total múltiplas peças - sem erros' },
+        ],
+        normal: [
+          { id: 'T022', desc: 'Ajuste preço (markup/desconto %)' },
+          { id: 'T023', desc: 'Arredondamento monetário (2 casas)' },
+        ],
+      },
+      'PDF & Export': {
+        critical: [
+          { id: 'T024', desc: 'PDF gera ao salvar orçamento' },
+          { id: 'T025', desc: 'PDF contém dados corretos' },
+        ],
+        normal: [
+          { id: 'T026', desc: 'Múltiplos PDFs sem conflito' },
+        ],
+      },
+      'Performance': {
+        critical: [
+          { id: 'T027', desc: 'Carregamento inicial < 3s' },
+          { id: 'T028', desc: 'Listagem 100+ clientes sem lag' },
+        ],
+        normal: [
+          { id: 'T029', desc: 'Edição 50+ peças - recálculo < 500ms' },
+          { id: 'T030', desc: 'Memory usage < 50MB sob carga' },
+          { id: 'T031', desc: 'IndexedDB 1000+ registros < 2s' },
+        ],
+      },
+      'Segurança': {
+        critical: [
+          { id: 'T032', desc: 'Senha NÃO salva em localStorage' },
+          { id: 'T033', desc: 'XSS - HTML injection escapado' },
+          { id: 'T034', desc: 'SQL Injection - string normal' },
+        ],
+        normal: [
+          { id: 'T035', desc: 'CSRF - multi-aba sincroniza' },
+          { id: 'T036', desc: 'Dados sensíveis NÃO em localStorage' },
+        ],
+      },
+      'UI/UX': {
+        critical: [
+          { id: 'T037', desc: 'Responsividade mobile/tablet/desktop' },
+        ],
+        normal: [
+          { id: 'T038', desc: 'Animações suaves (60 FPS)' },
+          { id: 'T039', desc: 'Acessibilidade - keyboard navigation' },
+          { id: 'T040', desc: 'Acessibilidade - color contrast > 4.5:1' },
+          { id: 'T041', desc: 'Mensagens erro claras e úteis' },
+        ],
+        low: [
+          { id: 'T042', desc: 'Loading states durante save' },
+          { id: 'T043', desc: 'Confirmação antes deletar' },
+          { id: 'T044', desc: 'Feedback sucesso (verde, auto-close)' },
+          { id: 'T045', desc: 'Data em formato local (pt-BR)' },
+        ],
+      },
+      'Integração': {
+        normal: [
+          { id: 'T046', desc: 'Novo cliente → disponível em orçador' },
+          { id: 'T047', desc: 'Novo material → em DXF import' },
+          { id: 'T048', desc: 'DXF import → CAD badge em orçamento' },
+          { id: 'T049', desc: 'Admin muda material → reflete orçador' },
+          { id: 'T050', desc: 'Persistência multi-aba realtime' },
+        ],
+      },
+      'Regressão': {
+        low: [
+          { id: 'T051', desc: 'Features antigos ainda funcionam' },
+          { id: 'T052', desc: 'Dados não se perdem após update' },
+        ],
+      },
+    };
+
+    let results = JSON.parse(localStorage.getItem('qa-results') || '{}');
+
+    function initChecklist() {
+      const container = document.getElementById('categories-container');
+      container.innerHTML = '';
+
+      Object.entries(tests).forEach(([category, testsByType]) => {
+        const div = document.createElement('div');
+        div.className = 'category';
+
+        let categoryHTML = `<div class="category-title">${category}</div>`;
+
+        ['critical', 'normal', 'low'].forEach(level => {
+          if (testsByType[level]) {
+            testsByType[level].forEach(test => {
+              const isChecked = results[test.id] ? 'checked' : '';
+              const severityMap = { critical: '🔴 Crítico', normal: '🟠 Normal', low: '🔵 Baixo' };
+
+              categoryHTML += `
+                <div class="test-item ${level}">
+                  <input type="checkbox" class="test-checkbox" data-test-id="${test.id}" ${isChecked} onchange="updateResult(this)">
+                  <div class="test-content">
+                    <span class="test-id">${test.id} <span class="severity ${level}">${severityMap[level]}</span></span>
+                    <div class="test-description">${test.desc}</div>
+                  </div>
+                </div>
+              `;
+            });
+          }
+        });
+
+        div.innerHTML = categoryHTML;
+        container.appendChild(div);
+      });
+
+      updateStats();
+    }
+
+    function updateResult(checkbox) {
+      const testId = checkbox.dataset.testId;
+      if (checkbox.checked) {
+        results[testId] = true;
+      } else {
+        delete results[testId];
+      }
+      localStorage.setItem('qa-results', JSON.stringify(results));
+      updateStats();
+    }
+
+    function updateStats() {
+      const totalTests = Object.values(tests).reduce((sum, cat) => {
+        return sum + (cat.critical?.length || 0) + (cat.normal?.length || 0) + (cat.low?.length || 0);
+      }, 0);
+
+      const passedCount = Object.keys(results).length;
+      const passPercent = totalTests > 0 ? Math.round((passedCount / totalTests) * 100) : 0;
+
+      document.getElementById('passed-count').textContent = passedCount;
+      document.getElementById('pass-percent').textContent = passPercent + '%';
+      document.getElementById('progress-fill').style.width = passPercent + '%';
+
+      // Check approval
+      let criticalPass = 0, criticalTotal = 0;
+      let normalPass = 0, normalTotal = 0;
+
+      Object.values(tests).forEach(cat => {
+        if (cat.critical) {
+          criticalTotal += cat.critical.length;
+          criticalPass += cat.critical.filter(t => results[t.id]).length;
+        }
+        if (cat.normal) {
+          normalTotal += cat.normal.length;
+          normalPass += cat.normal.filter(t => results[t.id]).length;
+        }
+      });
+
+      const criticalOK = criticalPass === criticalTotal;
+      const normalOK = normalPass >= Math.ceil(normalTotal * 0.9);
+
+      let statusText = 'Pendente';
+      let statusColor = '#ff9800';
+
+      if (criticalOK && normalOK) {
+        statusText = '✅ APROVADO';
+        statusColor = '#4caf50';
+      } else if (criticalOK) {
+        statusText = '⚠️ CONDICIONAL';
+        statusColor = '#ff9800';
+      } else {
+        statusText = '❌ REPROVADO';
+        statusColor = '#f44336';
+      }
+
+      const statusEl = document.getElementById('status-text');
+      statusEl.textContent = statusText;
+      statusEl.style.color = statusColor;
+    }
+
+    function selectAll(checked) {
+      document.querySelectorAll('.test-checkbox').forEach(cb => {
+        cb.checked = checked;
+        updateResult(cb);
+      });
+    }
+
+    function exportResults() {
+      const summary = {
+        data: new Date().toLocaleString('pt-BR'),
+        totalTestes: Object.keys(results).length,
+        totalEsperado: 53,
+        percentualAprovacao: Math.round((Object.keys(results).length / 53) * 100) + '%',
+        testes: results
+      };
+
+      const text = JSON.stringify(summary, null, 2);
+      const area = document.getElementById('export-area');
+      area.textContent = text;
+      area.style.display = 'block';
+
+      setTimeout(() => {
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qa-results-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 500);
+    }
+
+    function printChecklist() {
+      window.print();
+    }
+
+    initChecklist();
+  </script>
+</body>
+</html>

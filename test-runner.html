@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🤖 Test Runner - Aston Metalflow</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #eee;
+    }
+
+    .tab-btn {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      color: #999;
+      font-weight: 500;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .test-item {
+      padding: 15px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .test-item.pass {
+      border-left: 4px solid #4caf50;
+      background: #f1f8f5;
+    }
+
+    .test-item.fail {
+      border-left: 4px solid #f44336;
+      background: #fdedec;
+    }
+
+    .test-item.pending {
+      border-left: 4px solid #2196f3;
+      background: #f3f6ff;
+    }
+
+    .test-name {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .test-badge {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .test-badge.pass {
+      background: #4caf50;
+      color: white;
+    }
+
+    .test-badge.fail {
+      background: #f44336;
+      color: white;
+    }
+
+    .test-badge.pending {
+      background: #2196f3;
+      color: white;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #999;
+      text-transform: uppercase;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      background: #667eea;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #5568d3;
+    }
+
+    button.secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    button.secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .log {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+
+    .log-line {
+      padding: 2px 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .log-error { color: #f48771; }
+    .log-warning { color: #dcdcaa; }
+    .log-success { color: #6a9955; }
+    .log-info { color: #4fc1ff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 Test Runner - Aston Metalflow</h1>
+      <p>Monitor de testes da aplicação em tempo real</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tests')">🧪 Testes</button>
+      <button class="tab-btn" onclick="switchTab('console')">📋 Console</button>
+      <button class="tab-btn" onclick="switchTab('status')">📊 Status</button>
+    </div>
+
+    <!-- TAB: Testes -->
+    <div id="tests" class="tab-content active">
+      <div class="button-group">
+        <button onclick="runAllTests()">▶️ Rodar Todos os Testes</button>
+        <button class="secondary" onclick="clearTests()">🗑️ Limpar</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number" id="totalCount">0</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="passCount" style="color: #4caf50;">0</div>
+          <div class="stat-label">Passou</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="failCount" style="color: #f44336;">0</div>
+          <div class="stat-label">Falhou</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number" id="pendingCount" style="color: #2196f3;">0</div>
+          <div class="stat-label">Pendente</div>
+        </div>
+      </div>
+
+      <div id="testsContainer"></div>
+    </div>
+
+    <!-- TAB: Console -->
+    <div id="console" class="tab-content">
+      <div class="button-group">
+        <button class="secondary" onclick="clearConsole()">Limpar Console</button>
+      </div>
+      <div class="log" id="consoleLog"></div>
+    </div>
+
+    <!-- TAB: Status -->
+    <div id="status" class="tab-content">
+      <h3>Status da Aplicação</h3>
+      <div style="margin-top: 15px; line-height: 2;">
+        <div>React: <span id="reactStatus">Detectando...</span></div>
+        <div>IndexedDB: <span id="dbStatus">Detectando...</span></div>
+        <div>LocalStorage: <span id="storageStatus">Detectando...</span></div>
+        <div>User Logged: <span id="userStatus">Detectando...</span></div>
+        <div>Clientes: <span id="clientsCount">Detectando...</span></div>
+        <div>Orçamentos: <span id="quotationsCount">Detectando...</span></div>
+        <div>Materiais: <span id="materialsCount">Detectando...</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tests = [];
+    const consoleLogs = [];
+
+    // Interceptar console
+    const origLog = console.log;
+    const origWarn = console.warn;
+    const origError = console.error;
+
+    console.log = function(...args) {
+      origLog.apply(console, args);
+      addConsoleLog('info', args.join(' '));
+    };
+
+    console.warn = function(...args) {
+      origWarn.apply(console, args);
+      addConsoleLog('warning', args.join(' '));
+    };
+
+    console.error = function(...args) {
+      origError.apply(console, args);
+      addConsoleLog('error', args.join(' '));
+    };
+
+    function addConsoleLog(type, message) {
+      const timestamp = new Date().toLocaleTimeString();
+      consoleLogs.push({ timestamp, type, message });
+      if (consoleLogs.length > 100) consoleLogs.shift();
+      renderConsole();
+    }
+
+    function renderConsole() {
+      const el = document.getElementById('consoleLog');
+      el.innerHTML = consoleLogs.map(log => {
+        const classMap = { error: 'log-error', warning: 'log-warning', success: 'log-success', info: 'log-info' };
+        return `<div class="log-line ${classMap[log.type]}">[${log.timestamp}] ${log.type.toUpperCase()}: ${log.message}</div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // ──────────────── TESTES ────────────────
+    function addTest(name, fn) {
+      const test = { name, status: 'pending', fn };
+      tests.push(test);
+      renderTests();
+      return test;
+    }
+
+    async function runAllTests() {
+      tests.length = 0;
+
+      // Teste 1: App Loading
+      addTest('Aplicação carregada', async () => {
+        const el = document.getElementById('root');
+        if (!el || el.children.length === 0) throw new Error('Root não renderizado');
+      });
+
+      // Teste 2: React
+      addTest('React disponível', async () => {
+        if (!window.__REACT_DEVTOOLS_GLOBAL_HOOK__) throw new Error('React não detectado');
+      });
+
+      // Teste 3: IndexedDB
+      addTest('IndexedDB disponível', async () => {
+        if (!window.indexedDB) throw new Error('IndexedDB não disponível');
+        const dbs = await new Promise((res, rej) => {
+          indexedDB.databases().then(res).catch(rej);
+        });
+        const astonDb = dbs.find(d => d.name === 'AstonDB');
+        if (!astonDb) throw new Error('AstonDB não encontrado');
+      });
+
+      // Teste 4: LocalStorage
+      addTest('LocalStorage disponível', async () => {
+        if (!window.localStorage) throw new Error('LocalStorage não disponível');
+        const test = 'test-' + Date.now();
+        localStorage.setItem(test, 'value');
+        localStorage.removeItem(test);
+      });
+
+      // Teste 5: Login
+      addTest('Login funcional', async () => {
+        const user = localStorage.getItem('metalflow_user');
+        if (!user) throw new Error('Nenhum usuário logado');
+      });
+
+      // Teste 6: Dados no BD
+      addTest('Dados carregados no IndexedDB', async () => {
+        const db = await new Promise((res, rej) => {
+          const req = indexedDB.open('AstonDB');
+          req.onerror = () => rej(req.error);
+          req.onsuccess = () => res(req.result);
+        });
+
+        const countClients = await new Promise((res, rej) => {
+          const tx = db.transaction(['clients'], 'readonly');
+          const req = tx.objectStore('clients').count();
+          req.onerror = () => rej(req.error);
+          req.onsuccess = () => res(req.result);
+        });
+
+        if (countClients === 0) throw new Error('Nenhum cliente no BD');
+      });
+
+      // Executar testes
+      for (const test of tests) {
+        test.status = 'pending';
+        renderTests();
+        try {
+          await test.fn();
+          test.status = 'pass';
+        } catch (err) {
+          test.status = 'fail';
+          test.error = err.message;
+        }
+        renderTests();
+        await new Promise(res => setTimeout(res, 500));
+      }
+    }
+
+    function renderTests() {
+      const el = document.getElementById('testsContainer');
+      const passed = tests.filter(t => t.status === 'pass').length;
+      const failed = tests.filter(t => t.status === 'fail').length;
+      const pending = tests.filter(t => t.status === 'pending').length;
+
+      document.getElementById('totalCount').textContent = tests.length;
+      document.getElementById('passCount').textContent = passed;
+      document.getElementById('failCount').textContent = failed;
+      document.getElementById('pendingCount').textContent = pending;
+
+      el.innerHTML = tests.map(test => `
+        <div class="test-item ${test.status}">
+          <div>
+            <div class="test-name">${test.name}</div>
+            ${test.error ? `<div style="color: #f44336; font-size: 12px; margin-top: 5px;">${test.error}</div>` : ''}
+          </div>
+          <span class="test-badge ${test.status}">${test.status.toUpperCase()}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearTests() {
+      tests.length = 0;
+      renderTests();
+    }
+
+    function clearConsole() {
+      consoleLogs.length = 0;
+      renderConsole();
+    }
+
+    // Status updates
+    function updateStatus() {
+      document.getElementById('reactStatus').textContent = window.__REACT_DEVTOOLS_GLOBAL_HOOK__ ? '✓' : '✗';
+      document.getElementById('dbStatus').textContent = window.indexedDB ? '✓' : '✗';
+      document.getElementById('storageStatus').textContent = window.localStorage ? '✓' : '✗';
+      document.getElementById('userStatus').textContent = localStorage.getItem('metalflow_user') ? '✓ ' + localStorage.getItem('metalflow_user') : '✗';
+
+      // Contar dados
+      if (window.indexedDB) {
+        const req = indexedDB.open('AstonDB');
+        req.onsuccess = () => {
+          const db = req.result;
+          ['clients', 'quotations', 'materials'].forEach(store => {
+            const tx = db.transaction([store], 'readonly');
+            const countReq = tx.objectStore(store).count();
+            countReq.onsuccess = () => {
+              document.getElementById(store + 'Count').textContent = countReq.result;
+            };
+          });
+        };
+      }
+    }
+
+    // Atualizar status continuamente
+    setInterval(updateStatus, 2000);
+    updateStatus();
+  </script>
+</body>
+</html>

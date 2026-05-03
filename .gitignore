@@ -35,3 +35,12 @@ yarn-error.log*
 .parcel-cache
 .next/
 out/
+
+# Generated reports and logs
+.error-reports/
+.test-logs/
+*.backup
+*.orig
+*.old
+backup-*.json
+metalflow_backup_*.json

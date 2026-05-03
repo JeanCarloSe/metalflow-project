@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Test Monitoring</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1e1e2e;
+      color: #e0e0e0;
+      padding: 20px;
+    }
+    h1 { color: #58a6ff; }
+    .test {
+      background: rgba(0,0,0,0.3);
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 6px;
+      border-left: 3px solid #58a6ff;
+    }
+    .test h3 {
+      margin-top: 0;
+      color: #3fb950;
+    }
+    button {
+      padding: 10px 20px;
+      background: #58a6ff;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px 5px 5px 0;
+    }
+    button:hover {
+      background: #3fb950;
+    }
+    pre {
+      background: rgba(0,0,0,0.5);
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .status.ok {
+      background: rgba(63, 185, 80, 0.2);
+      color: #3fb950;
+    }
+    .status.error {
+      background: rgba(248, 81, 73, 0.2);
+      color: #f85149;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧪 Test Monitoring Components</h1>
+
+  <div class="test">
+    <h3>1️⃣ Check window objects</h3>
+    <button onclick="checkWindow()">Check</button>
+    <pre id="output1">Esperando...</pre>
+  </div>
+
+  <div class="test">
+    <h3>2️⃣ Check App Status</h3>
+    <button onclick="checkAppStatus()">Check</button>
+    <pre id="output2">Esperando...</pre>
+  </div>
+
+  <div class="test">
+    <h3>3️⃣ Trigger Test Error</h3>
+    <button onclick="triggerTestError()">Trigger Error</button>
+    <pre id="output3">Esperando...</pre>
+  </div>
+
+  <div class="test">
+    <h3>4️⃣ Test Click Tracking</h3>
+    <button onclick="testClickTracking()">Test Click</button>
+    <pre id="output4">Esperando...</pre>
+  </div>
+
+  <div class="test">
+    <h3>5️⃣ Check Console Logs</h3>
+    <p>Abra F12 → Console e veja os logs da aplicação</p>
+    <button onclick="triggerConsoleLogs()">Trigger Console Logs</button>
+  </div>
+
+  <script>
+    function checkWindow() {
+      const output = [];
+      output.push('=== CHECKING WINDOW OBJECTS ===\n');
+
+      output.push(`window.perfMonitor: ${!!window.perfMonitor}`);
+      if (window.perfMonitor) {
+        output.push(`  - Type: ${typeof window.perfMonitor}`);
+        output.push(`  - Methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(window.perfMonitor)).join(', ')}`);
+        const data = window.perfMonitor.getData?.();
+        output.push(`  - Data: ${JSON.stringify(data ? { clicks: data.clicks?.length, errors: data.errors?.length } : 'N/A', null, 2)}`);
+      }
+
+      output.push(`\nwindow.errorMapper: ${!!window.errorMapper}`);
+      if (window.errorMapper) {
+        output.push(`  - Type: ${typeof window.errorMapper}`);
+        output.push(`  - Methods: ${Object.getOwnPropertyNames(Object.getPrototypeOf(window.errorMapper)).join(', ')}`);
+        const stats = window.errorMapper.getStats?.();
+        output.push(`  - Stats: ${JSON.stringify(stats, null, 2)}`);
+      }
+
+      output.push(`\nwindow.PerformanceMonitor: ${!!window.PerformanceMonitor}`);
+      output.push(`window.ErrorMapper: ${!!window.ErrorMapper}`);
+
+      document.getElementById('output1').textContent = output.join('\n');
+    }
+
+    function checkAppStatus() {
+      const output = [];
+      output.push('=== APP STATUS ===\n');
+
+      try {
+        const root = document.getElementById('root');
+        output.push(`Root element exists: ${!!root}`);
+        output.push(`Root has children: ${root?.children?.length > 0}`);
+      } catch (e) {
+        output.push(`Error checking root: ${e.message}`);
+      }
+
+      output.push(`\nApp loaded: ${document.readyState}`);
+      output.push(`Location: ${window.location.href}`);
+
+      if (window.perfMonitor) {
+        const data = window.perfMonitor.getData();
+        output.push(`\nPerformance Data:`);
+        output.push(`  - Clicks: ${data.clicks?.length || 0}`);
+        output.push(`  - Errors: ${data.errors?.length || 0}`);
+        output.push(`  - Warnings: ${data.warnings?.length || 0}`);
+        output.push(`  - Requests: ${data.requests?.length || 0}`);
+        output.push(`  - FPS: ${data.metrics?.fps || 'N/A'}`);
+      }
+
+      document.getElementById('output2').textContent = output.join('\n');
+    }
+
+    function triggerTestError() {
+      const output = [];
+      output.push('=== TRIGGERING ERROR ===\n');
+
+      try {
+        output.push('Lançando erro...');
+        throw new Error('Test error from monitoring page');
+      } catch (e) {
+        output.push(`✅ Error caught: ${e.message}`);
+        output.push(`\nChecking if mapped:`);
+
+        setTimeout(() => {
+          if (window.errorMapper) {
+            const stats = window.errorMapper.getStats();
+            output.push(`\nErrorMapper stats after: ${JSON.stringify(stats)}`);
+            document.getElementById('output3').textContent = output.join('\n');
+          }
+        }, 500);
+      }
+
+      document.getElementById('output3').textContent = output.join('\n');
+    }
+
+    function testClickTracking() {
+      const output = [];
+      output.push('=== TESTING CLICK TRACKING ===\n');
+
+      if (!window.perfMonitor) {
+        output.push('❌ PerformanceMonitor not found');
+        document.getElementById('output4').textContent = output.join('\n');
+        return;
+      }
+
+      const beforeClicks = window.perfMonitor.getData().clicks?.length || 0;
+      output.push(`Clicks before: ${beforeClicks}`);
+
+      // Simular clique
+      const btn = document.querySelector('button');
+      if (btn) {
+        btn.click();
+        setTimeout(() => {
+          const afterClicks = window.perfMonitor.getData().clicks?.length || 0;
+          output.push(`Clicks after: ${afterClicks}`);
+          output.push(`\nClick detected: ${afterClicks > beforeClicks ? '✅ YES' : '❌ NO'}`);
+          document.getElementById('output4').textContent = output.join('\n');
+        }, 100);
+      } else {
+        output.push('❌ Could not find button to click');
+        document.getElementById('output4').textContent = output.join('\n');
+      }
+    }
+
+    function triggerConsoleLogs() {
+      console.log('✅ Test log from monitoring page');
+      console.warn('⚠️ Test warning from monitoring page');
+      console.error('❌ Test error from monitoring page');
+      alert('Logs enviados. Abra o console (F12) para ver.');
+    }
+
+    // Verificação automática ao carregar
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        console.log('📊 === MONITORING PAGE LOADED ===');
+        console.log('🔍 Checking for monitoring systems...');
+        console.log('window.perfMonitor:', window.perfMonitor ? '✅' : '❌');
+        console.log('window.errorMapper:', window.errorMapper ? '✅' : '❌');
+        if (window.perfMonitor) {
+          console.log('PerformanceMonitor data:', window.perfMonitor.getData());
+        }
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

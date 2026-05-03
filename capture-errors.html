@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📥 Capture Errors</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1e1e2e;
+      color: #e0e0e0;
+      padding: 40px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #3fb950;
+      margin-bottom: 20px;
+    }
+    .status {
+      background: rgba(63, 185, 80, 0.1);
+      border: 1px solid rgba(63, 185, 80, 0.3);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .section {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 6px;
+      border-left: 3px solid #58a6ff;
+    }
+    .section h2 {
+      color: #58a6ff;
+      margin-top: 0;
+      font-size: 14px;
+    }
+    pre {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 11px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    button {
+      padding: 12px 24px;
+      background: #3fb950;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px 5px 10px 0;
+      font-family: monospace;
+    }
+    button:hover {
+      background: #58a6ff;
+    }
+    .error-count {
+      font-size: 24px;
+      font-weight: 700;
+      color: #f85149;
+      margin: 10px 0;
+    }
+    .copy-hint {
+      color: #8b949e;
+      font-size: 11px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📥 Capturador de Erros Automático</h1>
+
+  <div class="status">
+    <h2 style="margin-top: 0;">✅ Status de Captura</h2>
+    <div id="captureStatus">Iniciando...</div>
+  </div>
+
+  <div class="section">
+    <h2>🔴 Erros Capturados</h2>
+    <div class="error-count" id="errorCount">0</div>
+    <div id="errorsList" style="max-height: 200px; overflow-y: auto;"></div>
+    <div class="copy-hint">Clique em um erro para copiar para clipboard</div>
+  </div>
+
+  <div class="section">
+    <h2>⚠️ Warnings Capturados</h2>
+    <div class="error-count" id="warningCount" style="color: #d88021;">0</div>
+    <div id="warningsList" style="max-height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  <div class="section">
+    <h2>🌐 Requisições com Erro</h2>
+    <div class="error-count" id="failedRequestCount">0</div>
+    <div id="failedRequestsList" style="max-height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  <div class="section">
+    <h2>📊 Dados Completos (JSON)</h2>
+    <pre id="fullData">Coletando dados...</pre>
+    <button onclick="copyToClipboard()">📋 Copiar JSON</button>
+    <button onclick="downloadJSON()">⬇️ Download JSON</button>
+  </div>
+
+  <div class="section">
+    <h2>💾 Ações</h2>
+    <button onclick="refreshCapture()">🔄 Atualizar</button>
+    <button onclick="clearCapture()">🗑️ Limpar</button>
+  </div>
+
+  <script>
+    const appWindow = window.opener || window.parent || window;
+    let capturedData = null;
+
+    function captureData() {
+      const data = {
+        timestamp: new Date().toISOString(),
+        errors: [],
+        warnings: [],
+        failedRequests: [],
+        slowRequests: [],
+        metrics: {},
+        environment: {
+          url: appWindow.location.href,
+          userAgent: navigator.userAgent
+        }
+      };
+
+      // Capturar do PerformanceMonitor
+      if (appWindow.perfMonitor) {
+        const perfData = appWindow.perfMonitor.getData();
+        data.errors = perfData.errors || [];
+        data.warnings = perfData.warnings || [];
+        data.slowRequests = (perfData.requests || []).filter(r => r.duration > 1000);
+        data.failedRequests = (perfData.requests || []).filter(r => r.status >= 400);
+        data.metrics = perfData.metrics || {};
+        data.requests = perfData.requests || [];
+        data.clicks = perfData.clicks || [];
+      }
+
+      // Capturar do ErrorMapper
+      if (appWindow.errorMapper) {
+        data.mappedErrors = appWindow.errorMapper.issues || [];
+        data.stats = appWindow.errorMapper.getStats?.() || {};
+      }
+
+      capturedData = data;
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      if (!capturedData) {
+        document.getElementById('captureStatus').textContent = '❌ Sem dados capturados';
+        return;
+      }
+
+      // Status
+      const hasErrors = capturedData.errors.length > 0;
+      const hasWarnings = capturedData.warnings.length > 0;
+      const hasMappedErrors = capturedData.mappedErrors?.length > 0;
+
+      let status = '✅ Monitorando...';
+      if (hasErrors || hasMappedErrors) {
+        status = `⚠️ ${capturedData.errors.length} erros, ${capturedData.mappedErrors?.length || 0} mapeados`;
+      }
+      document.getElementById('captureStatus').innerHTML = `
+        <div>${status}</div>
+        <div style="font-size: 12px; color: #8b949e; margin-top: 10px;">
+          Última atualização: ${new Date().toLocaleTimeString()}
+        </div>
+      `;
+
+      // Erros
+      document.getElementById('errorCount').textContent = capturedData.errors.length;
+      document.getElementById('errorsList').innerHTML = capturedData.errors
+        .slice(-5)
+        .map((e, i) => `
+          <div style="padding: 8px; background: rgba(248,81,73,0.1); margin: 5px 0; border-radius: 4px; border-left: 2px solid #f85149; cursor: pointer;"
+               onclick="copyText('${(e.message || e).replace(/'/g, "\\'")}')"
+               title="Clique para copiar">
+            🔴 ${(e.message || e).slice(0, 80)}
+          </div>
+        `).join('');
+
+      // Warnings
+      document.getElementById('warningCount').textContent = capturedData.warnings.length;
+      document.getElementById('warningsList').innerHTML = capturedData.warnings
+        .slice(-5)
+        .map((w, i) => `
+          <div style="padding: 8px; background: rgba(216,128,33,0.1); margin: 5px 0; border-radius: 4px; border-left: 2px solid #d88021;">
+            ⚠️ ${(w.message || w).slice(0, 80)}
+          </div>
+        `).join('');
+
+      // Failed Requests
+      document.getElementById('failedRequestCount').textContent = capturedData.failedRequests.length;
+      document.getElementById('failedRequestsList').innerHTML = capturedData.failedRequests
+        .slice(-5)
+        .map(r => `
+          <div style="padding: 8px; background: rgba(248,81,73,0.1); margin: 5px 0; border-radius: 4px; border-left: 2px solid #f85149; font-size: 11px;">
+            ${r.method} ${r.url} → <strong>${r.status}</strong> (${r.duration}ms)
+          </div>
+        `).join('');
+
+      // JSON
+      document.getElementById('fullData').textContent = JSON.stringify(capturedData, null, 2);
+    }
+
+    function copyToClipboard() {
+      const json = JSON.stringify(capturedData, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        alert('✅ JSON copiado para clipboard');
+      });
+    }
+
+    function copyText(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Copiado: ' + text.slice(0, 50));
+      });
+    }
+
+    function downloadJSON() {
+      const json = JSON.stringify(capturedData, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `errors-${Date.now()}.json`;
+      a.click();
+    }
+
+    function refreshCapture() {
+      captureData();
+      document.getElementById('captureStatus').textContent += ' ✅ Atualizado';
+    }
+
+    function clearCapture() {
+      if (appWindow.perfMonitor?.clear) {
+        appWindow.perfMonitor.clear();
+      }
+      if (appWindow.errorMapper?.clear) {
+        appWindow.errorMapper.clear();
+      }
+      capturedData = null;
+      updateDisplay();
+      alert('🗑️ Dados limpos');
+    }
+
+    // Auto-refresh a cada 2 segundos
+    setInterval(() => {
+      captureData();
+    }, 2000);
+
+    // Inicial
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('captureStatus').textContent = '⏳ Aguardando dados...';
+        captureData();
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DXF Parser Test</title>
+</head>
+<body>
+    <h1>DXF Parser Test</h1>
+    <input type="file" id="fileInput" accept=".dxf,.dwg">
+    <pre id="output"></pre>
+
+    <script type="module">
+        import * as dxf from 'https://cdn.jsdelivr.net/npm/dxf@5.3.1/+esm';
+
+        const output = document.getElementById('output');
+        const fileInput = document.getElementById('fileInput');
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                output.textContent = `File size: ${text.length} bytes\n`;
+                output.textContent += `First 200 chars:\n${text.substring(0, 200)}\n\n`;
+
+                const parsed = dxf.parseString(text);
+                output.textContent += `DXF parsed successfully!\n`;
+                output.textContent += `Keys: ${Object.keys(parsed).join(', ')}\n`;
+                output.textContent += `Entities: ${parsed.entities?.length || 0}\n`;
+
+                if (parsed.entities && parsed.entities.length > 0) {
+                    const layerMap = {};
+                    parsed.entities.forEach(e => {
+                        const layer = e.layer || '0';
+                        if (!layerMap[layer]) layerMap[layer] = 0;
+                        layerMap[layer]++;
+                    });
+                    output.textContent += `Layers: ${JSON.stringify(layerMap)}\n`;
+                }
+            } catch (err) {
+                output.textContent = `Error: ${err.message}`;
+            }
+        });
+
+        // Test with sample file
+        output.textContent = 'Loading sample file...\n';
+        fetch('/samples/teste_orcamento.dxf')
+            .then(r => r.text())
+            .then(text => {
+                output.textContent += `Sample file loaded: ${text.length} bytes\n`;
+                const parsed = dxf.parseString(text);
+                output.textContent += `Sample DXF parsed: ${parsed.entities?.length || 0} entities\n`;
+            })
+            .catch(e => output.textContent += `Error loading sample: ${e.message}\n`);
+    </script>
+</body>
+</html>
