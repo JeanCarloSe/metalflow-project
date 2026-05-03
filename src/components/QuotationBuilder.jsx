@@ -106,6 +106,13 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
   const totals = calculateTotals();
 
   const handleSubmit = () => {
+    // Validar cliente selecionado
+    if (!selectedClient || !selectedClient.id) {
+      alert('❌ Selecione um cliente antes de criar um orçamento.\n\nIsso é obrigatório para manter o histórico e a integridade dos dados.');
+      onChangeClient?.();
+      return;
+    }
+
     if (lines.some(l => !l.name.trim() || !l.materialId || l.services.length === 0 || !l.lengthMm || !l.widthMm || !l.thicknessMm)) {
       alert('Preencha todos os campos das peças (nome, material, pelo menos 1 serviço, dimensões)');
       return;
@@ -322,10 +329,16 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       </div>
 
       {!selectedClient && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-          <p className="text-sm text-amber-900">
-            Selecione um cliente para salvar o orçamento no histórico.
-          </p>
+        <div className="bg-red-50 border border-red-300 rounded-lg px-4 py-3 flex items-start gap-3">
+          <span className="text-xl mt-0.5">⚠️</span>
+          <div>
+            <p className="text-sm font-semibold text-red-900 mb-1">
+              Cliente obrigatório
+            </p>
+            <p className="text-sm text-red-800">
+              Você deve selecionar um cliente antes de salvar o orçamento. Isso é necessário para manter o histórico e a integridade dos dados da sua empresa.
+            </p>
+          </div>
         </div>
       )}
 
