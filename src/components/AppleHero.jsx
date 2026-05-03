@@ -80,7 +80,7 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
             { delay: 0, icon: '📊', label: 'Dashboard' },
             { delay: 0.2, icon: '💼', label: 'Clientes' },
             { delay: 0.4, icon: '🎯', label: 'Orçamentos' },
-          ].map((card) => (
+          ].map((card, i) => (
             <motion.div
               key={card.label}
               className="absolute w-32 h-32 bg-white rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
