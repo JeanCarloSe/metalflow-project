@@ -59,15 +59,16 @@ const AnalyticsReport = ({ quotations, clients }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-8">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2" style={{ color: '#0170B9' }}>📊 Relatórios Avançados</h1>
         <p className="text-lg text-gray-600">Análise detalhada e exportação de dados</p>
       </div>
 
       {/* Metric Selector & Export */}
-      <div className="card-premium p-6 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex gap-4">
+      <div className="card-glass p-6 flex items-center justify-between gap-2 sm:gap-3 md:gap-4 flex-wrap">
+        <div className="flex gap-2 sm:gap-3 md:gap-4">
           <button
             onClick={() => setSelectedMetric('clients')}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
@@ -98,7 +99,7 @@ const AnalyticsReport = ({ quotations, clients }) => {
       </div>
 
       {/* Trend Chart */}
-      <div className="card-premium p-7">
+      <div className="card-glass p-7">
         <h3 className="text-xl font-bold mb-6" style={{ color: '#0170B9' }}>Tendência Mensal</h3>
         <div className="chart-container">
           <ResponsiveContainer width="100%" height={300}>
@@ -118,7 +119,7 @@ const AnalyticsReport = ({ quotations, clients }) => {
       </div>
 
       {/* Detailed Table */}
-      <div className="card-premium p-7">
+      <div className="card-glass p-7">
         <h3 className="text-xl font-bold mb-6" style={{ color: '#0170B9' }}>
           {selectedMetric === 'clients' ? '🏢 Análise por Cliente' : '📦 Análise por Material'}
         </h3>
@@ -194,6 +195,7 @@ const AnalyticsReport = ({ quotations, clients }) => {
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

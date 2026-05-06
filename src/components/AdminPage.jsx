@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
-import AppLayout from './AppLayout';
 import AdminServiceManager from './AdminServiceManager';
 import AdminMaterialManager from './AdminMaterialManager';
 import AdminClientManager from './AdminClientManager';
@@ -37,48 +36,48 @@ const AdminPage = ({ currentUser, onLogout }) => {
   };
 
   return (
-    <AppLayout
-      title="⚙️ Painel Administrativo"
-      currentUser={currentUser}
-      onLogout={onLogout}
-    >
-      {/* Tabs Navigation */}
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 -mx-4 px-4" style={{ scrollBehavior: 'smooth' }}>
-        <div className="flex gap-2 backdrop-blur-sm rounded-xl p-2 inline-flex"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: '1px solid var(--color-border-light)' }}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className="px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 whitespace-nowrap"
-              style={activeTab === tab.id
-                ? {
-                    backgroundColor: ASTON_BRAND,
-                    color: '#fff',
-                    boxShadow: `0 4px 12px ${hexToRgba(ASTON_BRAND, 0.3)}`
-                  }
-                : { color: 'var(--color-text-secondary)' }}
-              onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-primary)'; }}
-              onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <div className="w-full min-h-screen bg-white flex flex-col">
+      <main className="flex-1 overflow-auto pt-8 pb-8">
+        <div className="max-w-7xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+          {/* Tabs Navigation */}
+          <div className="flex gap-2 mb-8 overflow-x-auto pb-2" style={{ scrollBehavior: 'smooth' }}>
+            <div className="flex gap-2 backdrop-blur-sm rounded-xl p-2 inline-flex"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)', border: '1px solid var(--color-border-light)' }}>
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 whitespace-nowrap"
+                  style={activeTab === tab.id
+                    ? {
+                        backgroundColor: ASTON_BRAND,
+                        color: '#fff',
+                        boxShadow: `0 4px 12px ${hexToRgba(ASTON_BRAND, 0.3)}`
+                      }
+                    : { color: 'var(--color-text-secondary)' }}
+                  onMouseEnter={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-primary)'; }}
+                  onMouseLeave={e => { if (activeTab !== tab.id) e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Tab Content Card */}
+          <div className="card-glass p-8">
+            {tabContent[activeTab]}
+          </div>
+
+          {/* Admin Info */}
+          <div className="mt-8 card-premium p-6" style={{ backgroundColor: 'rgba(1, 112, 185, 0.05)' }}>
+            <p style={{ color: 'var(--color-text-secondary)' }}>
+              👤 <strong>{currentUser.name}</strong> · {currentUser.login} · Admin
+            </p>
+          </div>
         </div>
-      </div>
-
-      {/* Tab Content Card */}
-      <div className="card-premium p-8">
-        {tabContent[activeTab]}
-      </div>
-
-      {/* Admin Info */}
-      <div className="mt-8 card-premium p-6" style={{ backgroundColor: 'rgba(1, 112, 185, 0.05)' }}>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          👤 <strong>{currentUser.name}</strong> · {currentUser.login} · Admin
-        </p>
-      </div>
-    </AppLayout>
+      </main>
+    </div>
   );
 };
 

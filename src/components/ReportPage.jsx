@@ -50,7 +50,7 @@ const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotation
         transition={{ duration: 0.3 }}
       >
         <div className="px-8 py-4 flex justify-between items-center max-w-6xl mx-auto">
-          <h3 className="text-lg font-semibold text-gray-900">Relatório de Orçamentos</h3>
+          <h3 className="subtitle-prominent" style={{ color: '#0D47A1' }}>Relatório de Orçamentos</h3>
           <div className="flex gap-3">
             <motion.button
               onClick={handlePrint}
@@ -109,7 +109,7 @@ const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotation
           </motion.div>
 
           {/* Stats Cards */}
-          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-4">
+          <motion.div variants={itemVariants} className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
             <div className="p-6 rounded-lg bg-white border border-gray-200">
               <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">
                 Orçamentos
@@ -165,7 +165,7 @@ const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotation
                       {/* Client Header */}
                       <div className="px-8 py-6 border-b border-gray-200 bg-gray-50">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
                             {clientData?.logoUrl ? (
                               <img
                                 src={clientData.logoUrl}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import Logo from './Logo';
+import { MetalFlowLogoWithText } from './MetalFlowLogo';
 import { PageIcon } from './PageIcons';
 
-const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
+const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick, isAdminMode = false }) => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -29,45 +29,34 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6 }}
     >
-      <nav className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo - Home Button */}
-        <motion.button
-          onClick={() => onNavigate('home')}
-          className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Logo size="md" />
-          <div className="hidden sm:flex flex-col">
-            <span className="text-sm font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent leading-none">
-              MetalFlow
-            </span>
-            <span className="text-xs text-gray-500">Orçamentos</span>
-          </div>
-        </motion.button>
+        <MetalFlowLogoWithText size="md" onNavigate={onNavigate} />
 
-        {/* Nav Items */}
-        <div className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => (
-            <motion.button
-              key={item.id}
-              onClick={() => onNavigate(item.id)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-100 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <PageIcon page={item.id} className="w-4 h-4" />
-              {item.label}
-              <motion.span
-                className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300"
-                layoutId="underline"
-              />
-            </motion.button>
-          ))}
-        </div>
+        {/* Nav Items - Oculto em modo admin */}
+        {!isAdminMode && (
+          <div className="hidden md:flex items-center gap-2 sm:gap-3">
+            {navItems.map((item) => (
+              <motion.button
+                key={item.id}
+                onClick={() => onNavigate(item.id)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-100 transition-colors"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <PageIcon page={item.id} className="w-4 h-4" />
+                {item.label}
+                <motion.span
+                  className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 group-hover:w-full transition-all duration-300"
+                  layoutId="underline"
+                />
+              </motion.button>
+            ))}
+          </div>
+        )}
 
         {/* User Info */}
-        <motion.div className="flex items-center gap-4">
+        <motion.div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           <div className="text-right hidden sm:block">
             <p className="text-sm font-semibold text-gray-900">{currentUser?.name || 'Admin'}</p>
             <p className="text-xs text-gray-500">{currentUser?.role}</p>
@@ -75,16 +64,20 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick }) => {
           {currentUser?.role === 'admin' && onAdminClick && (
             <motion.button
               onClick={onAdminClick}
-              className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold hover:shadow-lg transition-shadow"
-              whileHover={{ scale: 1.05, boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.3)' }}
+              className={`px-3 sm:px-4 py-2 rounded-lg text-white text-xs sm:text-sm font-semibold hover:shadow-lg transition-shadow ${
+                isAdminMode
+                  ? 'bg-gradient-to-r from-gray-500 to-gray-600'
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+              }`}
+              whileHover={{ scale: 1.05, boxShadow: isAdminMode ? '0 20px 25px -5px rgba(107, 114, 128, 0.3)' : '0 20px 25px -5px rgba(59, 130, 246, 0.3)' }}
               whileTap={{ scale: 0.95 }}
             >
-              ⚙️ Admin
+              {isAdminMode ? '← Voltar' : '⚙️ Admin'}
             </motion.button>
           )}
           <motion.button
             onClick={onLogout}
-            className="px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-semibold hover:shadow-lg transition-shadow"
+            className="px-3 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs sm:text-sm font-semibold hover:shadow-lg transition-shadow"
             whileHover={{ scale: 1.05, boxShadow: '0 20px 25px -5px rgba(239, 68, 68, 0.3)' }}
             whileTap={{ scale: 0.95 }}
           >

@@ -70,7 +70,7 @@ const CadFilePreview = ({ selectedClientId }) => {
       </div>
 
       {/* Miniaturas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
         {cadFiles.map((file) => (
           <CadFileThumbnail
             key={file.id}
@@ -116,6 +116,55 @@ const CadFileThumbnail = ({ file, isSelected, onSelect }) => {
 
 const CadCanvas = ({ file, size = 'small' }) => {
   const canvasRef = React.useRef(null);
+  const [zoom, setZoom] = React.useState(1);
+  const [pan, setPan] = React.useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = React.useState(false);
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 });
+
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newZoom = Math.max(0.1, Math.min(5, zoom * delta));
+    setZoom(newZoom);
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging) {
+      setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleFitView = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  React.useEffect(() => {
+    if (!canvasRef.current) return;
+    canvasRef.current.addEventListener('wheel', handleWheel, { passive: false });
+    canvasRef.current.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      canvasRef.current?.removeEventListener('wheel', handleWheel);
+      canvasRef.current?.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragStart, pan]);
 
   React.useEffect(() => {
     if (!canvasRef.current || !file) return;
@@ -164,34 +213,35 @@ const CadCanvas = ({ file, size = 'small' }) => {
     const scaleY = drawingHeight > 0 ? availableHeight / drawingHeight : 1;
     const scale = Math.min(scaleX, scaleY, 2);
 
-    // Calcular offset para centralizar
-    const offsetX = padding + (availableWidth - drawingWidth * scale) / 2;
-    const offsetY = padding + (availableHeight - drawingHeight * scale) / 2;
+    // Calcular offset para centralizar com zoom e pan
+    const offsetX = padding + (availableWidth - drawingWidth * scale) / 2 + pan.x;
+    const offsetY = padding + (availableHeight - drawingHeight * scale) / 2 + pan.y;
+    const finalScale = scale * zoom;
 
     // Desenhar grid (opcional)
     ctx.strokeStyle = '#f0f0f0';
     ctx.lineWidth = 0.5;
-    const gridSize = 100 * scale;
-    for (let i = 0; i < drawingWidth * scale; i += gridSize) {
+    const gridSize = 100 * finalScale;
+    for (let i = 0; i < drawingWidth * finalScale; i += Math.max(gridSize, 20)) {
       ctx.beginPath();
       ctx.moveTo(offsetX + i, offsetY);
-      ctx.lineTo(offsetX + i, offsetY + drawingHeight * scale);
+      ctx.lineTo(offsetX + i, offsetY + drawingHeight * finalScale);
       ctx.stroke();
     }
-    for (let i = 0; i < drawingHeight * scale; i += gridSize) {
+    for (let i = 0; i < drawingHeight * finalScale; i += Math.max(gridSize, 20)) {
       ctx.beginPath();
       ctx.moveTo(offsetX, offsetY + i);
-      ctx.lineTo(offsetX + drawingWidth * scale, offsetY + i);
+      ctx.lineTo(offsetX + drawingWidth * finalScale, offsetY + i);
       ctx.stroke();
     }
 
     // Desenhar cada layer como um retângulo
     file.layers.forEach((layer, idx) => {
       const color = colors[idx % colors.length];
-      const w = (layer.width || 100) * scale;
-      const h = (layer.height || 100) * scale;
-      const x = offsetX + (layer.x || 0) * scale;
-      const y = offsetY + (layer.y || 0) * scale;
+      const w = (layer.width || 100) * finalScale;
+      const h = (layer.height || 100) * finalScale;
+      const x = offsetX + (layer.x || 0) * finalScale;
+      const y = offsetY + (layer.y || 0) * finalScale;
 
       // Sombra
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
@@ -243,22 +293,108 @@ const CadCanvas = ({ file, size = 'small' }) => {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
     ctx.fillText(`Escala: 1:${Math.round(1 / (scale / 2))}  Unidade: mm`, padding + 5, canvas.offsetHeight - 5);
-  }, [file]);
+  }, [file, zoom, pan]);
 
   const width = size === 'small' ? 250 : 800;
   const height = size === 'small' ? 150 : 500;
 
+  if (size === 'small') {
+    return (
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          background: '#ffffff',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          cursor: isDragging ? 'grabbing' : 'grab'
+        }}
+      />
+    );
+  }
+
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        width: '100%',
-        height: '100%',
-        background: '#ffffff',
-        border: '1px solid #e5e7eb',
-        borderRadius: '8px'
-      }}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <canvas
+        ref={canvasRef}
+        style={{
+          width: '100%',
+          height: '100%',
+          background: '#ffffff',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          display: 'block'
+        }}
+      />
+      {/* Controles de zoom */}
+      <div style={{
+        position: 'absolute',
+        bottom: '12px',
+        right: '12px',
+        display: 'flex',
+        gap: '6px',
+        background: 'rgba(255, 255, 255, 0.9)',
+        padding: '8px',
+        borderRadius: '6px',
+        border: '1px solid #d1d5db'
+      }}>
+        <button
+          onClick={() => setZoom(Math.max(0.1, zoom - 0.2))}
+          style={{
+            padding: '6px 10px',
+            background: '#f3f4f6',
+            border: '1px solid #d1d5db',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }}
+        >
+          −
+        </button>
+        <div style={{
+          padding: '6px 8px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: '#6b7280',
+          minWidth: '45px',
+          textAlign: 'center'
+        }}>
+          {Math.round(zoom * 100)}%
+        </div>
+        <button
+          onClick={() => setZoom(Math.min(5, zoom + 0.2))}
+          style={{
+            padding: '6px 10px',
+            background: '#f3f4f6',
+            border: '1px solid #d1d5db',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }}
+        >
+          +
+        </button>
+        <button
+          onClick={handleFitView}
+          style={{
+            padding: '6px 10px',
+            background: '#0170B9',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '11px',
+            fontWeight: 'bold'
+          }}
+        >
+          Ajustar
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -283,7 +419,7 @@ const CadFileViewer = ({ file, onClose }) => {
 
         <div className="p-6 space-y-6">
           {/* Detalhes */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-xs text-gray-600 uppercase font-semibold mb-2">Tamanho</p>
               <p className="text-lg font-bold text-gray-900">

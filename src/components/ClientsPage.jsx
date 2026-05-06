@@ -21,13 +21,14 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
   const inputCls = 'w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all';
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-8">
 
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center border-b-4 pb-4" style={{ borderColor: '#0170B9' }}>
         <div>
-          <h2 className="text-3xl font-semibold">Clientes</h2>
-          <p className="text-base text-gray-600 mt-2">
+          <h2 className="title-prominent" style={{ color: '#0D47A1' }}>Clientes</h2>
+          <p className="text-base font-semibold mt-2" style={{ color: '#0170B9' }}>
             {clients.length} {clients.length === 1 ? 'cliente cadastrado' : 'clientes cadastrados'}
           </p>
         </div>
@@ -45,18 +46,18 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
 
       {/* New client form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white border border-gray-200 rounded-xl p-8 space-y-6">
-          <h3 className="text-lg font-semibold text-gray-900">Dados do Cliente</h3>
+        <form onSubmit={handleSubmit} className="bg-white border-t-4 border-gray-200 rounded-xl p-8 space-y-6" style={{ borderTopColor: '#0170B9' }}>
+          <h3 className="title-prominent" style={{ color: '#0170B9' }}>Dados do Cliente</h3>
 
           {/* Name + Code */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Nome</label>
+              <label className="block label-prominent mb-3" style={{ color: '#0170B9' }}>Nome</label>
               <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="Nome ou empresa" className={inputCls} autoFocus />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Código de Cadastro</label>
+              <label className="block label-prominent mb-3" style={{ color: '#0170B9' }}>Código de Cadastro</label>
               <input type="text" value={form.code} onChange={e => setForm(p => ({ ...p, code: e.target.value }))}
                 placeholder="Ex: CLI-001" className={inputCls} />
             </div>
@@ -70,28 +71,28 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
           </div>
 
           {/* Contact + Email */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Telefone</label>
+              <label className="block label-prominent mb-3" style={{ color: '#0170B9' }}>Telefone</label>
               <input type="text" value={form.contact} onChange={e => setForm(p => ({ ...p, contact: e.target.value }))}
                 placeholder="(00) 00000-0000" className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Email</label>
+              <label className="block label-prominent mb-3" style={{ color: '#0170B9' }}>Email</label>
               <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                 placeholder="email@empresa.com" className={inputCls} />
             </div>
           </div>
 
           {/* Website + Logo */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Website</label>
+              <label className="block label-prominent mb-3" style={{ color: '#0170B9' }}>Website</label>
               <input type="url" value={form.website} onChange={e => setForm(p => ({ ...p, website: e.target.value }))}
                 placeholder="https://empresa.com.br" className={inputCls} />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">URL do Logo</label>
+              <label className="block label-prominent mb-3" style={{ color: '#0170B9' }}>URL do Logo</label>
               <input type="url" value={form.logoUrl} onChange={e => setForm(p => ({ ...p, logoUrl: e.target.value }))}
                 placeholder="https://.../logo.png" className={inputCls} />
             </div>
@@ -151,10 +152,10 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
             <span className="text-2xl">👤</span>
           </div>
           <p className="text-gray-900 font-semibold mb-2 text-lg">Nenhum cliente ainda</p>
-          <p className="text-base text-gray-600">Crie um cliente para vincular aos orçamentos</p>
+          <p className="text-base text-gray-700">Crie um cliente para vincular aos orçamentos</p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-2 sm:gap-3 md:gap-4">
           {clients.map(c => {
             const brand = c.primaryColor || '#3b82f6';
             return (
@@ -167,7 +168,7 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
                 onMouseEnter={e => e.currentTarget.style.borderColor = hexToRgba(brand, 0.5)}
                 onMouseLeave={e => e.currentTarget.style.borderColor = hexToRgba(brand, 0.3)}
               >
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
                   {/* Logo or avatar */}
                   {c.logoUrl ? (
                     <div
@@ -195,13 +196,13 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
 
                   <div>
                     <div className="flex items-baseline gap-2">
-                      <h3 className="font-semibold text-gray-900 text-lg">{c.name}</h3>
-                      <span className="text-sm text-gray-600">{c.code || 'S/código'}</span>
+                      <h3 className="subtitle-prominent" style={{ color: brand }}>{c.name}</h3>
+                      <span className="text-sm text-gray-700">{c.code || 'S/código'}</span>
                     </div>
                     {c.tagline && <p className="text-sm mt-1" style={{ color: brand }}>{c.tagline}</p>}
                     <div className="flex gap-3 mt-2">
-                      {c.contact && <p className="text-sm text-gray-600">{c.contact}</p>}
-                      {c.email && <p className="text-sm text-gray-600">{c.email}</p>}
+                      {c.contact && <p className="text-sm text-gray-700">{c.contact}</p>}
+                      {c.email && <p className="text-sm text-gray-700">{c.email}</p>}
                       {c.website && (
                         <a href={c.website} target="_blank" rel="noreferrer"
                           className="text-sm hover:underline transition-colors"
@@ -252,6 +253,7 @@ const ClientsPage = ({ clients, onNewQuotation, onClientAdded, onEditClient, onV
           })}
         </div>
       )}
+      </div>
     </div>
   );
 };

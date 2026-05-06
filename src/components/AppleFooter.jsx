@@ -56,10 +56,10 @@ const AppleFooter = () => {
 
   return (
     <footer className="bg-gradient-to-b from-gray-50 to-gray-900 border-t border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16">
         {/* Main Footer Content */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16"
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-12 md:mb-16"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -67,8 +67,8 @@ const AppleFooter = () => {
         >
           {footerSections.map((section, idx) => (
             <motion.div key={idx} variants={itemVariants}>
-              <h4 className="text-gray-900 font-bold text-lg mb-4">{section.title}</h4>
-              <ul className="space-y-3">
+              <h4 className="text-gray-900 font-bold text-base sm:text-lg mb-3 sm:mb-4">{section.title}</h4>
+              <ul className="space-y-2 sm:space-y-3">
                 {section.links.map((link) => (
                   <motion.li
                     key={link}
@@ -85,11 +85,11 @@ const AppleFooter = () => {
         </motion.div>
 
         {/* Divider */}
-        <div className="border-t border-gray-700 my-12" />
+        <div className="border-t border-gray-700 my-8 sm:my-12" />
 
         {/* Bottom Section */}
         <motion.div
-          className="flex flex-col md:flex-row items-center justify-between"
+          className="flex flex-col md:flex-row items-center justify-between gap-2 sm:gap-3 md:gap-4 sm:gap-6"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -98,7 +98,7 @@ const AppleFooter = () => {
           <div className="text-gray-400 text-sm mb-4 md:mb-0">
             © 2026 MetalFlow. Todos os direitos reservados.
           </div>
-          <div className="flex gap-6">
+          <div className="flex gap-3 sm:gap-4 md:gap-6">
             {['🇧🇷 Português', 'Privacy', 'Terms', 'Cookies'].map((item) => (
               <motion.button
                 key={item}

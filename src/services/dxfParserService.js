@@ -26,154 +26,300 @@ export const parseDxfFile = async (file) => {
 
 /**
  * Extrair layers com dimensões e informações
+ * Agora aceita: layers específicas, layer 0, ou tudo em uma única layer
  */
 export const extractLayers = (dxfData) => {
   if (!dxfData?.entities || dxfData.entities.length === 0) {
+    console.warn('[extractLayers] Nenhuma entidade encontrada no DXF');
     return [];
   }
 
-  const layerMap = {};
-  let hasValidLayers = false;
+  console.log('[extractLayers] Processando', dxfData.entities.length, 'entidades');
 
+  const layerMap = {};
+  const entityTypes = {};
+  let hasNonBlockEntities = false;
+
+  // Agrupar entidades por layer - ACEITAR TODAS
   dxfData.entities.forEach(entity => {
     if (!entity) return;
-    const layerName = entity.layer || 'Padrão';
+
+    // Contar tipos de entidades
+    entityTypes[entity.type] = (entityTypes[entity.type] || 0) + 1;
+
+    // Usar layer da entidade ou "0" se não especificada
+    const layerName = entity.layer || '0';
     if (!layerMap[layerName]) layerMap[layerName] = [];
     layerMap[layerName].push(entity);
-    if (layerName !== '0') hasValidLayers = true;
+
+    // Verificar se tem geometria real (não é apenas referência de bloco)
+    if (entity.type !== 'INSERT') {
+      hasNonBlockEntities = true;
+    }
   });
 
-  const layers = Object.entries(layerMap)
+  console.log('[extractLayers] Layers encontradas:', Object.keys(layerMap).length);
+  console.log('[extractLayers] Tipos de entidades:', Object.entries(entityTypes).map(([k, v]) => `${k}(${v})`).join(', '));
+
+  // Converter map em array de layers
+  let layers = Object.entries(layerMap)
     .map(([layerName, entities]) => {
       const boundingBox = calculateBoundingBox(entities);
-      const width = Math.round((boundingBox.maxX - boundingBox.minX) * 1000) / 1000;
-      const height = Math.round((boundingBox.maxY - boundingBox.minY) * 1000) / 1000;
+      let width = Math.round((boundingBox.maxX - boundingBox.minX) * 1000) / 1000;
+      let height = Math.round((boundingBox.maxY - boundingBox.minY) * 1000) / 1000;
+      let depth = Math.round((boundingBox.maxZ - boundingBox.minZ) * 1000) / 1000;
 
-      return {
+      // Se dimensões calculadas são 0, usar valor padrão
+      if (width <= 0) width = 100;
+      if (height <= 0) height = 100;
+      if (depth <= 0) depth = 10;
+
+      const layer = {
         name: layerName,
         entityCount: entities.length,
         width,
         height,
-        depth: Math.round((boundingBox.maxZ - boundingBox.minZ) * 1000) / 1000,
+        depth,
         minX: boundingBox.minX,
         minY: boundingBox.minY,
         minZ: boundingBox.minZ,
         scale: 1,
         selected: true,
-        entities
+        entities,
+        x: boundingBox.minX,
+        y: boundingBox.minY,
+        z: boundingBox.minZ
       };
+
+      console.log(`[extractLayers] Layer "${layerName}": ${width}×${height}×${depth}mm, ${entities.length} entidades`);
+      return layer;
     })
-    .filter(layer => layer.width > 0 && layer.height > 0)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => {
+      // Ordenar: layers nomeadas primeiro, depois "0"
+      if (a.name === '0') return 1;
+      if (b.name === '0') return -1;
+      return a.name.localeCompare(b.name);
+    });
+
+  // Se temos layers mas nenhuma com geometria real (só blocos), extrair dos blocos
+  if (layers.length > 0 && !hasNonBlockEntities && dxfData.blocks) {
+    console.log('[extractLayers] Apenas blocos/inserts encontrados. Extraindo de BLOCKS...');
+    const blockLayers = extractFromBlocks(dxfData.blocks);
+    if (blockLayers.length > 0) {
+      console.log('[extractLayers] Encontrados', blockLayers.length, 'blocos');
+      return blockLayers;
+    }
+  }
 
   return layers;
 };
 
 /**
+ * Extrair layers de blocos (BLOCKS section)
+ */
+const extractFromBlocks = (blocks) => {
+  if (!blocks) return [];
+
+  return Object.entries(blocks)
+    .filter(([name]) => !name.startsWith('*')) // Ignorar blocos internos
+    .map(([blockName, blockData]) => {
+      const entities = blockData?.entities || [];
+      if (entities.length === 0) return null;
+
+      const boundingBox = calculateBoundingBox(entities);
+      let width = Math.round((boundingBox.maxX - boundingBox.minX) * 1000) / 1000;
+      let height = Math.round((boundingBox.maxY - boundingBox.minY) * 1000) / 1000;
+      let depth = Math.round((boundingBox.maxZ - boundingBox.minZ) * 1000) / 1000;
+
+      if (width <= 0) width = 100;
+      if (height <= 0) height = 100;
+      if (depth <= 0) depth = 10;
+
+      return {
+        name: blockName,
+        entityCount: entities.length,
+        width,
+        height,
+        depth,
+        minX: boundingBox.minX,
+        minY: boundingBox.minY,
+        minZ: boundingBox.minZ,
+        scale: 1,
+        selected: true,
+        entities,
+        x: boundingBox.minX,
+        y: boundingBox.minY,
+        z: boundingBox.minZ,
+        isBlock: true
+      };
+    })
+    .filter(layer => layer !== null)
+    .sort((a, b) => a.name.localeCompare(b.name));
+};
+
+/**
  * Calcular bounding box das entidades
+ * Suporta: LINE, CIRCLE, ARC, POLYLINE, LWPOLYLINE, SPLINE, TEXT, SOLID, 3DFACE, ELLIPSE, etc
  */
 const calculateBoundingBox = (entities) => {
   let minX = Infinity,  maxX = -Infinity;
   let minY = Infinity,  maxY = -Infinity;
   let minZ = Infinity,  maxZ = -Infinity;
 
+  const updateBounds = (x, y, z = 0) => {
+    if (x !== undefined && x !== null && !isNaN(x)) minX = Math.min(minX, x);
+    if (x !== undefined && x !== null && !isNaN(x)) maxX = Math.max(maxX, x);
+    if (y !== undefined && y !== null && !isNaN(y)) minY = Math.min(minY, y);
+    if (y !== undefined && y !== null && !isNaN(y)) maxY = Math.max(maxY, y);
+    if (z !== undefined && z !== null && !isNaN(z)) minZ = Math.min(minZ, z);
+    if (z !== undefined && z !== null && !isNaN(z)) maxZ = Math.max(maxZ, z);
+  };
+
   entities.forEach(entity => {
     if (!entity) return;
 
-    // Diferentes tipos de entidades têm propriedades diferentes
     switch (entity.type) {
+      // Polígonos: POLYLINE, LWPOLYLINE
       case 'LWPOLYLINE':
       case 'POLYLINE':
-        if (entity.vertices) {
+        if (entity.vertices && Array.isArray(entity.vertices)) {
           entity.vertices.forEach(v => {
-            minX = Math.min(minX, v.x || 0);
-            maxX = Math.max(maxX, v.x || 0);
-            minY = Math.min(minY, v.y || 0);
-            maxY = Math.max(maxY, v.y || 0);
-            minZ = Math.min(minZ, v.z || 0);
-            maxZ = Math.max(maxZ, v.z || 0);
+            updateBounds(v.x, v.y, v.z);
           });
         }
         break;
 
+      // Spline (curve)
+      case 'SPLINE':
+        if (entity.controlPoints && Array.isArray(entity.controlPoints)) {
+          entity.controlPoints.forEach(pt => {
+            updateBounds(pt.x, pt.y, pt.z);
+          });
+        }
+        break;
+
+      // Linhas: LINE, MLINE, XLINE
       case 'LINE':
       case 'MLINE':
-        const x1 = entity.start?.x || 0;
-        const y1 = entity.start?.y || 0;
-        const z1 = entity.start?.z || 0;
-        const x2 = entity.end?.x || 0;
-        const y2 = entity.end?.y || 0;
-        const z2 = entity.end?.z || 0;
-        minX = Math.min(minX, x1, x2);
-        maxX = Math.max(maxX, x1, x2);
-        minY = Math.min(minY, y1, y2);
-        maxY = Math.max(maxY, y1, y2);
-        minZ = Math.min(minZ, z1, z2);
-        maxZ = Math.max(maxZ, z1, z2);
+      case 'XLINE':
+        const x1 = entity.start?.x ?? entity.x1 ?? 0;
+        const y1 = entity.start?.y ?? entity.y1 ?? 0;
+        const z1 = entity.start?.z ?? entity.z1 ?? 0;
+        const x2 = entity.end?.x ?? entity.x2 ?? 0;
+        const y2 = entity.end?.y ?? entity.y2 ?? 0;
+        const z2 = entity.end?.z ?? entity.z2 ?? 0;
+        updateBounds(x1, y1, z1);
+        updateBounds(x2, y2, z2);
         break;
 
+      // Círculos
       case 'CIRCLE':
-      case 'ARC':
-        // Estrutura do dxf: x, y, r (não center e radius)
-        const cx = entity.x || entity.center?.x || 0;
-        const cy = entity.y || entity.center?.y || 0;
-        const cz = entity.z || entity.center?.z || 0;
-        const radius = entity.r || entity.radius || 0;
-        minX = Math.min(minX, cx - radius);
-        maxX = Math.max(maxX, cx + radius);
-        minY = Math.min(minY, cy - radius);
-        maxY = Math.max(maxY, cy + radius);
-        minZ = Math.min(minZ, cz);
-        maxZ = Math.max(maxZ, cz);
+        const cx = entity.center?.x ?? entity.x ?? 0;
+        const cy = entity.center?.y ?? entity.y ?? 0;
+        const cz = entity.center?.z ?? entity.z ?? 0;
+        const radius = entity.radius ?? entity.r ?? 0;
+        updateBounds(cx - radius, cy - radius, cz);
+        updateBounds(cx + radius, cy + radius, cz);
         break;
 
+      // Arcos
+      case 'ARC':
+        const acx = entity.center?.x ?? entity.x ?? 0;
+        const acy = entity.center?.y ?? entity.y ?? 0;
+        const acz = entity.center?.z ?? entity.z ?? 0;
+        const aradius = entity.radius ?? entity.r ?? 0;
+        updateBounds(acx - aradius, acy - aradius, acz);
+        updateBounds(acx + aradius, acy + aradius, acz);
+        break;
+
+      // Elipse
+      case 'ELLIPSE':
+        const ecx = entity.center?.x ?? entity.x ?? 0;
+        const ecy = entity.center?.y ?? entity.y ?? 0;
+        const ecz = entity.center?.z ?? entity.z ?? 0;
+        const majorAxis = entity.majorAxis ?? entity.majorAxisLength ?? 50;
+        const minorAxis = entity.minorAxis ?? entity.minorAxisLength ?? 25;
+        updateBounds(ecx - majorAxis, ecy - minorAxis, ecz);
+        updateBounds(ecx + majorAxis, ecy + minorAxis, ecz);
+        break;
+
+      // Sólidos e faces
+      case 'SOLID':
+      case '3DFACE':
+        for (let i = 0; i < 4; i++) {
+          const pt = entity[`point${i}`] || entity.points?.[i];
+          if (pt) updateBounds(pt.x, pt.y, pt.z);
+        }
+        break;
+
+      // Textos
+      case 'TEXT':
+      case 'MTEXT':
+        const tx = entity.position?.x ?? entity.x ?? 0;
+        const ty = entity.position?.y ?? entity.y ?? 0;
+        const tz = entity.position?.z ?? entity.z ?? 0;
+        const textWidth = (entity.text?.length ?? 0) * 2.5; // Aprox.
+        const textHeight = 5; // Aprox.
+        updateBounds(tx, ty, tz);
+        updateBounds(tx + textWidth, ty + textHeight, tz);
+        break;
+
+      // Pontos
+      case 'POINT':
+        const ptx = entity.position?.x ?? entity.x ?? 0;
+        const pty = entity.position?.y ?? entity.y ?? 0;
+        const ptz = entity.position?.z ?? entity.z ?? 0;
+        updateBounds(ptx, pty, ptz);
+        break;
+
+      // Retângulos e padrões
       case 'RECT':
       case 'RECTANGLE':
-        if (entity.vertices && entity.vertices.length >= 2) {
+        if (entity.vertices && Array.isArray(entity.vertices)) {
           entity.vertices.forEach(v => {
-            minX = Math.min(minX, v.x || 0);
-            maxX = Math.max(maxX, v.x || 0);
-            minY = Math.min(minY, v.y || 0);
-            maxY = Math.max(maxY, v.y || 0);
-            minZ = Math.min(minZ, v.z || 0);
-            maxZ = Math.max(maxZ, v.z || 0);
+            updateBounds(v.x, v.y, v.z);
           });
         }
         break;
 
-      case 'POINT':
-        minX = Math.min(minX, entity.position?.x || entity.x || 0);
-        maxX = Math.max(maxX, entity.position?.x || entity.x || 0);
-        minY = Math.min(minY, entity.position?.y || entity.y || 0);
-        maxY = Math.max(maxY, entity.position?.y || entity.y || 0);
-        minZ = Math.min(minZ, entity.position?.z || entity.z || 0);
-        maxZ = Math.max(maxZ, entity.position?.z || entity.z || 0);
+      // Referência de bloco (INSERT)
+      case 'INSERT':
+        const ix = entity.position?.x ?? entity.x ?? 0;
+        const iy = entity.position?.y ?? entity.y ?? 0;
+        const iz = entity.position?.z ?? entity.z ?? 0;
+        const iw = (entity.scaleX ?? 1) * 50;
+        const ih = (entity.scaleY ?? 1) * 50;
+        updateBounds(ix, iy, iz);
+        updateBounds(ix + iw, iy + ih, iz);
         break;
 
+      // Fallback: tentar propriedades genéricas
       default:
-        // Tentar x,y,z direto
-        if (entity.x !== undefined || entity.y !== undefined) {
-          minX = Math.min(minX, entity.x || 0);
-          maxX = Math.max(maxX, entity.x || 0);
-          minY = Math.min(minY, entity.y || 0);
-          maxY = Math.max(maxY, entity.y || 0);
-          minZ = Math.min(minZ, entity.z || 0);
-          maxZ = Math.max(maxZ, entity.z || 0);
-        } else if (entity.position) {
-          minX = Math.min(minX, entity.position.x || 0);
-          maxX = Math.max(maxX, entity.position.x || 0);
-          minY = Math.min(minY, entity.position.y || 0);
-          maxY = Math.max(maxY, entity.position.y || 0);
-          minZ = Math.min(minZ, entity.position.z || 0);
-          maxZ = Math.max(maxZ, entity.position.z || 0);
+        if (entity.x !== undefined && entity.y !== undefined) {
+          updateBounds(entity.x, entity.y, entity.z ?? 0);
+        }
+        if (entity.position) {
+          updateBounds(entity.position.x, entity.position.y, entity.position.z);
+        }
+        if (entity.center) {
+          updateBounds(entity.center.x, entity.center.y, entity.center.z);
+        }
+        if (entity.start && entity.end) {
+          updateBounds(entity.start.x, entity.start.y, entity.start.z);
+          updateBounds(entity.end.x, entity.end.y, entity.end.z);
         }
     }
   });
 
   // Se nenhuma entidade foi processada, retornar valores padrão
   if (minX === Infinity) {
-    return { minX: 0, maxX: 0, minY: 0, maxY: 0, minZ: 0, maxZ: 0 };
+    return { minX: 0, maxX: 100, minY: 0, maxY: 100, minZ: 0, maxZ: 0 };
   }
+
+  // Garantir que min < max
+  if (minX === maxX) maxX = minX + 100;
+  if (minY === maxY) maxY = minY + 100;
+  if (minZ === maxZ) maxZ = minZ + 10;
 
   return { minX, maxX, minY, maxY, minZ, maxZ };
 };

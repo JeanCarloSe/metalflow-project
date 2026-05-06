@@ -115,15 +115,15 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+    <div className="min-h-screen flex items-center justify-center px-3 sm:px-4 py-4 sm:py-6 md:py-8" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
       <div className="w-full max-w-md">
 
         {/* Brand */}
-        <div className="text-center mb-12">
-          <div className="mb-6 flex justify-center">
+        <div className="text-center mb-6 sm:mb-8 md:mb-12">
+          <div className="mb-3 sm:mb-4 md:mb-6 flex justify-center">
             <Logo size="lg" />
           </div>
-          <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>Sistema de Orçamentos</p>
+          <p className="text-xs sm:text-sm md:text-base" style={{ color: 'var(--color-text-secondary)' }}>Sistema de Orçamentos</p>
         </div>
 
         <div className="card-premium overflow-hidden">
@@ -132,7 +132,7 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
           <div className="flex" style={{ borderBottom: '2px solid var(--color-border-light)' }}>
             {[{ id: 'login', label: 'Entrar' }, { id: 'create', label: 'Novo usuário' }].map(t => (
               <button key={t.id} onClick={() => { setMode(t.id); setError(''); }}
-                className="flex-1 py-4 text-base font-medium transition-all"
+                className="flex-1 py-2 sm:py-3 md:py-4 text-xs sm:text-sm md:text-base font-medium transition-all"
                 style={mode === t.id ? { color: 'var(--color-primary)', borderBottom: '2px solid var(--color-primary)', marginBottom: '-2px' } : { color: 'var(--color-text-muted)' }}>
                 {t.label}
               </button>
@@ -140,13 +140,13 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
           </div>
 
           {isFirstAccess && (
-            <div className="px-8 pt-8 pb-0">
-              <p className="text-sm font-semibold text-center" style={{ color: 'var(--color-primary)' }}>Primeiro acesso</p>
-              <p className="text-center text-base mt-2 mb-6" style={{ color: 'var(--color-text-secondary)' }}>Crie o usuário administrador</p>
+            <div className="px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 md:pt-8 pb-0">
+              <p className="text-xs sm:text-sm font-semibold text-center" style={{ color: 'var(--color-primary)' }}>Primeiro acesso</p>
+              <p className="text-center text-xs sm:text-sm md:text-base mt-2 mb-4 sm:mb-6" style={{ color: 'var(--color-text-secondary)' }}>Crie o usuário administrador</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="px-8 py-8 space-y-6">
+          <form onSubmit={handleSubmit} className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 space-y-3 sm:space-y-4 md:space-y-6">
 
             {mode === 'create' && (
               <>

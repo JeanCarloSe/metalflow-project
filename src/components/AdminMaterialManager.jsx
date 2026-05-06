@@ -23,7 +23,7 @@ const AdminMaterialManager = () => {
     }
   };
 
-  const inputCls = 'w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg font-mono text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all';
+  const inputCls = 'w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all';
 
   const handleAddMaterial = async () => {
     setError('');
@@ -126,15 +126,16 @@ const AdminMaterialManager = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-gray-100 mb-4">Gerenciar Materiais</h3>
+        <h3 className="heading-section text-gray-900 mb-4">Gerenciar Materiais</h3>
         <p className="text-sm text-gray-500 mb-6">Adicione tipos de material com densidade e preço</p>
       </div>
 
       {/* Novo Material */}
-      <div className="bg-gray-900/60 border border-gray-700/40 rounded-xl p-5 space-y-4">
-        <h4 className="font-semibold text-gray-100">➕ Novo Material</h4>
+      <div className="card-premium rounded-xl p-5 space-y-4">
+        <h4 className="font-semibold text-gray-900">➕ Novo Material</h4>
 
         <div className="grid grid-cols-5 gap-3">
           <input
@@ -170,7 +171,7 @@ const AdminMaterialManager = () => {
           />
           <button
             onClick={handleAddMaterial}
-            className="px-4 py-2 text-sm font-mono font-bold text-white rounded-lg transition-all"
+            className="px-4 py-2 text-sm font-bold text-white rounded-lg transition-all"
             style={{ backgroundColor: ASTON_BRAND }}
             onMouseEnter={e => e.target.style.filter = 'brightness(1.15)'}
             onMouseLeave={e => e.target.style.filter = ''}
@@ -182,19 +183,19 @@ const AdminMaterialManager = () => {
 
       {/* Mensagens */}
       {error && (
-        <div className="bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
           <p className="text-red-400 text-sm font-mono">✕ {error}</p>
         </div>
       )}
       {success && (
-        <div className="bg-green-950/40 border border-green-700/40 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
           <p className="text-green-400 text-sm font-mono">✓ {success}</p>
         </div>
       )}
 
       {/* Lista de Materiais */}
       <div className="space-y-3">
-        <h4 className="font-semibold text-gray-100">Materiais Cadastrados ({materials.length})</h4>
+        <h4 className="font-semibold text-gray-900">Materiais Cadastrados ({materials.length})</h4>
 
         {materials.length === 0 ? (
           <p className="text-gray-500 text-sm font-mono">Nenhum material cadastrado</p>
@@ -203,11 +204,11 @@ const AdminMaterialManager = () => {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 font-mono text-xs text-gray-500 uppercase">Material</th>
-                  <th className="text-right py-3 px-4 font-mono text-xs text-gray-500 uppercase">Densidade</th>
-                  <th className="text-right py-3 px-4 font-mono text-xs text-gray-500 uppercase">Custo/kg</th>
-                  <th className="text-right py-3 px-4 font-mono text-xs text-gray-500 uppercase">Venda/kg</th>
-                  <th className="text-right py-3 px-4 font-mono text-xs text-gray-500 uppercase">Ações</th>
+                  <th className="text-left py-3 px-4 text-xs text-gray-500 uppercase">Material</th>
+                  <th className="text-right py-3 px-4 text-xs text-gray-500 uppercase">Densidade</th>
+                  <th className="text-right py-3 px-4 text-xs text-gray-500 uppercase">Custo/kg</th>
+                  <th className="text-right py-3 px-4 text-xs text-gray-500 uppercase">Venda/kg</th>
+                  <th className="text-right py-3 px-4 text-xs text-gray-500 uppercase">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,13 +254,13 @@ const AdminMaterialManager = () => {
                               const sellPrice = document.getElementById(`sellPrice-${mat.id}`).value;
                               handleUpdateMaterial(mat.id, mat.name, density, costPrice, sellPrice);
                             }}
-                            className="text-xs font-mono text-green-400 hover:text-green-300 transition-colors"
+                            className="text-xs text-green-400 hover:text-green-300 transition-colors"
                           >
                             ✓ Salvar
                           </button>
                           <button
                             onClick={() => setEditingId(null)}
-                            className="text-xs font-mono text-gray-500 hover:text-gray-300 transition-colors"
+                            className="text-xs text-gray-500 hover:text-gray-300 transition-colors"
                           >
                             ✕ Cancelar
                           </button>
@@ -267,9 +268,9 @@ const AdminMaterialManager = () => {
                       </>
                     ) : (
                       <>
-                        <td className="py-3 px-4 font-semibold text-gray-100">{mat.name}</td>
-                        <td className="py-3 px-4 text-right font-mono text-gray-400">{mat.density.toLocaleString('pt-BR')} kg/m³</td>
-                        <td className="py-3 px-4 text-right font-mono text-gray-500">
+                        <td className="py-3 px-4 font-semibold text-gray-900">{mat.name}</td>
+                        <td className="py-3 px-4 text-right text-gray-400">{mat.density.toLocaleString('pt-BR')} kg/m³</td>
+                        <td className="py-3 px-4 text-right text-gray-500">
                           R$ {(mat.costPrice || 0).toFixed(2)}/kg
                         </td>
                         <td className="py-3 px-4 text-right font-mono" style={{ color: ASTON_BRAND }}>
@@ -278,13 +279,13 @@ const AdminMaterialManager = () => {
                         <td className="py-3 px-4 text-right space-x-2">
                           <button
                             onClick={() => setEditingId(mat.id)}
-                            className="text-xs font-mono text-blue-400 hover:text-blue-300 transition-colors"
+                            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
                           >
                             ✏ Editar
                           </button>
                           <button
                             onClick={() => handleDeleteMaterial(mat.id, mat.name)}
-                            className="text-xs font-mono text-red-400 hover:text-red-300 transition-colors"
+                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
                           >
                             ✕ Remover
                           </button>
@@ -297,6 +298,7 @@ const AdminMaterialManager = () => {
             </table>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

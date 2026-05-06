@@ -54,25 +54,25 @@ const AppleFeatures = () => {
   };
 
   return (
-    <section className="py-24 px-4 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-12 sm:py-18 md:py-24 px-3 sm:px-4 bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-6xl mx-auto">
         {/* Section Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-12 md:mb-16"
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
             Recursos<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-500"> Poderosos</span>
           </h2>
-          <p className="text-xl text-gray-600">Tudo que você precisa para gerenciar orçamentos com excelência</p>
+          <p className="text-base sm:text-lg md:text-xl text-gray-600">Tudo que você precisa para gerenciar orçamentos com excelência</p>
         </motion.div>
 
         {/* Features Grid */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -83,7 +83,7 @@ const AppleFeatures = () => {
               key={idx}
               variants={cardVariants}
               whileHover="hover"
-              className="bg-white rounded-2xl p-8 border border-gray-100 cursor-pointer group relative overflow-hidden"
+              className="bg-white rounded-2xl p-4 sm:p-6 md:p-8 border border-gray-100 cursor-pointer group relative overflow-hidden"
             >
               {/* Gradient Background on Hover */}
               <motion.div
@@ -92,7 +92,7 @@ const AppleFeatures = () => {
 
               {/* Icon */}
               <motion.div
-                className="text-5xl mb-4 inline-block"
+                className="text-4xl sm:text-5xl mb-3 sm:mb-4 inline-block"
                 whileHover={{ scale: 1.2, rotate: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 10 }}
               >
@@ -100,8 +100,8 @@ const AppleFeatures = () => {
               </motion.div>
 
               {/* Content */}
-              <h3 className="text-2xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">{feature.title}</h3>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
 
               {/* Hover Indicator */}
               <motion.div

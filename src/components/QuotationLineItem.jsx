@@ -94,7 +94,7 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
     <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1">
-          <span className="text-sm font-semibold text-gray-600 w-6 text-center">{index}</span>
+          <span className="text-sm font-semibold text-gray-700 w-6 text-center">{index}</span>
           <input ref={nameRef} type="text" value={line.name || ''} onChange={e => onUpdate('name', e.target.value)}
             onKeyDown={(e) => handleTabPress(e, matRef)}
             placeholder="Nome da peça" className={inputCls} />
@@ -232,7 +232,7 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
         )}
 
         {line.services.length === 0 ? (
-          <div className="text-sm text-gray-600 p-3 bg-gray-50 rounded text-center">
+          <div className="text-sm text-gray-700 p-3 bg-gray-50 rounded text-center">
             Nenhum serviço adicionado
           </div>
         ) : (
@@ -259,7 +259,7 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
                       step="1"
                       className="w-16 px-2 py-1 text-sm bg-white border border-gray-300 rounded"
                     />
-                    <span className="text-xs text-gray-600 whitespace-nowrap">%</span>
+                    <span className="text-xs text-gray-700 whitespace-nowrap">%</span>
                   </div>
                   <button
                     onClick={() => onUpdate('services', line.services.filter((_, i) => i !== idx))}
@@ -292,19 +292,19 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
             </div>
             <div className="grid grid-cols-4 gap-2">
               <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600">Custo Real</p>
+                <p className="text-xs text-gray-700">Custo Real</p>
                 <p className="text-sm font-semibold text-gray-900">R$ {matCostPerKg.toFixed(2)}/kg</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600">Preço Padrão</p>
+                <p className="text-xs text-gray-700">Preço Padrão</p>
                 <p className="text-sm font-semibold text-gray-900">R$ {matBaseSellPrice.toFixed(2)}/kg</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3" style={{ borderLeft: `3px solid ${getMarginColor()}` }}>
-                <p className="text-xs text-gray-600">Preço Final</p>
+                <p className="text-xs text-gray-700">Preço Final</p>
                 <p className="text-sm font-semibold" style={{ color: getMarginColor() }}>R$ {matAdjustedSellPrice.toFixed(2)}/kg</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600">Peso</p>
+                <p className="text-xs text-gray-700">Peso</p>
                 <p className="text-sm font-semibold text-gray-900">{weightKg.toFixed(2)} kg</p>
               </div>
             </div>
@@ -337,19 +337,19 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
                         <p className="text-sm font-medium text-gray-900">{serviceName}</p>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600">Custo</p>
+                        <p className="text-xs text-gray-700">Custo</p>
                         <p className="text-sm font-semibold text-gray-900">R$ {service.costPerKg.toFixed(2)}/kg</p>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-3" style={{ borderLeft: `3px solid ${marginColor}` }}>
-                        <p className="text-xs text-gray-600">Venda</p>
+                        <p className="text-xs text-gray-700">Venda</p>
                         <p className="text-sm font-semibold" style={{ color: marginColor }}>R$ {adjustedSellPrice.toFixed(2)}/kg</p>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600">Margem</p>
+                        <p className="text-xs text-gray-700">Margem</p>
                         <p className="text-sm font-semibold" style={{ color: marginColor }}>{margin.toFixed(0)}%</p>
                       </div>
                       <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600">Total</p>
+                        <p className="text-xs text-gray-700">Total</p>
                         <p className="text-sm font-semibold text-gray-900">R$ {(weightKg * adjustedSellPrice).toFixed(2)}</p>
                       </div>
                     </div>
@@ -362,7 +362,7 @@ const QuotationLineItem = ({ line, materials, onUpdate, onRemove, brand, index }
           {/* TOTAL */}
           <div className="bg-gray-50 rounded-lg p-4 flex items-center justify-between border border-gray-200">
             <div>
-              <p className="text-sm text-gray-600">Total da Peça</p>
+              <p className="text-sm text-gray-700">Total da Peça</p>
               <p className="text-2xl font-bold" style={{ color: brand }}>R$ {totalCost.toFixed(2)}</p>
             </div>
             <div className="text-right">

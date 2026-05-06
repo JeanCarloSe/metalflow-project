@@ -24,7 +24,7 @@ const ClientHomePage = ({ client, quotations, onClose, onEditClient, materials =
       {/* Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
             <button
               onClick={onClose}
               className="text-gray-600 hover:text-gray-900 font-semibold text-lg"
@@ -45,9 +45,9 @@ const ClientHomePage = ({ client, quotations, onClose, onEditClient, materials =
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-4 sm:space-y-6 md:space-y-8">
         {/* Client Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {/* Contato */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
             <h3 className="font-semibold text-gray-900 text-lg">Informações de Contato</h3>
@@ -92,7 +92,7 @@ const ClientHomePage = ({ client, quotations, onClose, onEditClient, materials =
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
           <div className="bg-white rounded-lg border border-gray-200 p-4">
             <p className="text-xs text-gray-600 font-medium mb-1">Total Orçado</p>
             <p className="text-2xl font-bold" style={{ color: brand }}>R$ {totalRevenue.toFixed(2)}</p>
@@ -123,7 +123,7 @@ const ClientHomePage = ({ client, quotations, onClose, onEditClient, materials =
                   onClick={() => setSelectedQuotation(q)}
                   className="w-full bg-white rounded-lg border border-gray-200 p-4 hover:border-blue-400 hover:shadow-md transition-all text-left cursor-pointer"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start justify-between gap-2 sm:gap-3 md:gap-4">
                     <div className="flex-1">
                       <div className="flex items-start gap-3 mb-2">
                         <div className="flex-1">

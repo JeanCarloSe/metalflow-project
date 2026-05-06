@@ -23,7 +23,7 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
   };
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white flex items-center justify-center px-4 pt-20">
+    <section className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white flex items-center justify-center px-3 sm:px-4 pt-12 sm:pt-16 md:pt-20">
       <motion.div
         className="text-center max-w-3xl"
         variants={containerVariants}
@@ -37,7 +37,7 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
         </motion.p>
 
         {/* Main Title */}
-        <motion.h1 variants={itemVariants} className="text-6xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+        <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
           Orçamentos{' '}
           <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
             Profissionais
@@ -47,17 +47,17 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
         </motion.h1>
 
         {/* Description */}
-        <motion.p variants={itemVariants} className="text-lg text-gray-600 mb-8 leading-relaxed">
+        <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
           Crie orçamentos precisos, gerencie clientes e acompanhe vendas com a plataforma mais intuitiva do mercado.
         </motion.p>
 
         {/* CTA Buttons */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
           <motion.button
             onClick={onStartClick}
             whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)' }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-full hover:shadow-lg transition-shadow cursor-pointer"
+            className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-sm sm:text-base rounded-lg hover:shadow-lg transition-shadow cursor-pointer"
           >
             Começar Agora
           </motion.button>
@@ -65,7 +65,7 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
             onClick={onDemoClick}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-8 py-4 border-2 border-gray-300 text-gray-900 font-semibold rounded-full hover:border-gray-400 transition-colors cursor-pointer"
+            className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 border-2 border-gray-300 text-gray-900 font-semibold text-sm sm:text-base rounded-lg hover:border-gray-400 transition-colors cursor-pointer"
           >
             Ver Demo
           </motion.button>
@@ -74,7 +74,7 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
         {/* Floating Cards Animation */}
         <motion.div
           variants={itemVariants}
-          className="flex flex-wrap justify-center gap-8 mt-12"
+          className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12"
         >
           {[
             { delay: 0, icon: '📊', label: 'Dashboard' },
@@ -83,7 +83,7 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
           ].map((card) => (
             <motion.div
               key={card.label}
-              className="w-32 h-32 bg-white rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
+              className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-2xl sm:rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
               animate={{
                 y: [0, -20, 0],
                 rotate: [0, 5, 0],

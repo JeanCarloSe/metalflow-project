@@ -53,7 +53,7 @@ const IntegrationsPanel = ({ onClose }) => {
           aria-expanded={isExpanded}
           aria-label={`Integração ${config.title}`}
         >
-          <div className="flex items-center gap-4 flex-1 text-left">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 flex-1 text-left">
             <span className="text-3xl" aria-hidden="true">{config.icon}</span>
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900 text-base">{config.title}</h3>

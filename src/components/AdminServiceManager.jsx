@@ -13,7 +13,7 @@ const AdminServiceManager = () => {
     setServices(getAllServices());
   }, []);
 
-  const inputCls = 'w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg font-mono text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all';
+  const inputCls = 'w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all';
 
   const handleAddService = () => {
     setError('');
@@ -73,17 +73,18 @@ const AdminServiceManager = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-gray-100 mb-4">Gerenciar Serviços</h3>
-        <p className="text-sm text-gray-500 mb-6">Adicione ou edite serviços com seus custos por kg</p>
+        <h3 className="heading-section text-gray-900 mb-2">Gerenciar Serviços</h3>
+        <p className="text-description">Adicione ou edite serviços com seus custos por kg</p>
       </div>
 
       {/* Novo Serviço */}
-      <div className="bg-gray-900/60 border border-gray-700/40 rounded-xl p-5 space-y-4">
-        <h4 className="font-semibold text-gray-100">➕ Novo Serviço</h4>
+      <div className="card-premium px-6 py-4 space-y-4">
+        <h4 className="font-semibold text-gray-900">➕ Novo Serviço</h4>
 
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
           <input
             type="text"
             placeholder="Nome do serviço"
@@ -126,7 +127,7 @@ const AdminServiceManager = () => {
 
         <button
           onClick={handleAddService}
-          className="px-4 py-2 text-sm font-mono font-bold text-white rounded-lg transition-all"
+          className="px-4 py-2 text-sm font-bold text-white rounded-lg transition-all"
           style={{ backgroundColor: ASTON_BRAND }}
           onMouseEnter={e => e.target.style.filter = 'brightness(1.15)'}
           onMouseLeave={e => e.target.style.filter = ''}
@@ -137,30 +138,32 @@ const AdminServiceManager = () => {
 
       {/* Mensagens */}
       {error && (
-        <div className="bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">
-          <p className="text-red-400 text-sm font-mono">✕ {error}</p>
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg">
+          <span className="text-red-600">✕</span>
+          <p className="text-red-700 text-sm font-medium">{error}</p>
         </div>
       )}
       {success && (
-        <div className="bg-green-950/40 border border-green-700/40 rounded-lg px-4 py-3">
-          <p className="text-green-400 text-sm font-mono">✓ {success}</p>
+        <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
+          <span className="text-green-600">✓</span>
+          <p className="text-green-700 text-sm font-medium">{success}</p>
         </div>
       )}
 
       {/* Lista de Serviços */}
       <div className="space-y-3">
-        <h4 className="font-semibold text-gray-100">Serviços Cadastrados ({services.length})</h4>
+        <h4 className="font-semibold text-gray-900">Serviços Cadastrados ({services.length})</h4>
 
         {services.length === 0 ? (
           <p className="text-gray-500 text-sm font-mono">Nenhum serviço cadastrado</p>
         ) : (
           services.map(service => (
-            <div key={service.id} className="bg-gray-900/60 border border-gray-700/40 rounded-lg p-4">
+            <div key={service.id} className="card-premium px-6 py-4">
               {editingId === service.id ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-5 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     <div>
-                      <label className="text-xs text-gray-500 font-mono mb-1 block">Serviço</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Serviço</label>
                       <input
                         type="text"
                         value={service.name}
@@ -169,7 +172,7 @@ const AdminServiceManager = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-500 font-mono mb-1 block">Custo R$/kg</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Custo R$/kg</label>
                       <input
                         type="number"
                         defaultValue={service.costPerKg}
@@ -179,7 +182,7 @@ const AdminServiceManager = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-500 font-mono mb-1 block">Venda R$/kg</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Venda R$/kg</label>
                       <input
                         type="number"
                         defaultValue={service.sellPrice || (service.costPerKg * 1.5)}
@@ -189,7 +192,7 @@ const AdminServiceManager = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-500 font-mono mb-1 block">Margem %</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Margem %</label>
                       <input
                         type="number"
                         defaultValue={service.marginPercent || 50}
@@ -199,7 +202,7 @@ const AdminServiceManager = () => {
                       />
                     </div>
                     <div>
-                      <label className="text-xs text-gray-500 font-mono mb-1 block">Descrição</label>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">Descrição</label>
                       <input
                         type="text"
                         defaultValue={service.description}
@@ -217,13 +220,13 @@ const AdminServiceManager = () => {
                         const newDesc = document.getElementById(`desc-${service.id}`).value;
                         handleUpdateService(service.name, newCost, newSell, newMargin, newDesc);
                       }}
-                      className="px-3 py-1.5 text-xs font-mono text-green-400 hover:text-green-300 border border-green-500/40 rounded hover:bg-green-950/40 transition-all"
+                      className="px-3 py-1.5 text-xs text-green-400 hover:text-green-300 border border-green-500/40 rounded hover:bg-green-950/40 transition-all"
                     >
                       ✓ Salvar
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="px-3 py-1.5 text-xs font-mono text-gray-500 hover:text-gray-300 rounded hover:bg-gray-700/40 transition-all"
+                      className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-300 rounded hover:bg-gray-700/40 transition-all"
                     >
                       ✕ Cancelar
                     </button>
@@ -233,7 +236,7 @@ const AdminServiceManager = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="font-semibold text-gray-100">{service.name}</p>
-                    <div className="flex items-center gap-6 mt-2 text-xs font-mono">
+                    <div className="flex items-center gap-3 sm:gap-4 md:gap-6 mt-2 text-xs font-mono">
                       <div>
                         <p className="text-gray-600">Custo:</p>
                         <p className="text-gray-400">R$ {service.costPerKg.toFixed(2)}/kg</p>
@@ -257,13 +260,13 @@ const AdminServiceManager = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setEditingId(service.id)}
-                      className="px-3 py-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded hover:bg-blue-950/40 transition-all"
+                      className="px-3 py-1.5 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded hover:bg-blue-950/40 transition-all"
                     >
                       ✏ Editar
                     </button>
                     <button
                       onClick={() => handleDeleteService(service.name)}
-                      className="px-3 py-1.5 text-xs font-mono text-red-400 hover:text-red-300 border border-red-500/40 rounded hover:bg-red-950/40 transition-all"
+                      className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/40 rounded hover:bg-red-950/40 transition-all"
                     >
                       ✕ Remover
                     </button>
@@ -273,6 +276,7 @@ const AdminServiceManager = () => {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

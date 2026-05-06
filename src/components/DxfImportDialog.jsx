@@ -3,6 +3,8 @@ import { parseDxfFile, extractLayers, convertToQuotationItems } from '../service
 import { saveCadFile, getCadFilesByClient } from '../services/cadFileService';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
 import CadFilePreview from './CadFilePreview';
+import AutoCADWebViewer from './AutoCADWebViewer';
+import ProCADViewer from './ProCADViewer';
 
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -29,6 +31,8 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
   const [showPreview, setShowPreview] = useState(false);
   const [showCadPreview, setShowCadPreview] = useState(false);
   const [previewItems, setPreviewItems] = useState([]);
+  const [useAutoCADViewer, setUseAutoCADViewer] = useState(false);
+  const [viewerMode, setViewerMode] = useState('table'); // 'table', 'procad', 'autodesk'
 
   const availableMaterials = (materials && materials.length > 0) ? materials : DEFAULT_MATERIALS;
 
@@ -65,17 +69,91 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
     try {
       const dxfData = await parseDxfFile(f);
 
-      // Debug
-      console.log('[DxfImportDialog] dxfData keys:', Object.keys(dxfData || {}));
-      console.log('[DxfImportDialog] dxfData.entities:', dxfData?.entities?.length || 'undefined');
-      console.log('[DxfImportDialog] dxfData.tables:', !!dxfData?.tables);
+      // Debug detalhado
+      console.log('[DxfImportDialog] Parse completo');
+      console.log('[DxfImportDialog] Entities:', dxfData?.entities?.length || 0);
+      console.log('[DxfImportDialog] Blocks:', Object.keys(dxfData?.blocks || {}).length);
+      console.log('[DxfImportDialog] Layers:', Object.keys(dxfData?.layers || {}).length);
 
       const extractedLayers = extractLayers(dxfData);
-      console.log('[DxfImportDialog] extracted layers:', extractedLayers.length);
+      console.log('[DxfImportDialog] Layers extraídas:', extractedLayers.length);
 
       if (extractedLayers.length === 0) {
-        setError('Nenhuma layer encontrada. Verifique se o arquivo DXF é válido.');
-        setStatus('idle');
+        // Tentar criar uma layer default se arquivo tem entidades
+        if (dxfData?.entities?.length > 0) {
+          console.warn('[DxfImportDialog] Nenhuma layer nomeada encontrada. Usando todas as entidades como uma única peça.');
+
+          // Calcular bounding box de todas as entidades
+          let minX = Infinity, maxX = -Infinity;
+          let minY = Infinity, maxY = -Infinity;
+          let minZ = Infinity, maxZ = -Infinity;
+
+          dxfData.entities.forEach(e => {
+            if (!e) return;
+            // Tentar extrair coordenadas
+            const getCoords = (obj) => {
+              if (!obj) return [0, 0, 0];
+              if (obj.x !== undefined && obj.y !== undefined) return [obj.x, obj.y, obj.z || 0];
+              if (obj.position) return [obj.position.x || 0, obj.position.y || 0, obj.position.z || 0];
+              return [0, 0, 0];
+            };
+
+            if (e.start && e.end) {
+              const [x1, y1, z1] = getCoords(e.start);
+              const [x2, y2, z2] = getCoords(e.end);
+              minX = Math.min(minX, x1, x2); maxX = Math.max(maxX, x1, x2);
+              minY = Math.min(minY, y1, y2); maxY = Math.max(maxY, y1, y2);
+              minZ = Math.min(minZ, z1, z2); maxZ = Math.max(maxZ, z1, z2);
+            } else if (e.x !== undefined && e.y !== undefined) {
+              minX = Math.min(minX, e.x); maxX = Math.max(maxX, e.x);
+              minY = Math.min(minY, e.y); maxY = Math.max(maxY, e.y);
+              minZ = Math.min(minZ, e.z || 0); maxZ = Math.max(maxZ, e.z || 0);
+            } else if (e.vertices) {
+              e.vertices.forEach(v => {
+                minX = Math.min(minX, v.x || 0); maxX = Math.max(maxX, v.x || 0);
+                minY = Math.min(minY, v.y || 0); maxY = Math.max(maxY, v.y || 0);
+                minZ = Math.min(minZ, v.z || 0); maxZ = Math.max(maxZ, v.z || 0);
+              });
+            }
+          });
+
+          // Se nenhuma coordenada foi encontrada, usar defaults
+          if (minX === Infinity) {
+            minX = 0; maxX = 100;
+            minY = 0; maxY = 100;
+            minZ = 0; maxZ = 10;
+          } else {
+            // Garantir que tem dimensão
+            if (maxX - minX <= 0) maxX = minX + 100;
+            if (maxY - minY <= 0) maxY = minY + 100;
+            if (maxZ - minZ <= 0) maxZ = minZ + 10;
+          }
+
+          const width = Math.round((maxX - minX) * 10) / 10;
+          const height = Math.round((maxY - minY) * 10) / 10;
+          const depth = Math.round((maxZ - minZ) * 10) / 10;
+
+          const defaultLayer = {
+            name: file.name.replace(/\.[^.]+$/, '') || 'Peça', // Remove extensão
+            entityCount: dxfData.entities.length,
+            width,
+            height,
+            depth,
+            selected: true,
+            entities: dxfData.entities,
+            x: minX,
+            y: minY,
+            z: minZ
+          };
+
+          console.log(`[DxfImportDialog] Layer criada: ${defaultLayer.name} (${width}×${height}×${depth}mm, ${dxfData.entities.length} entidades)`);
+          setLayers([defaultLayer]);
+          setStatus('ready');
+          setShowCadPreview(true);
+        } else {
+          setError('❌ Arquivo vazio. Nenhuma entidade encontrada. Verifique se o arquivo DXF é válido.');
+          setStatus('idle');
+        }
         return;
       }
 
@@ -84,7 +162,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
       setShowCadPreview(true);
     } catch (err) {
       console.error('[DxfImportDialog] Error:', err);
-      setError(`Erro ao fazer parse: ${err.message}`);
+      setError(`❌ Erro ao fazer parse: ${err.message}`);
       setStatus('idle');
     }
   };
@@ -162,6 +240,34 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
 
   if (!isOpen) return null;
 
+  // Renderizar ProCAD Viewer (principal - WebGL powered)
+  if (viewerMode === 'procad' && file && layers.length > 0) {
+    return (
+      <ProCADViewer
+        file={{ fileName: file.name, fileSize: file.size, createdAt: new Date() }}
+        layers={layers}
+        onClose={() => {
+          setViewerMode('table');
+          setShowCadPreview(true);
+        }}
+      />
+    );
+  }
+
+  // Renderizar AutoCAD Web Viewer se solicitado
+  if (viewerMode === 'autodesk' && file && layers.length > 0) {
+    return (
+      <AutoCADWebViewer
+        file={{ fileName: file.name, fileSize: file.size, createdAt: new Date() }}
+        layers={layers}
+        onClose={() => {
+          setViewerMode('table');
+          setShowCadPreview(true);
+        }}
+      />
+    );
+  }
+
   // Modal de preview de CAD com tabela de dados
   if (showCadPreview && file && layers.length > 0) {
     return (
@@ -169,22 +275,60 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
         <div className="card-premium rounded-xl sm:rounded-2xl w-full max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col" style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)' }}>
           {/* Header */}
           <div className="sticky top-0 p-4 sm:p-6 border-b bg-white" style={{ borderColor: 'rgba(1, 112, 185, 0.1)' }}>
-            <div className="flex justify-between items-start gap-4">
+            <div className="flex justify-between items-start gap-2 sm:gap-3 md:gap-4">
               <div className="flex-1">
                 <h2 className="text-xl sm:text-2xl font-bold" style={{ color: ASTON_BRAND }}>📋 Dados do Arquivo CAD</h2>
                 <p className="text-gray-600 text-xs sm:text-sm mt-1">{file?.name} · {layers.length} peça(s)</p>
               </div>
-              <button
-                onClick={() => {
-                  setFile(null);
-                  setLayers([]);
-                  setShowCadPreview(false);
-                  setStatus('idle');
-                }}
-                className="text-gray-500 hover:text-gray-700 text-xl sm:text-2xl flex-shrink-0"
-              >
-                ✕
-              </button>
+              <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-1 bg-gray-100 rounded p-1">
+                  <button
+                    onClick={() => setViewerMode('table')}
+                    className={`text-xs px-2 py-1 rounded transition ${
+                      viewerMode === 'table'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-200'
+                    }`}
+                    title="Tabela"
+                  >
+                    📋
+                  </button>
+                  <button
+                    onClick={() => setViewerMode('procad')}
+                    className={`text-xs px-2 py-1 rounded transition ${
+                      viewerMode === 'procad'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-200'
+                    }`}
+                    title="ProCAD WebGL"
+                  >
+                    🏗️
+                  </button>
+                  <button
+                    onClick={() => setViewerMode('autodesk')}
+                    className={`text-xs px-2 py-1 rounded transition ${
+                      viewerMode === 'autodesk'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-200'
+                    }`}
+                    title="Autodesk Viewer"
+                  >
+                    🏢
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setFile(null);
+                    setLayers([]);
+                    setShowCadPreview(false);
+                    setStatus('idle');
+                    setViewerMode('table');
+                  }}
+                  className="text-gray-500 hover:text-gray-700 text-xl sm:text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           </div>
 
@@ -273,7 +417,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
                         />
                         <h3 className="text-lg font-semibold text-gray-900">{layer.name}</h3>
                       </div>
-                      <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 text-sm">
                         <div>
                           <p className="text-gray-500 uppercase text-xs tracking-wider">Elementos</p>
                           <p className="text-gray-900 font-semibold">{layer.entityCount}</p>
@@ -324,7 +468,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
         <div className="card-premium rounded-xl sm:rounded-2xl w-full max-w-4xl max-h-[85vh] sm:max-h-[90vh] overflow-hidden flex flex-col" style={{ backgroundColor: 'rgba(255, 255, 255, 0.98)' }}>
           {/* Header */}
           <div className="sticky top-0 p-4 sm:p-6 border-b bg-white" style={{ borderColor: 'rgba(1, 112, 185, 0.1)' }}>
-            <div className="flex justify-between items-start gap-4">
+            <div className="flex justify-between items-start gap-2 sm:gap-3 md:gap-4">
               <div className="flex-1">
                 <h2 className="text-xl sm:text-2xl font-bold" style={{ color: ASTON_BRAND }}>👁️ Preview</h2>
                 <p className="text-gray-600 text-xs sm:text-sm mt-1">{previewItems.length} peça(s) serão importadas</p>
@@ -343,7 +487,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
             <div className="space-y-4">
               {previewItems.map((item, idx) => (
                 <div key={idx} className="border rounded-lg p-4" style={{ borderColor: 'rgba(1, 112, 185, 0.2)', backgroundColor: 'rgba(1, 112, 185, 0.02)' }}>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                     <div>
                       <p className="text-xs text-gray-500 uppercase tracking-wider">Peça</p>
                       <p className="text-lg font-semibold text-gray-900">{item.name}</p>
@@ -566,7 +710,7 @@ const DxfImportDialog = ({ isOpen, onClose, onImport, materials, defaultServices
           )}
 
           {/* Buttons */}
-          <div className="flex gap-4 justify-end pt-4 border-t sticky bottom-0 bg-white" style={{ borderColor: 'var(--color-border-light)' }}>
+          <div className="flex gap-2 sm:gap-3 md:gap-4 justify-end pt-4 border-t sticky bottom-0 bg-white" style={{ borderColor: 'var(--color-border-light)' }}>
             <button
               onClick={onClose}
               disabled={status === 'importing'}

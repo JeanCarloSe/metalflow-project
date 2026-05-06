@@ -46,7 +46,7 @@ const QuotationPreviewModal = ({ quotation, clients, materials, onClose, onEdit,
           {/* Client Info */}
           {client && (
             <div className="bg-gray-900/40 border border-gray-700/40 rounded-lg p-4">
-              <p className="text-xs text-gray-600 font-mono uppercase mb-2">Cliente</p>
+              <p className="text-xs text-gray-700 font-mono uppercase mb-2">Cliente</p>
               <p className="text-lg font-semibold text-gray-100">{client.name}</p>
               {client.tagline && <p className="text-sm text-gray-400 mt-1">{client.tagline}</p>}
             </div>
@@ -55,7 +55,7 @@ const QuotationPreviewModal = ({ quotation, clients, materials, onClose, onEdit,
           {/* Operator Info */}
           {quotation.operator && (
             <div className="bg-gray-900/40 border border-gray-700/40 rounded-lg p-4">
-              <p className="text-xs text-gray-600 font-mono uppercase mb-2">Operador</p>
+              <p className="text-xs text-gray-700 font-mono uppercase mb-2">Operador</p>
               <p className="text-gray-100 font-mono">{quotation.operator.name}</p>
               {quotation.date && (
                 <p className="text-xs text-gray-500 mt-1">
@@ -67,7 +67,7 @@ const QuotationPreviewModal = ({ quotation, clients, materials, onClose, onEdit,
 
           {/* Status */}
           <div className="bg-gray-900/40 border border-gray-700/40 rounded-lg p-4">
-            <p className="text-xs text-gray-600 font-mono uppercase mb-2">Status</p>
+            <p className="text-xs text-gray-700 font-mono uppercase mb-2">Status</p>
             <select
               value={status}
               onChange={(e) => handleStatusChange(e.target.value)}
@@ -121,26 +121,26 @@ const QuotationPreviewModal = ({ quotation, clients, materials, onClose, onEdit,
 
                       <div className="grid grid-cols-4 gap-2 mb-3 text-xs">
                         <div className="bg-gray-800/60 rounded p-2">
-                          <p className="text-gray-600 font-mono">L</p>
+                          <p className="text-gray-700 font-mono">L</p>
                           <p className="font-mono text-gray-300">{line.lengthMm}mm</p>
                         </div>
                         <div className="bg-gray-800/60 rounded p-2">
-                          <p className="text-gray-600 font-mono">W</p>
+                          <p className="text-gray-700 font-mono">W</p>
                           <p className="font-mono text-gray-300">{line.widthMm}mm</p>
                         </div>
                         <div className="bg-gray-800/60 rounded p-2">
-                          <p className="text-gray-600 font-mono">H</p>
+                          <p className="text-gray-700 font-mono">H</p>
                           <p className="font-mono text-gray-300">{line.thicknessMm}mm</p>
                         </div>
                         <div className="bg-gray-800/60 rounded p-2">
-                          <p className="text-gray-600 font-mono">Peso</p>
+                          <p className="text-gray-700 font-mono">Peso</p>
                           <p className="font-mono text-gray-300">{weightKg.toFixed(2)}kg</p>
                         </div>
                       </div>
 
                       {line.services && line.services.length > 0 && (
                         <div className="mb-3">
-                          <p className="text-xs text-gray-600 font-mono mb-1">Serviços</p>
+                          <p className="text-xs text-gray-700 font-mono mb-1">Serviços</p>
                           <div className="flex flex-wrap gap-1">
                             {line.services.map((svc, sidx) => {
                               const serviceName = typeof svc === 'string' ? svc : svc.name;

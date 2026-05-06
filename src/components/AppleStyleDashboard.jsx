@@ -1,5 +1,5 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import AppleHeader from './AppleHeader';
 import AppleHero from './AppleHero';
 import AppleFeatures from './AppleFeatures';
@@ -45,19 +45,67 @@ const AppleStyleDashboard = ({
     return () => window.removeEventListener('navigate', handleNavigateEvent);
   }, []);
 
+  // Premium page transition effects
   const pageVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
+    fadeIn: {
+      hidden: { opacity: 0 },
+      visible: {
+        opacity: 1,
+        transition: { duration: 0.6, ease: 'easeOut' },
+      },
+      exit: { opacity: 0, transition: { duration: 0.3 } },
     },
-    exit: {
-      opacity: 0,
-      y: -20,
-      transition: { duration: 0.3 },
+    slideUp: {
+      hidden: { opacity: 0, y: 40 },
+      visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.5, ease: [0.23, 1, 0.320, 1] },
+      },
+      exit: { opacity: 0, y: 20, transition: { duration: 0.3 } },
+    },
+    scaleIn: {
+      hidden: { opacity: 0, scale: 0.95 },
+      visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { duration: 0.5, ease: 'easeOut' },
+      },
+      exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3 } },
+    },
+    blurFade: {
+      hidden: { opacity: 0, filter: 'blur(10px)' },
+      visible: {
+        opacity: 1,
+        filter: 'blur(0px)',
+        transition: { duration: 0.6, ease: 'easeOut' },
+      },
+      exit: { opacity: 0, filter: 'blur(10px)', transition: { duration: 0.3 } },
     },
   };
+
+  // Default animation effect (mix of fade + scale)
+  const activePageVariants = pageVariants.slideUp;
+
+  // Se admin está ativo, renderizar apenas o painel admin
+  if (showAdmin && currentUser?.role === 'admin') {
+    return (
+      <div className="w-full min-h-screen bg-white flex flex-col">
+        <AppleHeader
+          currentUser={currentUser}
+          onLogout={onLogout}
+          onNavigate={handleNavigate}
+          onAdminClick={() => setShowAdmin(false)}
+          isAdminMode={true}
+        />
+        <div className="flex-1 pt-16">
+          <Suspense fallback={<div className="text-center p-8">Carregando painel admin...</div>}>
+            <AdminPage currentUser={currentUser} onLogout={onLogout} />
+          </Suspense>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-white">
@@ -66,17 +114,20 @@ const AppleStyleDashboard = ({
         onLogout={onLogout}
         onNavigate={handleNavigate}
         onAdminClick={() => setShowAdmin(true)}
+        isAdminMode={false}
       />
 
-      {/* Main Content */}
-      <motion.main
-        variants={pageVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        className="pt-16"
-      >
-        {currentPage === 'home' && (
+      {/* Main Content with Page Transitions */}
+      <AnimatePresence mode="wait">
+        <motion.main
+          key={currentPage}
+          variants={activePageVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          className="pt-16"
+        >
+          {currentPage === 'home' && (
           <>
             <AppleHero
               onStartClick={() => {
@@ -90,7 +141,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'dashboard' && (
-          <section className="py-8">
+          <section className="min-h-screen py-16 pb-32">
             <DashboardPage
               quotations={quotations}
               clients={clients}
@@ -112,7 +163,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'quotation' && (
-          <section className="py-8 max-w-6xl mx-auto px-4">
+          <section className="min-h-screen py-16 pb-32 max-w-6xl mx-auto px-4">
             <QuotationBuilder
               materials={materials}
               selectedClient={selectedClient}
@@ -139,7 +190,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'clients' && (
-          <section className="py-8">
+          <section className="min-h-screen py-16 pb-32">
             <ClientsPage
               clients={clients}
               materials={materials}
@@ -156,7 +207,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'analytics' && (
-          <section className="py-8">
+          <section className="min-h-screen py-16 pb-32">
             <motion.div
               className="max-w-6xl mx-auto px-4"
               initial={{ opacity: 0 }}
@@ -175,7 +226,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'clients-list' && (
-          <section className="py-8">
+          <section className="min-h-screen py-16 pb-32">
             <Suspense fallback={<div className="text-center p-8">Carregando...</div>}>
               <ClientsListReport />
             </Suspense>
@@ -183,7 +234,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'materials' && (
-          <section className="py-8">
+          <section className="min-h-screen py-16 pb-32">
             <motion.div
               className="max-w-6xl mx-auto px-4"
               initial={{ opacity: 0 }}
@@ -207,7 +258,8 @@ const AppleStyleDashboard = ({
             </motion.div>
           </section>
         )}
-      </motion.main>
+        </motion.main>
+      </AnimatePresence>
 
       {showReport && (
         <ReportPage
@@ -224,20 +276,6 @@ const AppleStyleDashboard = ({
             }
           }}
         />
-      )}
-
-      {showAdmin && currentUser?.role === 'admin' && (
-        <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-          <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Painel Administrativo</h2>
-            <button onClick={() => setShowAdmin(false)} className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 font-medium">Voltar</button>
-          </div>
-          <div className="p-4">
-            <Suspense fallback={<div className="text-center p-8">Carregando painel admin...</div>}>
-              <AdminPage currentUser={currentUser} onLogout={onLogout} />
-            </Suspense>
-          </div>
-        </div>
       )}
 
       <AppleFooter />

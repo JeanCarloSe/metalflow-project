@@ -75,8 +75,9 @@ const CadHistoryPanel = ({ selectedClientId }) => {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Preview em Grid */}
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-8">
+        {/* Preview em Grid */}
       <div>
         <CadFilePreview selectedClientId={selectedClientId} />
       </div>
@@ -131,6 +132,7 @@ const CadHistoryPanel = ({ selectedClientId }) => {
             <p>💡 Total: {cadFiles.reduce((sum, f) => sum + (f.layers?.length || 0), 0)} layers | {(cadFiles.reduce((sum, f) => sum + (f.fileSize || 0), 0) / 1024).toFixed(1)} KB</p>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

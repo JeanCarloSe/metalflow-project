@@ -52,12 +52,12 @@ const QuotationReport = ({ quotation, client, materials, onClose }) => {
             <div>
               <Logo size="sm" />
               <p className="text-sm font-bold text-gray-800 mt-2">METALFLOW</p>
-              <p className="text-xs text-gray-600">Sistema de Orçamentos Inteligentes</p>
+              <p className="text-xs text-gray-700">Sistema de Orçamentos Inteligentes</p>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-gray-800">ORÇAMENTO</p>
               <p className="text-lg font-mono font-bold text-blue-600">{quotation.number}</p>
-              <p className="text-xs text-gray-600 mt-2">{formatDate(quotation.date)}</p>
+              <p className="text-xs text-gray-700 mt-2">{formatDate(quotation.date)}</p>
               {quotation.status && (
                 <div
                   className="inline-block mt-3 px-3 py-1.5 rounded-lg text-xs font-bold"
@@ -79,9 +79,9 @@ const QuotationReport = ({ quotation, client, materials, onClose }) => {
           <p className="text-xs font-bold text-gray-700 uppercase mb-2">CLIENTE</p>
           <div className="border border-gray-300 rounded p-4 bg-gray-50">
             <p className="font-bold text-gray-900">{client?.name || quotation.clientName || '—'}</p>
-            {client?.tagline && <p className="text-sm text-gray-600 mt-1">{client.tagline}</p>}
+            {client?.tagline && <p className="text-sm text-gray-700 mt-1">{client.tagline}</p>}
             {client?.website && <p className="text-xs text-blue-600">{client.website}</p>}
-            <div className="grid grid-cols-2 gap-4 mt-3 text-xs text-gray-700">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mt-3 text-xs text-gray-700">
               {client?.email && <div><span className="font-semibold">Email:</span> {client.email}</div>}
               {client?.phone && <div><span className="font-semibold">Telefone:</span> {client.phone}</div>}
             </div>
@@ -151,11 +151,11 @@ const QuotationReport = ({ quotation, client, materials, onClose }) => {
                 <span className="text-gray-700">Peso Total:</span>
                 <span className="font-mono font-semibold">{quotation.totalWeight} kg</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-gray-700">
                 <span>Custo de Material:</span>
                 <span className="font-mono">{formatCurrency(quotation.totalMaterial || 0)}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-gray-700">
                 <span>Custo de Serviços:</span>
                 <span className="font-mono">{formatCurrency(quotation.totalService || 0)}</span>
               </div>
@@ -172,13 +172,13 @@ const QuotationReport = ({ quotation, client, materials, onClose }) => {
         {/* Observações */}
         <div className="mb-8 border-t-2 border-gray-300 pt-6">
           <p className="text-xs font-bold text-gray-700 uppercase mb-2">OBSERVAÇÕES</p>
-          <div className="border border-gray-300 rounded p-4 h-20 bg-gray-50 text-gray-600 text-sm">
+          <div className="border border-gray-300 rounded p-4 h-20 bg-gray-50 text-gray-700 text-sm">
             <p className="text-gray-500">Valores válidos por 30 dias</p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center border-t-2 border-gray-300 pt-6 text-xs text-gray-600">
+        <div className="text-center border-t-2 border-gray-300 pt-6 text-xs text-gray-700">
           <p>MetalFlow - Orçamentos Inteligentes</p>
           <p>Gerado em {formatDate(quotation.date)}</p>
         </div>

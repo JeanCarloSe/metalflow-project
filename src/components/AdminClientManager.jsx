@@ -29,7 +29,7 @@ const AdminClientManager = ({ onClientSelect }) => {
     }
   };
 
-  const inputCls = 'w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg font-mono text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all';
+  const inputCls = 'w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-base text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all';
 
   const resetForm = () => {
     setFormData({ name: '', tagline: '', website: '', logoUrl: '', primaryColor: ASTON_BRAND, contact: '', email: '', phone: '' });
@@ -150,10 +150,11 @@ const AdminClientManager = ({ onClientSelect }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-bold text-gray-100 mb-2">Gerenciar Clientes</h3>
+          <h3 className="heading-section text-gray-900 mb-2">Gerenciar Clientes</h3>
           <p className="text-sm text-gray-500">Adicione, edite ou remova clientes</p>
         </div>
         <button
@@ -161,7 +162,7 @@ const AdminClientManager = ({ onClientSelect }) => {
             resetForm();
             setShowForm(true);
           }}
-          className="px-4 py-2 text-sm font-mono font-bold text-white rounded-lg transition-all"
+          className="px-4 py-2 text-sm font-bold text-white rounded-lg transition-all"
           style={{ backgroundColor: ASTON_BRAND }}
           onMouseEnter={e => e.target.style.filter = 'brightness(1.15)'}
           onMouseLeave={e => e.target.style.filter = ''}
@@ -172,8 +173,8 @@ const AdminClientManager = ({ onClientSelect }) => {
 
       {/* Formulário */}
       {showForm && (
-        <div className="bg-gray-900/60 border border-gray-700/40 rounded-xl p-5 space-y-4">
-          <h4 className="font-semibold text-gray-100">{editingId ? '✏️ Editar Cliente' : '➕ Novo Cliente'}</h4>
+        <div className="card-premium rounded-xl p-5 space-y-4">
+          <h4 className="font-semibold text-gray-900">{editingId ? '✏️ Editar Cliente' : '➕ Novo Cliente'}</h4>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -227,7 +228,7 @@ const AdminClientManager = ({ onClientSelect }) => {
                 className={inputCls}
               />
               <div className="flex items-center gap-2">
-                <label className="text-xs font-mono text-gray-500 uppercase">Cor Primária:</label>
+                <label className="text-xs text-gray-500 uppercase">Cor Primária:</label>
                 <input
                   type="color"
                   value={formData.primaryColor}
@@ -240,7 +241,7 @@ const AdminClientManager = ({ onClientSelect }) => {
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="px-4 py-2 text-sm font-mono font-bold text-white rounded-lg transition-all"
+                className="px-4 py-2 text-sm font-bold text-white rounded-lg transition-all"
                 style={{ backgroundColor: ASTON_BRAND }}
                 onMouseEnter={e => e.target.style.filter = 'brightness(1.15)'}
                 onMouseLeave={e => e.target.style.filter = ''}
@@ -253,7 +254,7 @@ const AdminClientManager = ({ onClientSelect }) => {
                   resetForm();
                   setShowForm(false);
                 }}
-                className="px-4 py-2 text-sm font-mono text-gray-400 border border-gray-700 rounded-lg hover:text-gray-300 transition-colors"
+                className="px-4 py-2 text-sm text-gray-400 border border-gray-700 rounded-lg hover:text-gray-300 transition-colors"
               >
                 ✕ Cancelar
               </button>
@@ -264,25 +265,25 @@ const AdminClientManager = ({ onClientSelect }) => {
 
       {/* Mensagens */}
       {error && (
-        <div className="bg-red-950/40 border border-red-700/40 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
           <p className="text-red-400 text-sm font-mono">✕ {error}</p>
         </div>
       )}
       {success && (
-        <div className="bg-green-950/40 border border-green-700/40 rounded-lg px-4 py-3">
+        <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
           <p className="text-green-400 text-sm font-mono">✓ {success}</p>
         </div>
       )}
 
       {/* Lista de Clientes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
         {clients.length === 0 ? (
-          <p className="text-gray-500 text-sm font-mono col-span-full">Nenhum cliente cadastrado</p>
+          <p className="text-gray-500 text-sm col-span-full">Nenhum cliente cadastrado</p>
         ) : (
           clients.map(client => (
             <div
               key={client.id}
-              className="bg-gray-900/60 border border-gray-700/40 rounded-xl p-4 space-y-3"
+              className="card-premium rounded-xl p-4 space-y-3"
               style={{ borderColor: hexToRgba(client.primaryColor || ASTON_BRAND, 0.3) }}
             >
               <div className="flex items-start justify-between">
@@ -296,8 +297,8 @@ const AdminClientManager = ({ onClientSelect }) => {
                       </div>
                     )}
                     <div>
-                      <h4 className="font-semibold text-gray-100">{client.name}</h4>
-                      <p className="text-xs font-mono text-gray-600 mt-0.5">{client.code || 'S/código'}</p>
+                      <h4 className="font-semibold text-gray-900">{client.name}</h4>
+                      <p className="text-xs text-gray-600 mt-0.5">{client.code || 'S/código'}</p>
                     </div>
                   </div>
                   {client.tagline && <p className="text-xs text-gray-500">{client.tagline}</p>}
@@ -322,7 +323,7 @@ const AdminClientManager = ({ onClientSelect }) => {
                     handleEdit(client);
                     onClientSelect?.(client.id);
                   }}
-                  className="flex-1 px-2 py-1.5 text-xs font-mono text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded hover:bg-blue-950/40 transition-all"
+                  className="flex-1 px-2 py-1.5 text-xs text-blue-400 hover:text-blue-300 border border-blue-500/40 rounded hover:bg-blue-950/40 transition-all"
                 >
                   ✏ Editar
                 </button>
@@ -330,13 +331,13 @@ const AdminClientManager = ({ onClientSelect }) => {
                   onClick={() => {
                     onClientSelect?.(client.id);
                   }}
-                  className="flex-1 px-2 py-1.5 text-xs font-mono text-green-400 hover:text-green-300 border border-green-500/40 rounded hover:bg-green-950/40 transition-all"
+                  className="flex-1 px-2 py-1.5 text-xs text-green-400 hover:text-green-300 border border-green-500/40 rounded hover:bg-green-950/40 transition-all"
                 >
                   📁 CADs
                 </button>
                 <button
                   onClick={() => handleDelete(client.id, client.name)}
-                  className="flex-1 px-2 py-1.5 text-xs font-mono text-red-400 hover:text-red-300 border border-red-500/40 rounded hover:bg-red-950/40 transition-all"
+                  className="flex-1 px-2 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/40 rounded hover:bg-red-950/40 transition-all"
                 >
                   ✕ Remover
                 </button>
@@ -344,6 +345,7 @@ const AdminClientManager = ({ onClientSelect }) => {
             </div>
           ))
         )}
+      </div>
       </div>
     </div>
   );

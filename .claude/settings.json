@@ -14,7 +14,25 @@
       "Bash(git commit -m 'Design: Premium Logo + Icon System \\(Modern & Strong\\) *)",
       "Bash(git commit -m 'Fix: DashboardPage quick action buttons now navigate correctly *)",
       "Bash(git commit -m 'Enforce: Client selection required before saving quotation *)",
-      "WebFetch(domain:pt.dwgfastview.com)"
+      "WebFetch(domain:pt.dwgfastview.com)",
+      "Bash(awk '{print $2}')",
+      "WebFetch(domain:www.bibliocad.com)",
+      "Bash(npm uninstall *)",
+      "Bash(xargs -I {} basename {})",
+      "Bash(sed -i '' \"s/text-lg font-bold/text-3xl font-semibold/g\" /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Admin*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Data*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/CadHistory*.jsx 2>/dev/null || true)",
+      "Bash(sed -i '' \"s/text-gray-600/text-gray-700/g\" /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Dashboard*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Clients*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Quotation*.jsx 2>/dev/null || true)",
+      "Bash(sed -i '' 's/className=\"text-3xl font-semibold/className=\"heading-section/g' /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Dashboard*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Clients*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Quotation*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Admin*.jsx 2>/dev/null || true)",
+      "Bash(sed -i '' 's/className=\"text-base text-gray-600/className=\"text-description/g' /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Dashboard*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Clients*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Admin*.jsx 2>/dev/null || true)",
+      "Bash(sed -i '' 's/font-mono //g' /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Admin*.jsx /Users/jeancarlosseverino/Documents/metalflow-project/src/components/Data*.jsx 2>/dev/null || true)",
+      "Bash(grep -E \"\\\\.\\(jsx|tsx\\)$\")",
+      "Bash(sed -i '' 's/max-w-6xl mx-auto px-4 py-8/max-w-6xl mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8/g' src/components/DashboardPage.jsx)",
+      "Bash(sed -i '' 's/max-w-6xl mx-auto px-4 py-16/max-w-6xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16/g' src/components/DashboardPage.jsx)",
+      "Bash(sed -i '' 's/gap-2 sm:gap-3 md:gap-4 sm:gap-6 md:gap-8/gap-4 sm:gap-6 md:gap-8/g' src/components/*.jsx)",
+      "Bash(sed -i '' 's/gap-3 sm:gap-4 md:gap-6 sm:gap-8 md:gap-12/gap-6 sm:gap-8 md:gap-12/g' src/components/*.jsx)",
+      "Bash(git commit -m ' *)"
+    ],
+    "additionalDirectories": [
+      "/Users/jeancarlosseverino/Documents/metalflow-project/src/components"
     ]
   }
 }

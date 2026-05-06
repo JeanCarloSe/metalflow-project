@@ -113,8 +113,9 @@ const DataManagementPanel = ({ currentUser }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
+      <div className="space-y-6">
+        {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Gerenciamento de Dados</h2>
         <p className="text-gray-600">Backup, arquivo, auditoria e sincronização</p>
@@ -170,7 +171,7 @@ const DataManagementPanel = ({ currentUser }) => {
                     borderColor: dbStatus.isHealthy ? COLORS.success : COLORS.danger,
                   }}
                 >
-                  <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
+                  <h3 className="text-3xl font-semibold mb-2 flex items-center gap-2">
                     {dbStatus.isHealthy ? '✅ Banco Saudável' : '⚠️ Problemas Detectados'}
                   </h3>
                   <p className="text-sm text-gray-600">
@@ -178,7 +179,7 @@ const DataManagementPanel = ({ currentUser }) => {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
                   <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg">
                     <p className="text-sm text-gray-600 font-medium">Orçamentos</p>
                     <p className="text-3xl font-bold text-blue-600 mt-2">
@@ -237,7 +238,7 @@ const DataManagementPanel = ({ currentUser }) => {
                 <div className="mt-8 p-6 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h4 className="text-lg font-bold text-cyan-900 mb-1">🔄 Auto-Backup Automático</h4>
+                      <h4 className="text-3xl font-semibold text-cyan-900 mb-1">🔄 Auto-Backup Automático</h4>
                       <p className="text-sm text-cyan-800">A cada 30 minutos seus dados são salvos automaticamente</p>
                     </div>
                     <span className="text-4xl">💾</span>
@@ -318,7 +319,7 @@ const DataManagementPanel = ({ currentUser }) => {
         {activeTab === 'backup' && (
           <div className="space-y-6">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-blue-900 mb-2">💾 Exportar Backup</h3>
+              <h3 className="text-3xl font-semibold text-blue-900 mb-2">💾 Exportar Backup</h3>
               <p className="text-sm text-blue-800 mb-4">
                 Baixe um arquivo JSON contendo todos os seus dados (orçamentos, clientes, materiais, usuários).
               </p>
@@ -332,7 +333,7 @@ const DataManagementPanel = ({ currentUser }) => {
             </div>
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h3 className="text-lg font-bold text-green-900 mb-2">📤 Importar Backup</h3>
+              <h3 className="text-3xl font-semibold text-green-900 mb-2">📤 Importar Backup</h3>
               <p className="text-sm text-green-800 mb-4">
                 Restaure dados de um arquivo JSON anteriormente exportado.
               </p>
@@ -428,6 +429,7 @@ const DataManagementPanel = ({ currentUser }) => {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

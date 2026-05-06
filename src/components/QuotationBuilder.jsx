@@ -145,13 +145,13 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
 
       {/* Quotation number + Status + CAD */}
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="card-premium px-6 py-4 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: THEME.primary }}>Número do Orçamento</p>
-          <p className="text-2xl font-bold mt-2 font-mono" style={{ color: THEME.primaryDark }}>
+      <div className="flex items-center justify-between gap-2 sm:gap-3 md:gap-4 mb-4">
+        <div className="card-premium px-6 py-4 flex-1 border-l-4" style={{ borderColor: THEME.primary }}>
+          <p className="label-prominent" style={{ color: THEME.primary }}>Número do Orçamento</p>
+          <p className="text-3xl font-black mt-3 font-mono" style={{ color: THEME.primaryDark, textShadow: '0 2px 4px rgba(13, 71, 161, 0.15)' }}>
             {quotationNumber || '(será gerado ao salvar)'}
           </p>
         </div>
@@ -179,7 +179,7 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
         <div className="rounded-xl border overflow-hidden bg-white"
           style={{ borderColor: hexToRgba(brand, 0.3) }}>
           <div className="px-6 py-4 flex items-center justify-between" style={{ backgroundColor: hexToRgba(brand, 0.08) }}>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
               {selectedClient.logoUrl ? (
                 <img src={selectedClient.logoUrl} alt={selectedClient.name} className="h-8 object-contain"
                   onError={e => { e.target.style.display = 'none'; }} />
@@ -237,8 +237,8 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       {selectedClient && lines.length > 0 && (
         <>
           {/* Lines header */}
-          <div className="mt-8">
-            <h3 className="font-semibold text-gray-900 text-lg mb-4">Peças do Orçamento</h3>
+          <div className="mt-8 border-b-4 pb-4" style={{ borderColor: brand }}>
+            <h3 className="title-prominent" style={{ color: brand }}>Peças do Orçamento</h3>
 
             {/* Lines */}
             <div className="space-y-3">
@@ -259,27 +259,28 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       )}
 
       {/* Summary */}
-      <div className="rounded-xl border p-6 space-y-4 gradient-quotation-summary card-premium" style={{
+      <div className="rounded-xl border-t-4 p-6 space-y-4 gradient-quotation-summary card-premium" style={{
         borderColor: hexToRgba(brand, 0.2),
+        borderTopColor: brand,
       }}>
-        <h3 className="font-semibold text-gray-900 text-lg">Resumo do Orçamento</h3>
+        <h3 className="title-prominent" style={{ color: brand }}>Resumo do Orçamento</h3>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
           {[
             { label: 'Peso total', value: `${totals.totalWeight} kg` },
             { label: 'Custo material', value: `R$ ${totals.totalMaterial}` },
             { label: 'Custo serviço', value: `R$ ${totals.totalService}` },
           ].map(item => (
-            <div key={item.label} className="metric-box">
-              <p className="text-sm text-gray-600">{item.label}</p>
-              <p className="text-xl font-semibold text-gray-900 mt-2">{item.value}</p>
+            <div key={item.label} className="metric-box border-l-4 border-gray-300">
+              <p className="label-prominent text-gray-700" style={{ fontSize: '12px' }}>{item.label}</p>
+              <p className="text-2xl font-black text-gray-900 mt-2" style={{ color: brand }}>{item.value}</p>
             </div>
           ))}
         </div>
 
         {/* Status Selection */}
         <div className="metric-box">
-          <p className="text-sm text-gray-600 mb-2 font-medium">Status do Orçamento</p>
+          <p className="text-sm text-gray-700 mb-2 font-medium">Status do Orçamento</p>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
@@ -292,13 +293,14 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
           </select>
         </div>
 
-        <div className="bg-gradient-to-r rounded-lg p-6 border" style={{
+        <div className="bg-gradient-to-r rounded-lg p-6 border-2 border-t-4" style={{
           backgroundColor: hexToRgba(brand, 0.08),
-          borderColor: hexToRgba(brand, 0.2)
+          borderColor: hexToRgba(brand, 0.3),
+          borderTopColor: brand,
         }}>
           <div className="flex justify-between items-center">
-            <p className="text-base text-gray-700 font-medium">Valor Total</p>
-            <p className="text-4xl font-bold" style={{ color: brand }}>
+            <p className="label-prominent" style={{ color: brand }}>Valor Total</p>
+            <p className="text-5xl font-black" style={{ color: brand, textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
               R$ {totals.grandTotal}
             </p>
           </div>
