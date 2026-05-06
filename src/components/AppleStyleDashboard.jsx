@@ -8,7 +8,6 @@ import DashboardPage from './DashboardPage';
 import QuotationBuilder from './QuotationBuilder';
 import ClientsPage from './ClientsPage';
 import ReportPage from './ReportPage';
-import ScrollGlassEffect from './ScrollGlassEffect';
 
 const AdminPage = lazy(() => import('./AdminPage'));
 const ClientsListReport = lazy(() => import('./ClientsListReport'));
@@ -110,9 +109,6 @@ const AppleStyleDashboard = ({
 
   return (
     <div className="w-full min-h-screen bg-white">
-      {/* Glass scroll effect */}
-      <ScrollGlassEffect />
-
       <AppleHeader
         currentUser={currentUser}
         onLogout={onLogout}
