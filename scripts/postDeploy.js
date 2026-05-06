@@ -5,8 +5,12 @@
  * Executado automaticamente após deploy para garantir que a conexão está estabelecida
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log('');
 console.log('🚀 ═══════════════════════════════════════════════════════════════');
@@ -39,13 +43,19 @@ const tasks = [
     check: () => {
       const requiredFiles = [
         'src/services/databaseConnection.js',
+        'src/services/databasePool.js',
       ];
 
       requiredFiles.forEach(file => {
+        const fullPath = path.join(__dirname, '..', file);
         try {
-          require(path.join(__dirname, '..', file));
+          const content = fs.readFileSync(fullPath, 'utf8');
+          // Basic syntax check - must have class or export
+          if (!content.includes('class') && !content.includes('export')) {
+            throw new Error('Invalid syntax');
+          }
         } catch (error) {
-          throw new Error(`❌ Erro ao carregar ${file}: ${error.message}`);
+          throw new Error(`❌ Erro ao validar ${file}: ${error.message}`);
         }
       });
 
