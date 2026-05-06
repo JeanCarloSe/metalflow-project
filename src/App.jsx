@@ -26,6 +26,7 @@ import { getSession, clearSession, hasAnyUser, createLocalUser } from './service
 import { generateQuotationCode } from './services/codeService';
 import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusService';
 import { PerformanceMonitor } from './utils/performanceMonitor';
+import DatabaseConnection from './services/databaseConnection';
 
 const DEFAULT_MATERIALS = [
   { id: 'aço-carbono', name: 'Aço Carbono',   density: 7850, costPrice: 3.50, sellPrice: 4.25, basePrice: 4.25 },
@@ -72,6 +73,12 @@ function App() {
         const dbOpId = perfMonitor.startOperation('initDB');
         await initDB();
         perfMonitor.endOperation(dbOpId);
+
+        // Inicializar conexão com health checks automáticos
+        const dbConnOpId = perfMonitor.startOperation('dbConnection');
+        const dbConnection = DatabaseConnection.getInstance();
+        await dbConnection.initialize();
+        perfMonitor.endOperation(dbConnOpId);
 
         const persistOpId = perfMonitor.startOperation('initPersistence');
         await initPersistence();
