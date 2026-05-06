@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { hexToRgba, ASTON_BRAND, THEME } from '../services/themeService';
 import QuotationLink from './QuotationLink';
-
-const ASTON_LOGO = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
+import Logo from './Logo';
 
 const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotationClick }) => {
-  const [logoOk, setLogoOk] = useState(true);
   const total = quotations.reduce((sum, q) => sum + parseFloat(q.totalPrice || 0), 0);
   const uniqueClients = new Set(quotations.map(q => q.clientId).filter(Boolean)).size;
   const sorted = [...quotations].reverse();
@@ -85,14 +83,9 @@ const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotation
           <motion.div variants={itemVariants} className="space-y-6">
             <div className="flex justify-between items-start">
               <div>
-                {logoOk && (
-                  <img
-                    src={ASTON_LOGO}
-                    alt="Aston"
-                    className="h-10 object-contain mb-6"
-                    onError={() => setLogoOk(false)}
-                  />
-                )}
+                <div className="mb-6">
+                  <Logo size="md" />
+                </div>
                 <h1 className="text-4xl font-bold text-gray-900 mb-2">Relatório de Orçamentos</h1>
                 <p className="text-sm text-gray-500">
                   {new Date().toLocaleDateString('pt-BR', {
@@ -318,16 +311,9 @@ const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotation
             variants={itemVariants}
             className="border-t border-gray-200 pt-6 flex items-center justify-between"
           >
-            <img
-              src={ASTON_LOGO}
-              alt="Aston"
-              className="h-5 object-contain opacity-40"
-              onError={e => {
-                e.target.style.display = 'none';
-              }}
-            />
+            <div></div>
             <p className="text-xs text-gray-500">
-              Aston Metalúrgica · Emitido em {new Date().toLocaleString('pt-BR')}
+              MetalFlow Orçamentos · Emitido em {new Date().toLocaleString('pt-BR')}
               {currentOperator && ` · Op: ${currentOperator.name}`}
             </p>
           </motion.div>

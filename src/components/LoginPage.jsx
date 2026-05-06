@@ -1,14 +1,7 @@
 import React, { useState } from 'react';
 import { loginUser, createLocalUser } from '../services/authService';
 import { ASTON_BRAND } from '../services/themeService';
-
-const ASTON_LOGO = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
-
-const ASTON_CONTACT = {
-  phones: ['+55 (47) 3436-4569', '+55 (47) 3801-7575'],
-  email: 'aston@astonmetalurgica.com.br',
-  website: 'https://astonmetalurgica.com.br'
-};
+import Logo from './Logo';
 
 const LoginPage = ({ onLogin, isFirstAccess }) => {
   const [mode,     setMode]     = useState(isFirstAccess ? 'create' : 'login');
@@ -40,7 +33,6 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
   const [role,     setRole]     = useState('operator');
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
-  const [logoOk,   setLogoOk]   = useState(true);
 
   const inputCls = 'input-premium w-full';
 
@@ -51,7 +43,7 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
     if (mode === 'create' && !name.trim()) { setError('Informe seu nome.'); return; }
     setLoading(true);
     try {
-      const tenantId = 'aston-metalurgica'; // ID do tenant (fixo por enquanto)
+      const tenantId = 'metalflow'; // ID do tenant (fixo por enquanto)
       localStorage.setItem('metalflow_tenant', tenantId);
 
       if (mode === 'login') {
@@ -81,7 +73,7 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
             id: 'user-1',
             login: 'admin',
             name: 'Administrador',
-            email: 'admin@aston.com.br',
+            email: 'admin@metalflow.local',
             role: 'admin',
             tenantId
           };
@@ -128,13 +120,9 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
 
         {/* Brand */}
         <div className="text-center mb-12">
-          {logoOk ? (
-            <img src={ASTON_LOGO} alt="Aston Metalúrgica" className="h-20 object-contain mx-auto mb-6"
-              style={{ imageRendering: 'crisp-edges' }}
-              onError={() => setLogoOk(false)} />
-          ) : (
-            <h1 className="text-4xl font-bold mb-6" style={{ color: 'var(--color-primary)' }}>ASTON</h1>
-          )}
+          <div className="mb-6 flex justify-center">
+            <Logo size="lg" />
+          </div>
           <p className="text-base" style={{ color: 'var(--color-text-secondary)' }}>Sistema de Orçamentos</p>
         </div>
 
@@ -224,20 +212,8 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
         {/* Contact info */}
         <div className="px-8 py-6 rounded-b-2xl space-y-3" style={{ backgroundColor: 'var(--color-bg-secondary)', borderTop: '1px solid var(--color-border-light)' }}>
           <p className="text-xs font-semibold text-center" style={{ color: 'var(--color-text-secondary)' }}>Suporte</p>
-          <div className="flex items-center justify-center gap-2 flex-wrap text-sm">
-            <a href={`tel:${ASTON_CONTACT.phones[0].replace(/\D/g, '')}`}
-              className="transition-colors" style={{ color: 'var(--color-text-secondary)' }}
-              onMouseEnter={e => e.target.style.color = 'var(--color-primary)'}
-              onMouseLeave={e => e.target.style.color = 'var(--color-text-secondary)'}>
-              {ASTON_CONTACT.phones[0]}
-            </a>
-            <span style={{ color: 'var(--color-border-light)' }}>·</span>
-            <a href={`mailto:${ASTON_CONTACT.email}`}
-              className="transition-colors" style={{ color: 'var(--color-text-secondary)' }}
-              onMouseEnter={e => e.target.style.color = 'var(--color-primary)'}
-              onMouseLeave={e => e.target.style.color = 'var(--color-text-secondary)'}>
-              {ASTON_CONTACT.email}
-            </a>
+          <div className="text-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <p>MetalFlow © 2024 - Desenvolvido com dedicação</p>
           </div>
         </div>
       </div>

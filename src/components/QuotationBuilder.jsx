@@ -22,7 +22,7 @@ const emptyLine = (index) => {
 };
 
 const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient, currentUser, initialQuotation, onEditComplete }) => {
-  const [lines, setLines] = useState(initialQuotation?.lines || [emptyLine()]);
+  const [lines, setLines] = useState(initialQuotation?.lines || []);
   const [quotationNumber, setQuotationNumber] = useState(initialQuotation?.number || null);
   const [status, setStatus] = useState(initialQuotation?.status || 'em-andamento');
   const [showDxfImport, setShowDxfImport] = useState(false);
@@ -147,31 +147,6 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
   return (
     <div className="space-y-4">
 
-      {/* Aston Header */}
-      <div className="rounded-2xl p-8 text-white mb-6 shadow-lg backdrop-blur-lg"
-        style={{
-          background: `linear-gradient(135deg, ${THEME.primary} 0%, ${THEME.primaryDark} 100%)`,
-          boxShadow: `0 10px 30px rgba(1, 112, 185, 0.3)`
-        }}>
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold mb-2">ASTON METALÚRGICA</h2>
-            <p className="text-blue-100 mb-4 text-lg">Sistema de Orçamentos - Premium</p>
-            <div className="flex gap-8 text-sm">
-              <a href="https://astonmetalurgica.com.br" target="_blank" rel="noreferrer" className="text-blue-100 hover:text-white transition-colors hover:underline">
-                🌐 www.astonmetalurgica.com.br
-              </a>
-              <span className="text-blue-200">📞 (47) 3436-4569</span>
-            </div>
-          </div>
-          <div className="text-right bg-white/10 backdrop-blur-lg px-6 py-4 rounded-xl border border-white/20">
-            <p className="text-sm text-blue-100 mb-2 font-medium">Operador</p>
-            <p className="text-lg font-bold text-white">{currentUser?.name || 'N/A'}</p>
-            <p className="text-xs text-blue-200 mt-2">{currentUser?.number || currentUser?.login || 'Aston'}</p>
-          </div>
-        </div>
-      </div>
-
       {/* Quotation number + Status + CAD */}
       <div className="flex items-center justify-between gap-4 mb-4">
         <div className="card-premium px-6 py-4 flex-1">
@@ -240,35 +215,48 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
         </div>
       )}
 
-      {/* Lines header */}
-      <div className="flex items-center justify-between mt-8">
-        <h3 className="font-semibold text-gray-900 text-lg">Peças do Orçamento</h3>
-        <div className="flex gap-2">
-          <button onClick={() => setShowDxfImport(true)}
-            className="text-sm px-4 py-2 border border-dashed border-blue-400 text-blue-700 hover:text-blue-900 hover:border-blue-600 rounded-lg transition-all font-medium">
+      {/* Action buttons - Show when client selected */}
+      {selectedClient && (
+        <div className="flex gap-2 mt-8">
+          <button
+            onClick={() => setShowDxfImport(true)}
+            className="text-sm px-4 py-2 border border-dashed border-blue-400 text-blue-700 hover:text-blue-900 hover:border-blue-600 rounded-lg transition-all font-medium hover:bg-blue-50"
+          >
             📁 Importar DXF/DWG
           </button>
-          <button onClick={addLine}
-            className="text-sm px-4 py-2 border border-dashed border-gray-400 text-gray-700 hover:text-gray-900 hover:border-gray-600 rounded-lg transition-all font-medium">
+          <button
+            onClick={addLine}
+            className="text-sm px-4 py-2 border border-dashed border-gray-400 text-gray-700 hover:text-gray-900 hover:border-gray-600 rounded-lg transition-all font-medium hover:bg-gray-50"
+          >
             + Adicionar peça
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Lines */}
-      <div className="space-y-3">
-        {lines.map((line, idx) => (
-          <QuotationLineItem
-            key={line.id}
-            line={line}
-            materials={materials}
-            onUpdate={(field, value) => updateLine(line.id, field, value)}
-            onRemove={() => removeLine(line.id)}
-            brand={brand}
-            index={idx + 1}
-          />
-        ))}
-      </div>
+      {/* Lines section - Show only when peças exist */}
+      {selectedClient && lines.length > 0 && (
+        <>
+          {/* Lines header */}
+          <div className="mt-8">
+            <h3 className="font-semibold text-gray-900 text-lg mb-4">Peças do Orçamento</h3>
+
+            {/* Lines */}
+            <div className="space-y-3">
+              {lines.map((line, idx) => (
+                <QuotationLineItem
+                  key={line.id}
+                  line={line}
+                  materials={materials}
+                  onUpdate={(field, value) => updateLine(line.id, field, value)}
+                  onRemove={() => removeLine(line.id)}
+                  brand={brand}
+                  index={idx + 1}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Summary */}
       <div className="rounded-xl border p-6 space-y-4 gradient-quotation-summary card-premium" style={{

@@ -1,8 +1,8 @@
 import html2pdf from 'html2pdf.js';
 import { QUOTATION_STATUS } from './statusService';
 
-const BRAND_COLOR = '#0055d4';
-const LOGO_URL = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
+const BRAND_COLOR = '#0170B9';
+// Logo URL removed - using text-based branding instead
 
 export const generateQuotationPDF = async (quotation, client) => {
   if (!quotation || !client) return null;
@@ -23,11 +23,10 @@ export const generateQuotationPDF = async (quotation, client) => {
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1f2937; line-height: 1.6;">
 
       <!-- HEADER COM GRADIENTE -->
-      <div style="background: linear-gradient(135deg, #0055d4 0%, #0047a3 100%); padding: 40px 30px; margin: -10px -10px 40px -10px; border-radius: 0;">
+      <div style="background: linear-gradient(135deg, ${BRAND_COLOR} 0%, #0D47A1 100%); padding: 40px 30px; margin: -10px -10px 40px -10px; border-radius: 0;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
           <div>
-            <img src="${LOGO_URL}" alt="Aston" style="height: 40px; margin-bottom: 10px;">
-            <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700;">ASTON METALÚRGICA</h1>
+            <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 700;">METALFLOW</h1>
             <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Sistema de Orçamentos Premium</p>
           </div>
           <div style="text-align: right;">
@@ -115,9 +114,8 @@ export const generateQuotationPDF = async (quotation, client) => {
 
       <!-- RODAPÉ -->
       <div style="border-top: 2px solid #e5e7eb; padding-top: 20px; text-align: center; color: #6b7280; font-size: 11px;">
-        <p style="margin: 0 0 5px 0;"><strong style="color: ${BRAND_COLOR};">ASTON METALÚRGICA</strong></p>
-        <p style="margin: 0 0 3px 0;">Telefone: (47) 3436-4569 | (47) 3801-7575</p>
-        <p style="margin: 0; color: #9ca3af;">Email: aston@astonmetalurgica.com.br | www.astonmetalurgica.com.br</p>
+        <p style="margin: 0 0 5px 0;"><strong style="color: ${BRAND_COLOR};">METALFLOW</strong></p>
+        <p style="margin: 0 0 3px 0;">Sistema de Orçamentos Inteligentes</p>
         <p style="margin: 8px 0 0 0; color: #d1d5db; font-size: 10px;">Orçamento gerado em ${new Date().toLocaleString('pt-BR')}</p>
       </div>
 

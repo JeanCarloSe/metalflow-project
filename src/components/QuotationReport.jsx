@@ -1,12 +1,6 @@
 import React from 'react';
 import { getStatusLabel, getStatusBg, getStatusColor } from '../services/statusService';
-
-const ASTON_LOGO = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
-const ASTON_CONTACT = {
-  phones: ['+55 (47) 3436-4569', '+55 (47) 3801-7575'],
-  email: 'aston@astonmetalurgica.com.br',
-  website: 'https://astonmetalurgica.com.br'
-};
+import Logo from './Logo';
 
 const QuotationReport = ({ quotation, client, materials, onClose }) => {
   const handlePrint = () => window.print();
@@ -56,11 +50,9 @@ const QuotationReport = ({ quotation, client, materials, onClose }) => {
         <div className="print-header mb-8 border-b-2 border-gray-300 pb-6">
           <div className="flex justify-between items-start">
             <div>
-              <img src={ASTON_LOGO} alt="Aston" className="h-12 object-contain mb-4"
-                onError={e => { e.target.style.display = 'none'; }} />
-              <p className="text-sm font-bold text-gray-800">ASTON METALÚRGICA</p>
-              <p className="text-xs text-gray-600">{ASTON_CONTACT.email}</p>
-              <p className="text-xs text-gray-600">{ASTON_CONTACT.phones[0]}</p>
+              <Logo size="sm" />
+              <p className="text-sm font-bold text-gray-800 mt-2">METALFLOW</p>
+              <p className="text-xs text-gray-600">Sistema de Orçamentos Inteligentes</p>
             </div>
             <div className="text-right">
               <p className="text-3xl font-bold text-gray-800">ORÇAMENTO</p>
@@ -187,8 +179,8 @@ const QuotationReport = ({ quotation, client, materials, onClose }) => {
 
         {/* Footer */}
         <div className="text-center border-t-2 border-gray-300 pt-6 text-xs text-gray-600">
-          <p>Aston Metalúrgica - {ASTON_CONTACT.website}</p>
-          <p>Orçamento gerado em {formatDate(quotation.date)}</p>
+          <p>MetalFlow - Orçamentos Inteligentes</p>
+          <p>Gerado em {formatDate(quotation.date)}</p>
         </div>
       </div>
     </div>

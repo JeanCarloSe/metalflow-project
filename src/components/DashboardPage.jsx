@@ -19,6 +19,9 @@ const COLORS = {
   gray2: '#F3F4F6',
   gray3: '#6B7280',
   gray4: '#1F2937',
+  chartBlue: '#006ED9',
+  chartGreen: '#00D084',
+  chartOrange: '#FF7A00',
 };
 
 const formatMoney = (val) => {
@@ -323,7 +326,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
   const monthName = new Date(currentYear, currentMonth).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-5xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Dashboard de Orçamentos</h1>
@@ -333,120 +336,121 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       </div>
 
       {/* Quick Access */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
         <button
           onClick={() => onNavigate?.('quotation')}
-          className="group relative overflow-hidden rounded-xl p-6 text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
-          style={{ background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryDark} 100%)` }}
+          className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
+          style={{ background: `linear-gradient(135deg, #0170B9 0%, #0D47A1 100%)` }}
         >
+          <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
           <div className="relative z-10">
-            <div className="text-3xl mb-3">📝</div>
-            <p className="font-bold text-lg">Novo Orçamento</p>
-            <p className="text-sm opacity-90">Criar orçamento</p>
+            <div className="text-5xl mb-4">📝</div>
+            <p className="font-black text-xl mb-2 text-white" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)' }}>Novo Orçamento</p>
+            <p className="text-sm font-semibold text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>Criar orçamento</p>
           </div>
         </button>
 
         <button
-          onClick={() => onNavigate?.('history')}
-          className="group relative overflow-hidden rounded-xl p-6 text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
-          style={{ background: `linear-gradient(135deg, ${COLORS.success} 0%, #059669 100%)` }}
+          onClick={() => onNavigate?.('analytics')}
+          className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
+          style={{ background: `linear-gradient(135deg, #10B981 0%, #059669 100%)` }}
         >
+          <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
           <div className="relative z-10">
-            <div className="text-3xl mb-3">📋</div>
-            <p className="font-bold text-lg">Histórico</p>
-            <p className="text-sm opacity-90">{quotations.length} orçamentos</p>
+            <div className="text-5xl mb-4">📋</div>
+            <p className="font-black text-xl mb-2 text-white" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)' }}>Histórico</p>
+            <p className="text-sm font-semibold text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>{quotations.length} orçamentos</p>
           </div>
         </button>
 
         <button
           onClick={() => onNavigate?.('clients')}
-          className="group relative overflow-hidden rounded-xl p-6 text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
+          className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
           style={{ background: `linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)` }}
         >
+          <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
           <div className="relative z-10">
-            <div className="text-3xl mb-3">🏢</div>
-            <p className="font-bold text-lg">Clientes</p>
-            <p className="text-sm opacity-90">{clients.length} clientes</p>
+            <div className="text-5xl mb-4">🏢</div>
+            <p className="font-black text-xl mb-2 text-white" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)' }}>Clientes</p>
+            <p className="text-sm font-semibold text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>{clients.length} clientes</p>
           </div>
         </button>
 
         <button
           onClick={() => onNavigate?.('materials')}
-          className="group relative overflow-hidden rounded-xl p-6 text-white shadow-lg transition-all hover:shadow-xl hover:scale-105"
-          style={{ background: `linear-gradient(135deg, ${COLORS.accent} 0%, #f97316 100%)` }}
+          className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
+          style={{ background: `linear-gradient(135deg, #3B82F6 0%, #f97316 100%)` }}
         >
+          <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
           <div className="relative z-10">
-            <div className="text-3xl mb-3">📦</div>
-            <p className="font-bold text-lg">Materiais</p>
-            <p className="text-sm opacity-90">Gerenciar materiais</p>
+            <div className="text-5xl mb-4">📦</div>
+            <p className="font-black text-xl mb-2 text-white" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)' }}>Materiais</p>
+            <p className="text-sm font-semibold text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>Gerenciar materiais</p>
           </div>
         </button>
       </div>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+        <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-primary)' }}>
           <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-primary)' }}>Total de Orçamentos (Mês)</p>
-              <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-primary)' }}>{stats.monthTotal}</p>
-            </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110" style={{ backgroundColor: `rgba(1, 112, 185, 0.1)` }}>
-              <span className="text-2xl">📊</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-primary)' }}>Valor Total (Mês)</p>
-              <p className="text-4xl font-bold mt-4" style={{ color: 'var(--color-success)' }}>R$ {(stats.monthValue / 1000).toFixed(1)}k</p>
-              <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>
-                {stats.monthTotal > 0 ? `R$ ${(stats.monthValue / stats.monthTotal).toFixed(2)}/orç` : '—'}
+            <div className="flex-1">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#0170B9' }}>Total de Orçamentos (Mês)</p>
+              <p className="text-6xl font-black mt-3" style={{ color: '#0D47A1', textShadow: '0 2px 4px rgba(13, 71, 161, 0.1)' }}>{stats.monthTotal}</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: '#0170B9' }}>
+                Junho
               </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200" style={{ backgroundColor: `rgba(16, 185, 129, 0.1)` }}>
-              <span className="text-2xl">💰</span>
-            </div>
+            <div className="text-3xl">📊</div>
           </div>
         </div>
 
-        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
+        <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-success)' }}>
           <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-secondary)' }}>Peso Total (Mês)</p>
-              <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-info)' }}>{stats.monthWeight.toFixed(0)}</p>
-              <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>kg</p>
+            <div className="flex-1">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#10B981' }}>Valor Total (Mês)</p>
+              <p className="text-5xl font-black mt-3" style={{ color: '#059669', textShadow: '0 2px 4px rgba(5, 150, 105, 0.1)' }}>R$ {(stats.monthValue / 1000).toFixed(1)}k</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: '#10B981' }}>
+                {stats.monthTotal > 0 ? `R$ ${(stats.monthValue / stats.monthTotal).toFixed(0)}/orç` : '—'}
+              </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200" style={{ backgroundColor: `rgba(59, 130, 246, 0.1)` }}>
-              <span className="text-2xl">⚖️</span>
-            </div>
+            <div className="text-3xl">💰</div>
           </div>
         </div>
 
-        <div className="card-premium p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer">
+        <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-info)' }}>
           <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'var(--color-text-secondary)' }}>Clientes Ativos</p>
-              <p className="text-5xl font-bold mt-4" style={{ color: 'var(--color-warning)' }}>{stats.uniqueClients}</p>
-              <p className="text-xs mt-2" style={{ color: 'var(--color-text-muted)' }}>
+            <div className="flex-1">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3B82F6' }}>Peso Total (Mês)</p>
+              <p className="text-6xl font-black mt-3" style={{ color: '#2563EB', textShadow: '0 2px 4px rgba(37, 99, 235, 0.1)' }}>{stats.monthWeight.toFixed(0)}</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: '#3B82F6' }}>
+                kg processados
+              </p>
+            </div>
+            <div className="text-3xl">⚖️</div>
+          </div>
+        </div>
+
+        <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-warning)' }}>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F59E0B' }}>Clientes Ativos</p>
+              <p className="text-6xl font-black mt-3" style={{ color: '#D97706', textShadow: '0 2px 4px rgba(217, 119, 6, 0.1)' }}>{stats.uniqueClients}</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: '#F59E0B' }}>
                 {stats.uniqueClients > 0 ? `${(Object.values(stats.valueByStatus).reduce((a,b) => a+b, 0) / stats.uniqueClients / 1000).toFixed(1)}k/cliente` : '—'}
               </p>
             </div>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center transition-transform duration-200" style={{ backgroundColor: `rgba(245, 158, 11, 0.1)` }}>
-              <span className="text-2xl">👥</span>
-            </div>
+            <div className="text-3xl">👥</div>
           </div>
         </div>
       </div>
 
       {/* Primary Charts - Full Width */}
-      <div className="card-premium p-7">
+      <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Evolução Mensal de Orçamentos</h3>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Últimos 6 meses: valor total e quantidade de orçamentos</p>
+            <h3 className="text-2xl font-black mb-2" style={{ color: '#0D47A1' }}>Evolução Mensal de Orçamentos</h3>
+            <p className="text-sm font-semibold" style={{ color: '#0170B9' }}>Últimos 6 meses: valor total e quantidade de orçamentos</p>
           </div>
           <button
             onClick={() => setDataModal({
@@ -470,20 +474,24 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
               <ComposedChart data={stats.timelineData} margin={{ top: 30, right: 50, left: 10, bottom: 30 }}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.9}/>
-                    <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0}/>
+                    <stop offset="5%" stopColor={COLORS.chartBlue} stopOpacity={0.95}/>
+                    <stop offset="95%" stopColor={COLORS.chartBlue} stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={COLORS.chartGreen} stopOpacity={0.9}/>
+                    <stop offset="100%" stopColor={COLORS.chartGreen} stopOpacity={0.5}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="4 4" stroke="var(--color-border-light)" vertical={false} />
-                <XAxis dataKey="month" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 600 }} />
-                <YAxis yAxisId="left" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 600 }} />
-                <YAxis yAxisId="right" orientation="right" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 600 }} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(1, 112, 185, 0.1)' }} />
-                <Area yAxisId="left" type="monotone" dataKey="value" fill="url(#colorValue)" stroke={COLORS.primary} name="Valor (R$)" strokeWidth={3} />
-                <Bar yAxisId="right" dataKey="count" fill={COLORS.success} name="Quantidade" radius={[8, 8, 0, 0]} />
+                <XAxis dataKey="month" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 700 }} />
+                <YAxis yAxisId="left" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 700 }} />
+                <YAxis yAxisId="right" orientation="right" stroke={COLORS.gray3} style={{ fontSize: '14px', fontWeight: 700 }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 110, 217, 0.15)' }} />
+                <Area yAxisId="left" type="monotone" dataKey="value" fill="url(#colorValue)" stroke={COLORS.chartBlue} name="Valor (R$)" strokeWidth={4} isAnimationActive={true} />
+                <Bar yAxisId="right" dataKey="count" fill="url(#colorCount)" name="Quantidade" radius={[8, 8, 0, 0]} />
               </ComposedChart>
             </ResponsiveContainer>
-            <div className="flex justify-center gap-6 mt-6">
+            <div className="flex justify-center gap-3 sm:gap-4 md:gap-6 mt-6">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded" style={{ backgroundColor: COLORS.primary }}></div>
                 <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Valor Total (R$)</span>
@@ -501,11 +509,11 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       </div>
 
       {/* Secondary Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
         {/* Distribuição por Status */}
-        <div className="card-premium p-7">
+        <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Distribuição por Status</h3>
+            <h3 className="text-xl font-black" style={{ color: '#0D47A1' }}>Distribuição por Status</h3>
             <button
               onClick={() => setDataModal({
                 isOpen: true,
@@ -563,24 +571,24 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         </div>
 
         {/* Funil */}
-        <div className="card-premium p-7">
-          <h3 className="text-xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Funil de Conversão (Mês)</h3>
+        <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartGreen }}>
+          <h3 className="text-xl font-black mb-8" style={{ color: '#059669' }}>Funil de Conversão (Mês)</h3>
           <div className="space-y-5">
             {stats.funnelData.map((stage, idx) => {
               const percentage = (stage.value / stats.funnelData[0].value) * 100;
               return (
                 <div key={idx} className="group">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>{stage.stage}</span>
-                    <span className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>{stage.value} ({percentage.toFixed(0)}%)</span>
+                  <div className="flex justify-between mb-3">
+                    <span className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>{stage.stage}</span>
+                    <span className="text-sm font-bold" style={{ color: stage.fill }}>{stage.value} ({percentage.toFixed(0)}%)</span>
                   </div>
-                  <div className="w-full rounded-full h-3 overflow-hidden shadow-sm" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                  <div className="w-full rounded-full h-4 overflow-hidden shadow-md" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
                     <div
-                      className="h-3 rounded-full transition-all group-hover:brightness-110 duration-500"
+                      className="h-4 rounded-full transition-all group-hover:brightness-110 duration-500"
                       style={{
                         width: `${percentage}%`,
                         background: `linear-gradient(90deg, ${stage.fill}, ${stage.fill}dd)`,
-                        boxShadow: `0 0 8px ${stage.fill}40`
+                        boxShadow: `0 0 12px ${stage.fill}60`
                       }}
                     />
                   </div>
@@ -591,9 +599,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         </div>
 
         {/* Top Clientes - Gráfico */}
-        <div className="card-premium p-7">
+        <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartOrange }}>
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Top 5 Clientes</h3>
+            <h3 className="text-xl font-black" style={{ color: '#D97706' }}>Top 5 Clientes</h3>
             <button
               onClick={() => setDataModal({
                 isOpen: true,
@@ -652,26 +660,29 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       </div>
 
       {/* Valor por Status - Full Width */}
-      <div className="card-premium p-7">
-        <h3 className="text-2xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Análise de Valores por Status</h3>
+      <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
+        <div className="mb-8">
+          <h3 className="text-2xl font-black mb-2" style={{ color: '#0D47A1' }}>Análise de Valores por Status</h3>
+          <p className="text-sm font-semibold" style={{ color: '#0170B9' }}>Distribuição de valores em cada etapa da negociação</p>
+        </div>
         {stats.valueChartData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={350}>
+          <ResponsiveContainer width="100%" height={380}>
             <BarChart data={stats.valueChartData} margin={{ top: 30, right: 40, left: 10, bottom: 100 }}>
               <defs>
                 {stats.valueChartData.map((entry, idx) => (
                   <linearGradient key={`grad-${idx}`} id={`color-${idx}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={entry.color} stopOpacity={0.9}/>
-                    <stop offset="100%" stopColor={entry.color} stopOpacity={0.5}/>
+                    <stop offset="0%" stopColor={entry.color} stopOpacity={1}/>
+                    <stop offset="100%" stopColor={entry.color} stopOpacity={0.6}/>
                   </linearGradient>
                 ))}
               </defs>
               <CartesianGrid strokeDasharray="4 4" stroke="var(--color-border-light)" vertical={false} />
-              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} stroke={COLORS.gray3} style={{ fontSize: '13px', fontWeight: 500 }} />
-              <YAxis stroke={COLORS.gray3} style={{ fontSize: '13px', fontWeight: 500 }} />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(1, 112, 185, 0.05)' }} />
-              <Bar dataKey="value" radius={[8, 8, 0, 0]} strokeWidth={0}>
+              <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} stroke={COLORS.gray3} style={{ fontSize: '13px', fontWeight: 700 }} />
+              <YAxis stroke={COLORS.gray3} style={{ fontSize: '13px', fontWeight: 700 }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0, 110, 217, 0.1)' }} />
+              <Bar dataKey="value" radius={[8, 8, 0, 0]} strokeWidth={2}>
                 {stats.valueChartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={`url(#color-${index})`} />
+                  <Cell key={`cell-${index}`} fill={`url(#color-${index})`} stroke={entry.color} />
                 ))}
               </Bar>
             </BarChart>
@@ -682,9 +693,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       </div>
 
       {/* Status Summary */}
-      <div className="card-premium p-7">
-        <h3 className="text-xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>Resumo de Status - Todos os Orçamentos</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-4">
+      <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartOrange }}>
+        <h3 className="text-xl font-black mb-8" style={{ color: '#D97706' }}>Resumo de Status - Todos os Orçamentos</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
           {Object.entries(QUOTATION_STATUS).map(([key, status]) => {
             const count = stats.byStatus[key] || 0;
             const value = stats.valueByStatus[key] || 0;
@@ -721,10 +732,10 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-2xl font-bold" style={{ color: getStatusColor(key) }}>
+                    <p className="text-4xl font-black" style={{ color: getStatusColor(key), textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                       {count}
                     </p>
-                    <p className="text-xs font-semibold uppercase tracking-wide mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                    <p className="text-xs font-bold uppercase tracking-wide mt-2 text-gray-900">
                       {status.label}
                     </p>
                   </div>
@@ -733,7 +744,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
                   )}
                 </div>
                 {isActive && (
-                  <div className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  <div className="text-xs font-semibold text-gray-700">
                     {formatMoney(value)}
                   </div>
                 )}
@@ -745,13 +756,13 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
       {/* Advanced Analytics Section */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-bold mt-8" style={{ color: 'var(--color-text-primary)' }}>📈 Analytics Avançado</h2>
+        <h2 className="text-3xl font-black mt-8" style={{ color: '#0D47A1' }}>📈 Analytics Avançado</h2>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {/* Top Clientes */}
-          <div className="card-premium p-7">
+          <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>🏢 Top Clientes</h3>
+              <h3 className="text-xl font-black" style={{ color: '#0D47A1' }}>🏢 Top Clientes</h3>
               <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(1, 112, 185, 0.1)', color: COLORS.primary }}>
                 Valor Total
               </span>
@@ -792,9 +803,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
           </div>
 
           {/* Top Materiais */}
-          <div className="card-premium p-7">
+          <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartOrange }}>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>📦 Top Materiais</h3>
+              <h3 className="text-xl font-black" style={{ color: '#D97706' }}>📦 Top Materiais</h3>
               <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: COLORS.warning }}>
                 Por Valor
               </span>
@@ -833,14 +844,14 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         </div>
 
         {/* Peso vs Valor Analysis */}
-        <div className="card-premium p-7">
+        <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartGreen }}>
           <div className="mb-6">
-            <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>⚖️ Análise Peso vs Valor (ROI)</h3>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            <h3 className="text-xl font-black mb-2" style={{ color: '#059669' }}>⚖️ Análise Peso vs Valor (ROI)</h3>
+            <p className="text-sm font-semibold" style={{ color: '#10B981' }}>
               Quanto valor você gera por kg de material processado
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
             {stats.topMaterials.map((mat, idx) => (
               <div
                 key={idx}
@@ -871,14 +882,14 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
       {/* AI Insights & Recommendations */}
       {insights && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {/* Insights Card */}
-          <div className="card-premium p-7">
+          <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
             <div className="mb-6">
-              <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              <h3 className="text-2xl font-black mb-2" style={{ color: '#0D47A1' }}>
                 💡 Insights IA
               </h3>
-              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              <p className="text-sm font-semibold" style={{ color: '#0170B9' }}>
                 Análise automática do seu desempenho
               </p>
             </div>
@@ -930,7 +941,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
           </div>
 
           {/* Recommendations Card */}
-          <div className="card-premium p-7">
+          <div className="card-glass p-7">
             <div className="mb-6">
               <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
                 🎯 Recomendações

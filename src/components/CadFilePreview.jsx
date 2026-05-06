@@ -122,48 +122,142 @@ const CadCanvas = ({ file, size = 'small' }) => {
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const padding = 40;
 
-    // Limpar canvas
-    ctx.fillStyle = '#f9fafb';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Ajustar canvas para alta resolução
+    canvas.width = canvas.offsetWidth * dpr;
+    canvas.height = canvas.offsetHeight * dpr;
+    ctx.scale(dpr, dpr);
 
-    // Desenhar cor por layer
-    const layerHeight = canvas.height / (file.layers?.length || 1);
-    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+    // Limpar canvas com fundo branco
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
 
-    file.layers?.forEach((layer, idx) => {
-      const y = idx * layerHeight;
-      const color = colors[idx % colors.length];
+    if (!file.layers || file.layers.length === 0) {
+      ctx.fillStyle = '#9ca3af';
+      ctx.font = '14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Sem geometrias', canvas.offsetWidth / 2, canvas.offsetHeight / 2);
+      return;
+    }
 
-      // Desenhar barra de cor
-      ctx.fillStyle = color;
-      ctx.fillRect(0, y, 8, layerHeight);
+    const colors = ['#0170B9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-      // Desenhar padrão no fundo
-      ctx.fillStyle = color + '20';
-      ctx.fillRect(8, y, canvas.width - 8, layerHeight);
+    // Calcular bounding box
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
-      // Texto do layer
-      ctx.fillStyle = '#374151';
-      ctx.font = '10px monospace';
-      ctx.fillText(layer.name?.substring(0, 20) || `Layer ${idx}`, 12, y + layerHeight / 2 + 3);
+    file.layers.forEach(layer => {
+      minX = 0;
+      minY = 0;
+      maxX = Math.max(maxX, layer.width || 100);
+      maxY = Math.max(maxY, layer.height || 100);
     });
 
-    // Borda
+    const drawingWidth = maxX - minX;
+    const drawingHeight = maxY - minY;
+
+    const availableWidth = canvas.offsetWidth - padding * 2;
+    const availableHeight = canvas.offsetHeight - padding * 2;
+
+    const scaleX = drawingWidth > 0 ? availableWidth / drawingWidth : 1;
+    const scaleY = drawingHeight > 0 ? availableHeight / drawingHeight : 1;
+    const scale = Math.min(scaleX, scaleY, 2);
+
+    // Calcular offset para centralizar
+    const offsetX = padding + (availableWidth - drawingWidth * scale) / 2;
+    const offsetY = padding + (availableHeight - drawingHeight * scale) / 2;
+
+    // Desenhar grid (opcional)
+    ctx.strokeStyle = '#f0f0f0';
+    ctx.lineWidth = 0.5;
+    const gridSize = 100 * scale;
+    for (let i = 0; i < drawingWidth * scale; i += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(offsetX + i, offsetY);
+      ctx.lineTo(offsetX + i, offsetY + drawingHeight * scale);
+      ctx.stroke();
+    }
+    for (let i = 0; i < drawingHeight * scale; i += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(offsetX, offsetY + i);
+      ctx.lineTo(offsetX + drawingWidth * scale, offsetY + i);
+      ctx.stroke();
+    }
+
+    // Desenhar cada layer como um retângulo
+    file.layers.forEach((layer, idx) => {
+      const color = colors[idx % colors.length];
+      const w = (layer.width || 100) * scale;
+      const h = (layer.height || 100) * scale;
+      const x = offsetX + (layer.x || 0) * scale;
+      const y = offsetY + (layer.y || 0) * scale;
+
+      // Sombra
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(x + 2, y + 2, w, h);
+
+      // Retângulo preenchido
+      ctx.fillStyle = color + '30';
+      ctx.fillRect(x, y, w, h);
+
+      // Borda
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x, y, w, h);
+
+      // Desenhar dimensões internas
+      ctx.fillStyle = color;
+      ctx.font = `bold ${Math.max(10, 12 * (scale / 2))}px 'Courier New', monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const dimText = `${layer.width?.toFixed(0)} × ${layer.height?.toFixed(0)} mm`;
+      ctx.fillText(dimText, x + w / 2, y + h / 2);
+
+      // Label do layer (nome)
+      ctx.fillStyle = color;
+      ctx.font = `bold ${Math.max(9, 11 * (scale / 2))}px monospace`;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(layer.name?.substring(0, 25) || `Peça ${idx + 1}`, x + 5, y - 3);
+
+      // Índice
+      ctx.fillStyle = color;
+      ctx.font = `bold ${Math.max(8, 10 * (scale / 2))}px sans-serif`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'top';
+      ctx.fillRect(x + w - 20, y, 20, 18);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText((idx + 1).toString(), x + w - 10, y + 9);
+    });
+
+    // Borda geral
     ctx.strokeStyle = '#d1d5db';
     ctx.lineWidth = 1;
-    ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeRect(padding, padding, availableWidth, availableHeight);
+
+    // Escala e unidade
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(`Escala: 1:${Math.round(1 / (scale / 2))}  Unidade: mm`, padding + 5, canvas.offsetHeight - 5);
   }, [file]);
 
-  const width = size === 'small' ? 200 : 600;
-  const height = size === 'small' ? 120 : 400;
+  const width = size === 'small' ? 250 : 800;
+  const height = size === 'small' ? 150 : 500;
 
   return (
     <canvas
       ref={canvasRef}
-      width={width}
-      height={height}
-      style={{ width: '100%', height: '100%' }}
+      style={{
+        width: '100%',
+        height: '100%',
+        background: '#ffffff',
+        border: '1px solid #e5e7eb',
+        borderRadius: '8px'
+      }}
     />
   );
 };
@@ -188,11 +282,6 @@ const CadFileViewer = ({ file, onClose }) => {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Visualização expandida */}
-          <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <CadCanvas file={file} size="large" />
-          </div>
-
           {/* Detalhes */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50 p-4 rounded-lg">
@@ -202,27 +291,38 @@ const CadFileViewer = ({ file, onClose }) => {
               </p>
             </div>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-xs text-gray-600 uppercase font-semibold mb-2">Layers</p>
+              <p className="text-xs text-gray-600 uppercase font-semibold mb-2">Peças</p>
               <p className="text-lg font-bold text-gray-900">{file.layers?.length || 0}</p>
             </div>
           </div>
 
-          {/* Lista de layers */}
+          {/* Tabela de layers com dados */}
           {file.layers && file.layers.length > 0 && (
             <div>
-              <h4 className="font-semibold text-gray-900 mb-3">Layers</h4>
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {file.layers.map((layer, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-2 bg-gray-50 rounded">
-                    <div
-                      className="w-4 h-4 rounded"
-                      style={{
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'][idx % 6]
-                      }}
-                    />
-                    <span className="text-sm font-mono text-gray-700">{layer.name || `Layer ${idx}`}</span>
-                  </div>
-                ))}
+              <h4 className="font-semibold text-gray-900 mb-3">Peças Importadas</h4>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead style={{ backgroundColor: 'rgba(1, 112, 185, 0.05)' }}>
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold text-gray-900">Peça</th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-900">Comp. (mm)</th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-900">Larg. (mm)</th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-900">Esp. (mm)</th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-900">Elementos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {file.layers.map((layer, idx) => (
+                      <tr key={idx} className="border-t border-gray-200 hover:bg-gray-50">
+                        <td className="px-4 py-3 font-mono text-gray-900">{layer.name || `Peça ${idx + 1}`}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">{layer.width?.toFixed(1)}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">{layer.height?.toFixed(1)}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">{layer.depth?.toFixed(1)}</td>
+                        <td className="px-4 py-3 text-center text-gray-700">{layer.entityCount || 0}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

@@ -6,6 +6,7 @@ import ReportPage from './components/ReportPage';
 import LoginPage from './components/LoginPage';
 import AdminPage from './components/AdminPage';
 import AppleStyleDashboard from './components/AppleStyleDashboard';
+import Logo from './components/Logo';
 import SavingIndicator from './components/SavingIndicator';
 import QuotationPreviewModal from './components/QuotationPreviewModal';
 import QuotationReport from './components/QuotationReport';
@@ -22,18 +23,9 @@ import { initPersistence, enableTabSync, validateDatabase } from './services/per
 import { initAutoBackup, stopAutoBackup, getBackupSummary } from './services/autoBackupService';
 import { downloadQuotationPDF } from './services/pdfService';
 import { getSession, clearSession, hasAnyUser, createLocalUser } from './services/authService';
-import { ASTON_BRAND } from './services/themeService';
 import { generateQuotationCode } from './services/codeService';
 import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusService';
 import { PerformanceMonitor } from './utils/performanceMonitor';
-
-const ASTON_LOGO = 'https://astonmetalurgica.com.br/wp-content/uploads/2020/05/cropped-Logo-Aston-240x80.png';
-
-const ASTON_CONTACT = {
-  phones: ['+55 (47) 3436-4569', '+55 (47) 3801-7575'],
-  email: 'aston@astonmetalurgica.com.br',
-  website: 'https://astonmetalurgica.com.br'
-};
 
 const DEFAULT_MATERIALS = [
   { id: 'aço-carbono', name: 'Aço Carbono',   density: 7850, costPrice: 3.50, sellPrice: 4.25, basePrice: 4.25 },
@@ -278,11 +270,8 @@ function App() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <div className="text-center space-y-6">
-          <div>
-            <img src={ASTON_LOGO} alt="Aston Metalúrgica" className="h-24 object-contain mx-auto animate-pulse"
-              style={{ imageRendering: 'crisp-edges' }}
-              onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
-            <p className="hidden text-3xl font-bold mt-3" style={{ color: ASTON_BRAND }}>ASTON</p>
+          <div className="animate-pulse">
+            <Logo size="lg" />
           </div>
 
           <div className="space-y-2">

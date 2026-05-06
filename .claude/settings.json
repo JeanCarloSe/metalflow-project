@@ -13,7 +13,8 @@
       "Bash(git commit -m 'Improve home icon: modern design + navigate to home on click *)",
       "Bash(git commit -m 'Design: Premium Logo + Icon System \\(Modern & Strong\\) *)",
       "Bash(git commit -m 'Fix: DashboardPage quick action buttons now navigate correctly *)",
-      "Bash(git commit -m 'Enforce: Client selection required before saving quotation *)"
+      "Bash(git commit -m 'Enforce: Client selection required before saving quotation *)",
+      "WebFetch(domain:pt.dwgfastview.com)"
     ]
   }
 }

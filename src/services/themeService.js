@@ -1,9 +1,14 @@
-// ── PALETA PREMIUM ASTON ──────────────────────────────────────────────────────
+// ── PALETA PREMIUM METALFLOW ──────────────────────────────────────────────────
 
 // Cores primárias
-export const ASTON_BRAND = '#0170B9';        // Azul Aston
+export const ASTON_BRAND = '#0170B9';        // Azul MetalFlow
 export const ASTON_DARK = '#0D47A1';          // Azul escuro
 export const ASTON_LIGHT = '#42A5F5';         // Azul claro
+
+// Aliases MetalFlow (manter compatibilidade)
+export const METALFLOW_BRAND = ASTON_BRAND;
+export const METALFLOW_DARK = ASTON_DARK;
+export const METALFLOW_LIGHT = ASTON_LIGHT;
 
 // Cores secundárias
 export const PREMIUM_GOLD = '#D4AF37';        // Ouro premium
