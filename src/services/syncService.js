@@ -5,6 +5,7 @@
 
 import DatabasePool from './databasePool.js';
 import backendApi from './apiBackendService.js';
+import demoBackendService from './demoBackendService.js';
 
 class SyncService {
   static instance = null;
@@ -22,8 +23,17 @@ class SyncService {
     this.isSyncing = false;
     this.changeLog = [];
     this.listeners = new Map();
+    this.useDemo = false;
+    this.backendApi = backendApi;
 
     this.initialize();
+  }
+
+  /**
+   * 🔌 Obter API a usar (real ou demo)
+   */
+  getApi() {
+    return this.useDemo ? demoBackendService : this.backendApi;
   }
 
   /**
@@ -80,6 +90,13 @@ class SyncService {
     console.log('🔄 Iniciando sincronização...');
 
     try {
+      // Verificar se está online
+      if (!this.isOnline) {
+        console.log('📴 Offline - pulando sincronização');
+        this.isSyncing = false;
+        return;
+      }
+
       // Se não tem lastSyncTime, fazer snapshot (primeira vez)
       if (!this.lastSyncTime) {
         await this.importSnapshot();
@@ -97,8 +114,51 @@ class SyncService {
         lastSyncTime: this.lastSyncTime,
       });
     } catch (error) {
-      console.error('❌ Erro na sincronização:', error);
-      this.emit('syncError', { error });
+      const errorMsg = error?.message || String(error) || 'Erro desconhecido';
+      console.error('❌ Erro na sincronização:', errorMsg);
+      console.error('   Stack:', error?.stack);
+
+      // Se for erro de conexão e não estamos em demo mode, ativar demo
+      if (!this.useDemo && (
+        errorMsg.includes('fetch') ||
+        errorMsg.includes('network') ||
+        errorMsg.includes('Failed') ||
+        errorMsg.includes('Backend') ||
+        errorMsg.includes('Cannot') ||
+        errorMsg.includes('null')
+      )) {
+        console.log('📱 Ativando modo demo (backend indisponível)');
+        this.useDemo = true;
+
+        // Tentar sincronizar novamente em modo demo
+        try {
+          if (!this.lastSyncTime) {
+            await this.importSnapshot();
+          } else {
+            await this.syncIncremental();
+          }
+
+          this.lastSyncTime = new Date().toISOString();
+          localStorage.setItem('metalflow_lastSync', this.lastSyncTime);
+
+          console.log('✅ Modo demo ativado com sucesso');
+          this.emit('synced', {
+            timestamp: new Date(),
+            lastSyncTime: this.lastSyncTime,
+            isDemoMode: true,
+          });
+        } catch (demoError) {
+          console.error('❌ Erro até no modo demo:', demoError);
+          this.emit('syncWarning', {
+            message: '⚠️ Trabalhando em modo offline local. Backend indisponível.',
+          });
+        }
+      } else {
+        this.emit('syncError', {
+          error: errorMsg,
+          details: error
+        });
+      }
     } finally {
       this.isSyncing = false;
     }
@@ -111,7 +171,12 @@ class SyncService {
     console.log('📥 Importando snapshot completo...');
 
     try {
-      const response = await backendApi.getSyncSnapshot();
+      const api = this.getApi();
+      const response = await api.getSyncSnapshot();
+
+      if (!response) {
+        throw new Error('Backend não respondeu (null response)');
+      }
 
       if (response.ok && response.snapshot) {
         const { clients, materials, quotations, lines } = response.snapshot;
@@ -183,6 +248,8 @@ class SyncService {
     console.log('🔄 Sincronização incremental desde:', this.lastSyncTime);
 
     try {
+      const api = this.getApi();
+
       // 1. Enviar mudanças locais
       const changes = this.changeLog;
       if (changes.length > 0) {
@@ -194,10 +261,17 @@ class SyncService {
 
       // 2. Buscar mudanças remotas
       console.log('📥 Buscando mudanças remotas...');
-      const delta = await backendApi.getSyncDelta(this.lastSyncTime);
+      const delta = await api.getSyncDelta(this.lastSyncTime);
+
+      if (!delta) {
+        console.warn('⚠️ Backend não respondeu no delta');
+        return;
+      }
 
       if (delta.ok && delta.delta) {
         await this.applyDelta(delta.delta);
+      } else {
+        console.warn('⚠️ Resposta delta inválida:', delta);
       }
     } catch (error) {
       console.error('❌ Erro na sincronização incremental:', error);
@@ -210,6 +284,8 @@ class SyncService {
    */
   async uploadLocalChanges(changes) {
     try {
+      const api = this.getApi();
+
       // Agrupar mudanças por tipo
       const grouped = {
         clients: changes.filter(c => c.entity === 'clients').map(c => c.data),
@@ -217,7 +293,7 @@ class SyncService {
         quotations: changes.filter(c => c.entity === 'quotations').map(c => c.data),
       };
 
-      const response = await backendApi.importSyncChanges(grouped);
+      const response = await api.importSyncChanges(grouped);
 
       if (response.ok) {
         console.log(`✅ Mudanças sincronizadas:`, response.results);

@@ -40,9 +40,15 @@ export const useSync = () => {
       addNotification('✅ Sincronizado com sucesso', 'success');
     });
 
-    syncService.on('syncError', (error) => {
+    syncService.on('syncError', (data) => {
       updateStatus();
-      addNotification(`❌ Erro na sincronização: ${error.message}`, 'error');
+      const msg = data?.error || 'Erro desconhecido';
+      addNotification(`❌ Erro: ${msg}`, 'error');
+    });
+
+    syncService.on('syncWarning', (data) => {
+      updateStatus();
+      addNotification(`⚠️ ${data?.message || 'Backend indisponível'}`, 'warning');
     });
 
     syncService.on('changesUploaded', (results) => {
