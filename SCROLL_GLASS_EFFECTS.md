@@ -61,14 +61,16 @@ function MyPage() {
 
 ## 🎯 Como Funciona
 
-### ScrollGlassEffect (Global)
+### ScrollGlassEffect (Global - Sides Only)
 ```
 1. Escuta scroll do navegador
-2. Calcula opacidade: scrollY / 300 (máx 0.6)
-3. Calcula blur: scrollY / 100 (máx 12px)
-4. Calcula offset: scrollY * 0.3 (parallax)
-5. Aplica gradiente + backdrop-filter + transform
-6. Z-index: 20 (encima do conteúdo)
+2. Cria dois painéis: esquerda (5%) + direita (5%)
+3. Calcula opacidade: scrollY / 800 (máx 0.15 - bem sutil)
+4. Calcula blur: scrollY / 200 (máx 4px - discreto)
+5. Calcula offset: scrollY * 0.15 (parallax suave)
+6. Aplica gradiente apenas nas laterais
+7. Z-index: 20 (encima do conteúdo)
+8. Inclui linha de acento no topo
 ```
 
 ### PageGlassWrapper (Por página)
@@ -86,33 +88,30 @@ function MyPage() {
 
 ### Scroll Y = 0px (Inicial)
 ```
-┌─────────────────────┐
-│  Sem efeito         │
-│  Fundo branco       │
-│  Sem blur           │
-└─────────────────────┘
+│█|                        |█│
+│█|  Sem efeito           |█│
+│█|  Fundo branco         |█│
+│█|  Sem blur             |█│
 ```
+*5% cada lado, transparente*
 
-### Scroll Y = 300px (Meio)
+### Scroll Y = 400px (Meio)
 ```
-┌─────────────────────┐
-│  ✨ Glass efeito    │
-│  Gradiente azul     │
-│  Blur 6px           │
-│  Luz radial         │
-└─────────────────────┘
+│█╱|                      |╲█│
+│█╱|  ✨ Efeito sutil    |╲█│
+│█╱|  Gradiente leve     |╲█│
+│█╱|  Blur 2px           |╲█│
 ```
+*Opacidade 7%, Blur 2px*
 
-### Scroll Y = 600px+ (Máximo)
+### Scroll Y = 800px+ (Máximo)
 ```
-┌─────────────────────┐
-│  ✨✨ Premium glass  │
-│  Gradiente forte    │
-│  Blur 12px          │
-│  Shimmer effect     │
-│  Parallax suave     │
-└─────────────────────┘
+│█╱╱|                    |╲╲█│
+│█╱╱|  ✨ Glass elegante |╲╲█│
+│█╱╱|  Efeito sutil      |╲╲█│
+│█╱╱|  Blur 4px          |╲╲█│
 ```
+*Opacidade 15%, Blur 4px máximo*
 
 ---
 
