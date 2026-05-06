@@ -732,10 +732,10 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="text-4xl font-black" style={{ color: getStatusColor(key), textShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+                    <p className="text-4xl font-black text-black">
                       {count}
                     </p>
-                    <p className="text-xs font-bold uppercase tracking-wide mt-2 text-gray-900">
+                    <p className="text-xs font-bold uppercase tracking-wide mt-2 text-black">
                       {status.label}
                     </p>
                   </div>
@@ -744,7 +744,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
                   )}
                 </div>
                 {isActive && (
-                  <div className="text-xs font-semibold text-gray-700">
+                  <div className="text-xs font-semibold text-black">
                     {formatMoney(value)}
                   </div>
                 )}
