@@ -8,6 +8,8 @@
 
 const API_URL = import.meta.env.VITE_BACKEND_API || 'http://localhost:3000/api';
 
+console.log('📡 Backend API URL:', API_URL);
+
 class BackendAPIService {
   constructor() {
     this.lastSync = localStorage.getItem('quoteos_lastSync') || null;

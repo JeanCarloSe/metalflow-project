@@ -27,6 +27,8 @@ import { generateQuotationCode } from './services/codeService';
 import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusService';
 import { PerformanceMonitor } from './utils/performanceMonitor';
 import DatabaseConnection from './services/databaseConnection';
+import SyncService from './services/syncService';
+import SyncIndicator from './components/SyncIndicator';
 
 const DEFAULT_MATERIALS = [
   { id: 'aço-carbono', name: 'Aço Carbono',   density: 7850, costPrice: 3.50, sellPrice: 4.25, basePrice: 4.25 },
@@ -316,6 +318,7 @@ function App() {
         onAddMaterial={addMaterial}
       />
       <SavingIndicator isVisible={isSaving} />
+      <SyncIndicator />
     </>
   );
 }
