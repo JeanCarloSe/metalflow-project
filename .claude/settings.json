@@ -29,7 +29,8 @@
       "Bash(sed -i '' 's/max-w-6xl mx-auto px-4 py-16/max-w-6xl mx-auto px-3 sm:px-4 py-8 sm:py-12 md:py-16/g' src/components/DashboardPage.jsx)",
       "Bash(sed -i '' 's/gap-2 sm:gap-3 md:gap-4 sm:gap-6 md:gap-8/gap-4 sm:gap-6 md:gap-8/g' src/components/*.jsx)",
       "Bash(sed -i '' 's/gap-3 sm:gap-4 md:gap-6 sm:gap-8 md:gap-12/gap-6 sm:gap-8 md:gap-12/g' src/components/*.jsx)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(node scripts/postDeploy.js)"
     ],
     "additionalDirectories": [
       "/Users/jeancarlosseverino/Documents/metalflow-project/src/components"
