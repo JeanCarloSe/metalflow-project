@@ -30,7 +30,20 @@
       "Bash(sed -i '' 's/gap-2 sm:gap-3 md:gap-4 sm:gap-6 md:gap-8/gap-4 sm:gap-6 md:gap-8/g' src/components/*.jsx)",
       "Bash(sed -i '' 's/gap-3 sm:gap-4 md:gap-6 sm:gap-8 md:gap-12/gap-6 sm:gap-8 md:gap-12/g' src/components/*.jsx)",
       "Bash(git commit -m ' *)",
-      "Bash(node scripts/postDeploy.js)"
+      "Bash(node scripts/postDeploy.js)",
+      "Bash(curl -s https://metalflow.pages.dev/health)",
+      "Bash(wrangler pages *)",
+      "Bash(npx wrangler *)",
+      "Bash(curl -s https://162c3da9.metalflow.pages.dev/health)",
+      "Bash(curl -s https://d82f25cc.metalflow.pages.dev/health)",
+      "Bash(node -c functions/api/[[path]].js)",
+      "Bash(node -c 'functions/api/[[path]].js')",
+      "Bash(curl -s -X POST https://d82f25cc.metalflow.pages.dev/api/clients -H 'Content-Type: application/json' -d '{\"name\":\"Test\"}')",
+      "Bash(curl -s https://7f3974ce.metalflow-project.pages.dev/health)",
+      "Bash(git commit *)",
+      "Bash(curl -s https://metalflow-project.pages.dev/health)",
+      "Bash(curl -s -I https://metalflow.pages.dev/)",
+      "Bash(git clean *)"
     ],
     "additionalDirectories": [
       "/Users/jeancarlosseverino/Documents/metalflow-project/src/components"
