@@ -3,7 +3,7 @@
  * Conecta com IA/ML do backend para sugestões de preço
  */
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_BACKEND_API || '/api';
 
 export async function getSuggestedPrice(material, thickness, flat, quantity) {
   try {

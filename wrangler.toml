@@ -5,17 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "metalflow"
-database_id = "metalflow-db"
-
-# Environment variables
-[env.production]
-vars = { ENVIRONMENT = "production" }
-
-[env.preview]
-vars = { ENVIRONMENT = "preview" }
-
-# Routes para Workers
-[[routes]]
-pattern = "api/*"
-zone_name = "metalflow.pages.dev"
-custom_domain = true
+database_id = "57d2c15a-9d95-4926-acfc-c5e8621ea48e"

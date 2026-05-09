@@ -3,7 +3,7 @@ import DatabasePool from './databasePool.js';
 const SESSION_KEY = 'metalflow_user';
 const TENANT_KEY = 'metalflow_tenant';
 
-const API_URL = import.meta.env.VITE_BACKEND_API || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_BACKEND_API || '/api';
 
 /**
  * Login: tenta backend primeiro, fallback para local

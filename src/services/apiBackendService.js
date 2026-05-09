@@ -6,7 +6,7 @@
  * ✅ Multi-tenant isolado
  */
 
-const API_URL = import.meta.env.VITE_BACKEND_API || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_BACKEND_API || '/api';
 
 console.log('📡 Backend API URL:', API_URL);
 
