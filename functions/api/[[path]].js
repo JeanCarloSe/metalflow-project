@@ -52,6 +52,7 @@ export async function onRequest(context) {
     console.error('API error:', error);
     return new Response(JSON.stringify({
       error: error.message,
+      details: error.toString(),
       status: 'error'
     }), {
       status: 500,
@@ -75,23 +76,33 @@ async function handleClients(request, env, path, corsHeaders) {
   }
 
   if (request.method === 'POST') {
-    const body = await request.json();
-    const id = crypto.randomUUID();
+    try {
+      const body = await request.json();
+      const id = crypto.randomUUID();
 
-    await db.prepare(
-      `INSERT INTO clients (id, tenant_id, name, contact, phone, email,
-       address_street, address_number, address_city, address_state, address_zip, primary_color, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      id, tenantId, body.name, body.contact, body.phone, body.email,
-      body.address_street, body.address_number, body.address_city,
-      body.address_state, body.address_zip, body.primary_color, body.notes
-    ).run();
+      await db.prepare(
+        `INSERT INTO clients (id, tenant_id, name, contact, phone, email,
+         address_street, address_number, address_city, address_state, address_zip, primary_color, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        id, tenantId, body.name || '', body.contact || null, body.phone || null, body.email || null,
+        body.address_street || null, body.address_number || null, body.address_city || null,
+        body.address_state || null, body.address_zip || null, body.primary_color || null, body.notes || null
+      ).run();
 
-    return new Response(JSON.stringify({ id, ...body }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders }
-    });
+      return new Response(JSON.stringify({ id, ...body }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({
+        error: err.message,
+        details: err.toString()
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
   }
 }
 
@@ -110,22 +121,32 @@ async function handleQuotations(request, env, path, corsHeaders) {
   }
 
   if (request.method === 'POST') {
-    const body = await request.json();
-    const id = crypto.randomUUID();
+    try {
+      const body = await request.json();
+      const id = crypto.randomUUID();
 
-    await db.prepare(
-      `INSERT INTO quotations (id, tenant_id, client_id, number, date, status,
-       total_price, total_weight, notes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      id, tenantId, body.client_id, body.number, body.date,
-      body.status || 'draft', body.total_price || 0, body.total_weight || 0, body.notes
-    ).run();
+      await db.prepare(
+        `INSERT INTO quotations (id, tenant_id, client_id, number, date, status,
+         total_price, total_weight, notes)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        id, tenantId, body.client_id, body.number, body.date,
+        body.status || 'draft', body.total_price || 0, body.total_weight || 0, body.notes
+      ).run();
 
-    return new Response(JSON.stringify({ id, ...body }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders }
-    });
+      return new Response(JSON.stringify({ id, ...body }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({
+        error: err.message,
+        details: err.toString()
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
   }
 }
 
@@ -144,20 +165,30 @@ async function handleMaterials(request, env, path, corsHeaders) {
   }
 
   if (request.method === 'POST') {
-    const body = await request.json();
-    const id = crypto.randomUUID();
+    try {
+      const body = await request.json();
+      const id = crypto.randomUUID();
 
-    await db.prepare(
-      `INSERT INTO materials (id, tenant_id, name, density, cost_price, sell_price, base_price)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    ).bind(
-      id, tenantId, body.name, body.density, body.cost_price, body.sell_price, body.base_price
-    ).run();
+      await db.prepare(
+        `INSERT INTO materials (id, tenant_id, name, density, cost_price, sell_price, base_price)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).bind(
+        id, tenantId, body.name, body.density, body.cost_price, body.sell_price, body.base_price
+      ).run();
 
-    return new Response(JSON.stringify({ id, ...body }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders }
-    });
+      return new Response(JSON.stringify({ id, ...body }), {
+        status: 201,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    } catch (err) {
+      return new Response(JSON.stringify({
+        error: err.message,
+        details: err.toString()
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
+    }
   }
 }
 
