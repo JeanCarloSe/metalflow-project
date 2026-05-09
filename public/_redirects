@@ -1,4 +1,6 @@
+# API routes (Page Functions) - don't redirect
+/api/* 200
+
 # SPA routing - redirect all non-asset routes to index.html
 # This allows React Router to handle all routing on the client side
-
 /*  /index.html  200
