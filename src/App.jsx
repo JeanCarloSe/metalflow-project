@@ -28,7 +28,8 @@ import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusSe
 import { PerformanceMonitor } from './utils/performanceMonitor';
 import DatabaseConnection from './services/databaseConnection';
 import SyncService from './services/syncService';
-import SyncIndicator from './components/SyncIndicator';
+import MultiUserService from './services/multiUserService';
+import DataAccessService from './services/dataAccessService';
 
 const DEFAULT_MATERIALS = [
   { id: 'aço-carbono', name: 'Aço Carbono',   density: 7850, costPrice: 3.50, sellPrice: 4.25, basePrice: 4.25 },
@@ -105,7 +106,7 @@ function App() {
 
         setIsFirstAccess(!anyUser);
 
-        const session = getSession();
+        let session = getSession();
         if (session) setCurrentUser(session);
 
         setLoadingMessage('Carregando materiais...');
@@ -116,20 +117,49 @@ function App() {
         }
         setMaterials(loadedMaterials);
 
-        setLoadingMessage('Carregando clientes...');
-        setClients(await getClients());
+        setLoadingMessage('Carregando clientes e orçamentos...');
+        const allClients = await getClients();
 
-        setLoadingMessage('Carregando orçamentos...');
         // Remove duplicatas
         await cleanDuplicateQuotations();
-        setQuotations(await getQuotations());
+        const allQuotations = await getQuotations();
+
+        // Reatualizar session para garantir que temos a versão mais recente
+        session = getSession();
+
+        // Filtrar dados baseado na role do usuário
+        const filteredClients = DataAccessService.filterClients(
+          allClients,
+          allQuotations,
+          session
+        );
+        const filteredQuotations = DataAccessService.filterQuotations(allQuotations, session);
+
+        setClients(filteredClients);
+        setQuotations(filteredQuotations);
 
         setLoadingMessage('Finalizando...');
         // Habilitar sincronização entre abas
         const unsubscribeSync = enableTabSync(async () => {
           setMaterials(await getMaterials());
-          setClients(await getClients());
-          setQuotations(await getQuotations());
+
+          // Filtrar dados baseado na role do usuário
+          const currentSession = getSession();
+          const syncClients = await getClients();
+          const syncQuotations = await getQuotations();
+
+          const syncFilteredClients = DataAccessService.filterClients(
+            syncClients,
+            syncQuotations,
+            currentSession
+          );
+          const syncFilteredQuotations = DataAccessService.filterQuotations(
+            syncQuotations,
+            currentSession
+          );
+
+          setClients(syncFilteredClients);
+          setQuotations(syncFilteredQuotations);
         });
 
         // Iniciar auto-backup automático (a cada 30 minutos)
@@ -152,14 +182,22 @@ function App() {
   }, []);
 
   const handleLogin = (user) => {
+    const multiUserService = MultiUserService.getInstance();
     setCurrentUser(user);
+    setCurrentTenant(user.tenantId);
     setIsFirstAccess(false);
     setCurrentPage('dashboard');
+
+    // Emitir evento de login para MultiUserService
+    multiUserService.emit('userLoggedIn', user);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const multiUserService = MultiUserService.getInstance();
+    await multiUserService.logout();
     clearSession();
     setCurrentUser(null);
+    setCurrentTenant(null);
     setCurrentPage('dashboard');
   };
 
@@ -170,6 +208,16 @@ function App() {
 
   const handleClientAdded = async (data) => {
     try {
+      const multiUserService = MultiUserService.getInstance();
+
+      // Verificar permissão
+      if (!multiUserService.hasPermission('create', 'clients')) {
+        console.error('❌ Sem permissão para criar clientes');
+        setSuccessMessage('❌ Você não tem permissão para criar clientes');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        return;
+      }
+
       setIsSaving(true);
       console.log('📝 Salvando novo cliente...');
       const start = performance.now();
@@ -184,6 +232,9 @@ function App() {
       await addClient(clientWithId);
       const saveDuration = performance.now() - start;
       console.log(`✅ Cliente salvo em ${Math.round(saveDuration)}ms`);
+
+      // Rastrear mudança para sincronização e audit log
+      multiUserService.trackChange('clients', clientWithId, 'create');
 
       // Atualizar lista LOCALMENTE (não recarregar tudo)
       const updateStart = performance.now();
@@ -202,6 +253,16 @@ function App() {
 
   const handleClientUpdated = async (updatedClient) => {
     try {
+      const multiUserService = MultiUserService.getInstance();
+
+      // Verificar permissão
+      if (!multiUserService.hasPermission('update', 'clients')) {
+        console.error('❌ Sem permissão para atualizar clientes');
+        setSuccessMessage('❌ Você não tem permissão para atualizar clientes');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        return;
+      }
+
       setIsSaving(true);
       console.log('📝 Atualizando cliente...');
       const start = performance.now();
@@ -210,6 +271,9 @@ function App() {
       await updateClient(updatedClient);
       const saveDuration = performance.now() - start;
       console.log(`✅ Cliente atualizado em ${Math.round(saveDuration)}ms`);
+
+      // Rastrear mudança para sincronização e audit log
+      multiUserService.trackChange('clients', updatedClient, 'update');
 
       // Atualizar lista LOCALMENTE
       const updateStart = performance.now();
@@ -229,14 +293,35 @@ function App() {
 
   const handleQuotationSubmit = async (quotation) => {
     try {
+      const multiUserService = MultiUserService.getInstance();
       const isEditing = !!quotation.id;
+      const actionType = isEditing ? 'update' : 'create';
+
+      // Verificar permissão
+      if (!multiUserService.hasPermission(actionType, 'quotations')) {
+        console.error(`❌ Sem permissão para ${actionType === 'create' ? 'criar' : 'atualizar'} orçamentos`);
+        setSuccessMessage(`❌ Você não tem permissão para ${actionType === 'create' ? 'criar' : 'atualizar'} orçamentos`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+        return;
+      }
+
       const number = quotation.number || generateQuotationCode();
-      const newQuotation = { ...quotation, number, operator: currentUser };
+      const newQuotation = {
+        ...quotation,
+        number,
+        operator: currentUser,
+        operatorId: currentUser?.id,
+        createdBy: currentUser?.id,
+      };
 
       if (isEditing) {
         // Atualizando orçamento existente
         await updateQuotation(newQuotation);
         setQuotations(await getQuotations());
+
+        // Rastrear mudança para sincronização e audit log
+        multiUserService.trackChange('quotations', newQuotation, 'update');
+
         const clientData = clients.find(c => c.id === quotation.clientId);
         if (clientData) {
           setTimeout(() => {
@@ -256,6 +341,9 @@ function App() {
 
         await addQuotation(newQuotation);
         setQuotations(await getQuotations());
+
+        // Rastrear mudança para sincronização e audit log
+        multiUserService.trackChange('quotations', newQuotation, 'create');
 
         // Gera PDF do orçamento
         const clientData = clients.find(c => c.id === quotation.clientId);
@@ -318,7 +406,6 @@ function App() {
         onAddMaterial={addMaterial}
       />
       <SavingIndicator isVisible={isSaving} />
-      <SyncIndicator />
     </>
   );
 }

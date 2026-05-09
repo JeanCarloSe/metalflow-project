@@ -8,6 +8,7 @@ import DashboardPage from './DashboardPage';
 import QuotationBuilder from './QuotationBuilder';
 import ClientsPage from './ClientsPage';
 import ReportPage from './ReportPage';
+import AnalyticsReport from './AnalyticsReport';
 
 const AdminPage = lazy(() => import('./AdminPage'));
 const ClientsListReport = lazy(() => import('./ClientsListReport'));
@@ -207,21 +208,11 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'analytics' && (
-          <section className="min-h-screen py-16 pb-32">
-            <motion.div
-              className="max-w-6xl mx-auto px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h2 className="text-4xl font-bold mb-8 text-gray-900">Relatórios & Analytics</h2>
-              <button
-                onClick={() => setShowReport(true)}
-                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold rounded-full hover:shadow-lg transition-shadow"
-              >
-                Ver Relatório Detalhado
-              </button>
-            </motion.div>
+          <section className="min-h-screen py-8 pb-32 bg-white">
+            <AnalyticsReport
+              quotations={quotations}
+              clients={clients}
+            />
           </section>
         )}
 

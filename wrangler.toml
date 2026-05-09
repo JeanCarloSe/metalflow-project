@@ -1,0 +1,31 @@
+# Cloudflare Pages + Workers Configuration
+# Deploy: `wrangler pages deploy dist`
+
+name = "metalflow"
+type = "javascript"
+
+# Pages configuration
+pages_build_configuration = {
+  build_command = "npm run build",
+  build_caching = true,
+  build_dir = "dist",
+  build_watch_paths = ["src/**/*.{jsx,js,css}"],
+  preview_branch_includes = ["*"],
+  preview_branch_excludes = []
+}
+
+# Environment variables (adicionar em Settings > Environment Variables no dashboard)
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[env.preview]
+vars = { ENVIRONMENT = "preview" }
+
+[env.development]
+vars = { ENVIRONMENT = "development" }
+
+# Observability
+observability = { enabled = true }
+
+# Analytics Engine (para performance monitoring)
+analytics_engine_datasets = ["metalflow_performance"]

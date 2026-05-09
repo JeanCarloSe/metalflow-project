@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { loginUser, createLocalUser } from '../services/authService';
 import { ASTON_BRAND } from '../services/themeService';
+import MultiUserService from '../services/multiUserService';
 import Logo from './Logo';
 
 const LoginPage = ({ onLogin, isFirstAccess }) => {
@@ -45,12 +46,13 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
     try {
       const tenantId = 'metalflow'; // ID do tenant (fixo por enquanto)
       localStorage.setItem('metalflow_tenant', tenantId);
+      const multiUserService = MultiUserService.getInstance();
 
       if (mode === 'login') {
-        // Fallback: login local se backend não responder
+        // Tentar login via MultiUserService (tenta backend primeiro)
         try {
-          const result = await loginUser(login, password, tenantId);
-          if (result.ok) {
+          const result = await multiUserService.login(login, password, tenantId);
+          if (result.ok && result.user) {
             if (rememberMe) {
               localStorage.setItem('metalflow_login', login);
               localStorage.setItem('metalflow_password', password);
@@ -60,6 +62,7 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
               localStorage.removeItem('metalflow_password');
               localStorage.removeItem('metalflow_remember');
             }
+            localStorage.setItem('metalflow_user', JSON.stringify(result.user));
             onLogin(result.user);
             return;
           }
@@ -95,12 +98,31 @@ const LoginPage = ({ onLogin, isFirstAccess }) => {
           setError('Credenciais inválidas (login: admin, senha: 123456)');
         }
       } else {
-        // Criar novo usuário
+        // Criar novo usuário via MultiUserService
+        try {
+          const result = await multiUserService.register(login, login + '@metalflow.local', name, password, tenantId);
+          if (result.ok && result.user) {
+            // Login automático após registro
+            const loginResult = await multiUserService.login(login, password, tenantId);
+            if (loginResult.ok) {
+              localStorage.setItem('metalflow_user', JSON.stringify(loginResult.user));
+              onLogin(loginResult.user);
+            } else {
+              setError('Registro realizado, mas houve erro ao fazer login');
+            }
+            return;
+          }
+        } catch (err) {
+          console.warn('Backend indisponível, usando fallback local');
+        }
+
+        // Fallback: criar usuário local
         const result = await createLocalUser(login, password, name, number, role);
         if (result.ok) {
           // Login automático após registro
           const loginResult = await loginUser(login, password, tenantId);
           if (loginResult.ok) {
+            localStorage.setItem('metalflow_user', JSON.stringify(loginResult.user));
             onLogin(loginResult.user);
           } else {
             setError('Registro realizado, mas houve erro ao fazer login: ' + loginResult.error);

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { getStatusLabel, getStatusColor, getStatusBg, QUOTATION_STATUS } from '../services/statusService';
 import { getInsights, getRecommendations } from '../services/pricingBackend';
+import DataAccessService from '../services/dataAccessService';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area
 } from 'recharts';
@@ -141,6 +142,11 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
 
+  // Filtrar quotations baseado na role do usuário
+  const accessibleQuotations = useMemo(() => {
+    return DataAccessService.filterQuotations(quotations, currentUser);
+  }, [quotations, currentUser]);
+
   // Fetch insights and recommendations from backend
   useEffect(() => {
     const fetchAIData = async () => {
@@ -158,11 +164,11 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
   }, [quotations]);
 
   const thisMonthQuotations = useMemo(() => {
-    return quotations.filter(q => {
+    return accessibleQuotations.filter(q => {
       const qDate = new Date(q.date);
       return qDate.getMonth() === currentMonth && qDate.getFullYear() === currentYear;
     });
-  }, [quotations, currentMonth, currentYear]);
+  }, [accessibleQuotations, currentMonth, currentYear]);
 
   const stats = useMemo(() => {
     const monthTotal = thisMonthQuotations.length;
@@ -176,7 +182,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       valueByStatus[status] = 0;
     });
 
-    quotations.forEach(q => {
+    accessibleQuotations.forEach(q => {
       const status = q.status || 'em-andamento';
       byStatus[status]++;
       valueByStatus[status] += parseFloat(q.totalPrice || 0);
@@ -196,10 +202,10 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
     });
 
     // Análise por cliente
-    const uniqueClients = new Set(quotations.map(q => q.clientId));
+    const uniqueClients = new Set(accessibleQuotations.map(q => q.clientId));
     const clientsData = Array.from(uniqueClients).map(clientId => {
       const client = clients.find(c => c.id === clientId);
-      const clientQuotes = quotations.filter(q => q.clientId === clientId);
+      const clientQuotes = accessibleQuotations.filter(q => q.clientId === clientId);
       const approved = clientQuotes.filter(q => q.status === 'aprovado').length;
       const conversionRate = clientQuotes.length > 0 ? (approved / clientQuotes.length) * 100 : 0;
       return {
@@ -215,7 +221,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
     // Análise por material
     const materialStats = {};
-    quotations.forEach(q => {
+    accessibleQuotations.forEach(q => {
       q.lines?.forEach(line => {
         const matId = line.materialId;
         if (!materialStats[matId]) {
@@ -321,7 +327,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       timelineData,
       cascataData,
     };
-  }, [thisMonthQuotations, quotations, clients]);
+  }, [thisMonthQuotations, accessibleQuotations, clients]);
 
   const monthName = new Date(currentYear, currentMonth).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
 
@@ -706,7 +712,10 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
                 key={key}
                 onClick={() => {
                   if (onNavigate) {
-                    onNavigate('history', { filterStatus: key });
+                    // Navegar para analytics com filtro de status
+                    onNavigate('analytics');
+                    // Armazenar filtro no localStorage para a tela de analytics
+                    localStorage.setItem('quotationStatusFilter', key);
                   }
                 }}
                 disabled={!isActive}

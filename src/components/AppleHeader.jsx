@@ -57,9 +57,11 @@ const AppleHeader = ({ currentUser, onLogout, onNavigate, onAdminClick, isAdminM
 
         {/* User Info */}
         <motion.div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-          <div className="text-right hidden sm:block">
-            <p className="text-sm font-semibold text-gray-900">{currentUser?.name || 'Admin'}</p>
-            <p className="text-xs text-gray-500">{currentUser?.role}</p>
+          <div className="text-right hidden sm:flex sm:items-center sm:gap-2">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <p className="text-sm font-semibold text-green-700">
+              {currentUser?.name || 'Admin'} • {currentUser?.role}
+            </p>
           </div>
           {currentUser?.role === 'admin' && onAdminClick && (
             <motion.button

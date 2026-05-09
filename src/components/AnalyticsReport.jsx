@@ -1,22 +1,46 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { generateClientReport, calculateMaterialMetrics, generateMonthlyTrend, exportToCSV, calculatePerformanceScore } from '../services/analyticsService';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { QUOTATION_STATUS, getStatusLabel } from '../services/statusService';
+import DataAccessService from '../services/dataAccessService';
+import { getSession } from '../services/authService';
 
 const AnalyticsReport = ({ quotations, clients }) => {
   const [exportFormat, setExportFormat] = useState('csv');
   const [selectedMetric, setSelectedMetric] = useState('clients');
+  const [statusFilter, setStatusFilter] = useState(null);
+
+  // Carregar filtro do localStorage
+  useEffect(() => {
+    const filter = localStorage.getItem('quotationStatusFilter');
+    if (filter) {
+      setStatusFilter(filter);
+      localStorage.removeItem('quotationStatusFilter'); // Limpar após usar
+    }
+  }, []);
+
+  // Filtrar quotations baseado na role do usuário
+  const accessibleQuotations = useMemo(() => {
+    const currentUser = getSession();
+    return DataAccessService.filterQuotations(quotations, currentUser);
+  }, [quotations]);
 
   const analytics = useMemo(() => {
-    const clientReport = generateClientReport(quotations, clients);
-    const materialMetrics = calculateMaterialMetrics(quotations);
-    const monthlyTrend = generateMonthlyTrend(quotations);
+    // Filtrar quotations por status se houver filtro ativo
+    const filteredQuotations = statusFilter
+      ? accessibleQuotations.filter(q => q.status === statusFilter)
+      : accessibleQuotations;
+
+    const clientReport = generateClientReport(filteredQuotations, clients);
+    const materialMetrics = calculateMaterialMetrics(filteredQuotations);
+    const monthlyTrend = generateMonthlyTrend(filteredQuotations);
 
     return {
       clientReport,
       materialMetrics,
       monthlyTrend,
     };
-  }, [quotations, clients]);
+  }, [accessibleQuotations, clients, statusFilter]);
 
   const trendData = Object.entries(analytics.monthlyTrend).map(([month, data]) => ({
     month,
@@ -64,6 +88,19 @@ const AnalyticsReport = ({ quotations, clients }) => {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2" style={{ color: '#0170B9' }}>📊 Relatórios Avançados</h1>
         <p className="text-lg text-gray-600">Análise detalhada e exportação de dados</p>
+        {statusFilter && (
+          <div className="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded flex items-center justify-between">
+            <span className="text-sm">
+              <strong>Filtro ativo:</strong> Exibindo apenas orçamentos <strong>{getStatusLabel(statusFilter)}</strong>
+            </span>
+            <button
+              onClick={() => setStatusFilter(null)}
+              className="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+            >
+              ✕ Limpar filtro
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Metric Selector & Export */}
