@@ -11,6 +11,39 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
 };
 
+const ArrowRightIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M2.5 7h9M8 3.5L11.5 7 8 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PipelineIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <circle cx="3" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
+    <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
+    <circle cx="15" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M5 9h2M11 9h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <path d="M3 4v2M9 4v2M15 4v2M3 12v2M9 12v2M15 12v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const PrecisionIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <path d="M4 14L9 3L14 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 10.5h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    <path d="M9 3V1.5M4 14H2.5M14 14H15.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+  </svg>
+);
+
+const DashboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <rect x="1.5" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="10" y="1.5" width="6.5" height="4" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="10" y="7.5" width="6.5" height="9" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="1.5" y="11.5" width="6.5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+  </svg>
+);
+
 const metrics = [
   { value: '+37%', label: 'Conversão de orçamentos' },
   { value: '4×', label: 'Velocidade de criação' },
@@ -249,40 +282,5 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
     </section>
   );
 };
-
-// ── Ícones ─────────────────────────────────────────────────────────────────────
-
-const ArrowRightIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M2.5 7h9M8 3.5L11.5 7 8 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const PipelineIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-    <circle cx="3" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
-    <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
-    <circle cx="15" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
-    <path d="M5 9h2M11 9h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    <path d="M3 4v2M9 4v2M15 4v2M3 12v2M9 12v2M15 12v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-  </svg>
-);
-
-const PrecisionIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-    <path d="M4 14L9 3L14 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M6 10.5h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-    <path d="M9 3V1.5M4 14H2.5M14 14H15.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
-  </svg>
-);
-
-const DashboardIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-    <rect x="1.5" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
-    <rect x="10" y="1.5" width="6.5" height="4" rx="1" stroke="currentColor" strokeWidth="1.3" />
-    <rect x="10" y="7.5" width="6.5" height="9" rx="1" stroke="currentColor" strokeWidth="1.3" />
-    <rect x="1.5" y="11.5" width="6.5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
-  </svg>
-);
 
 export default AppleHero;

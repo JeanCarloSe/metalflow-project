@@ -1,86 +1,40 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
-import QuotationBuilder from './components/QuotationBuilder';
-import ClientsPage from './components/ClientsPage';
-import ClientHomePage from './components/ClientHomePage';
-import ReportPage from './components/ReportPage';
+import React, { useState, useEffect } from 'react';
 import LoginPage from './components/LoginPage';
-import AdminPage from './components/AdminPage';
 import AppleStyleDashboard from './components/AppleStyleDashboard';
 import Logo from './components/Logo';
 import SavingIndicator from './components/SavingIndicator';
-import QuotationPreviewModal from './components/QuotationPreviewModal';
-import QuotationReport from './components/QuotationReport';
-import ClientDetailModal from './components/ClientDetailModal';
-import DashboardPage from './components/DashboardPage';
-import AnalyticsReport from './components/AnalyticsReport';
-import TenantAdmin from './components/TenantAdmin';
-import IntegrationsPanel from './components/IntegrationsPanel';
 import {
-  getClients, addClient, updateClient,
+  getClients, addClient, updateClient, deleteClient,
   getQuotations, addQuotation, updateQuotation,
-  getMaterials, addMaterial, updateMaterial,
-  cleanDuplicateQuotations,
+  getMaterials, addMaterial,
 } from './services/d1Service';
-import { initPersistence, enableTabSync, validateDatabase } from './services/persistenceService';
-import { initAutoBackup, stopAutoBackup, getBackupSummary } from './services/autoBackupService';
 import { downloadQuotationPDF } from './services/pdfService';
-import { getSession, clearSession, hasAnyUser, createLocalUser } from './services/authService';
 import { generateQuotationCode } from './services/codeService';
-import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusService';
-import { PerformanceMonitor } from './utils/performanceMonitor';
-import SyncService from './services/syncService';
-import MultiUserService from './services/multiUserService';
 import DataAccessService from './services/dataAccessService';
 
 const DEFAULT_MATERIALS = [
   { id: 'aço-carbono', name: 'Aço Carbono',   density: 7850, costPrice: 3.50, sellPrice: 4.25, basePrice: 4.25 },
   { id: 'inox',        name: 'Inox 304',       density: 8000, costPrice: 4.10, sellPrice: 5.30, basePrice: 5.30 },
-  { id: 'aluminio',    name: 'Alumínio 1050',  density: 2700, costPrice: 4.50, sellPrice: 6.00, basePrice: 6.00  },
-];
-
-const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'clients',   label: 'Clientes'  },
-  { id: 'quotation', label: 'Orçador'   },
-  { id: 'materials', label: 'Materiais' },
-  { id: 'history',   label: 'Histórico' },
-  { id: 'analytics', label: 'Relatórios' },
+  { id: 'aluminio',    name: 'Alumínio 1050',  density: 2700, costPrice: 4.50, sellPrice: 6.00, basePrice: 6.00 },
 ];
 
 function App() {
-  const [materials,        setMaterials]        = useState([]);
-  const [loading,          setLoading]          = useState(true);
-  const [loadingMessage,   setLoadingMessage]   = useState('Carregando...');
-  const [currentPage,      setCurrentPage]      = useState('dashboard');
-  const [clients,          setClients]          = useState([]);
-  const [quotations,       setQuotations]       = useState([]);
-  const [selectedClient,   setSelectedClient]   = useState(null);
-  const [currentUser,      setCurrentUser]      = useState(null);
-  const [currentTenant,    setCurrentTenant]    = useState(null);
-  const [isFirstAccess,    setIsFirstAccess]    = useState(false);
-  const [showReport,       setShowReport]       = useState(false);
-  const [showTenantAdmin,  setShowTenantAdmin]  = useState(false);
-  const [showIntegrations, setShowIntegrations] = useState(false);
-  const [editingQuotation,  setEditingQuotation]  = useState(null);
-  const [editingClient,     setEditingClient]     = useState(null);
-  const [successMessage,    setSuccessMessage]    = useState('');
-  const [viewingClientHome, setViewingClientHome] = useState(null);
-  const [isSaving,          setIsSaving]          = useState(false);
+  const [materials,       setMaterials]       = useState([]);
+  const [loading,         setLoading]         = useState(true);
+  const [loadingMessage,  setLoadingMessage]  = useState('Carregando...');
+  const [clients,         setClients]         = useState([]);
+  const [quotations,      setQuotations]      = useState([]);
+  const [currentUser,     setCurrentUser]     = useState(null);
+  const [editingClient,   setEditingClient]   = useState(null);
+  const [successMessage,  setSuccessMessage]  = useState('');
+  const [isSaving,        setIsSaving]        = useState(false);
 
   useEffect(() => {
     const bootstrap = async () => {
       try {
         setLoadingMessage('Verificando autenticação...');
-        let anyUser = await hasAnyUser();
-
-        if (!anyUser) {
-          const result = await createLocalUser('adm', 'adm', 'Administrador', 'ADM-001', 'admin');
-          if (result.ok) anyUser = true;
-        }
-
-        setIsFirstAccess(!anyUser);
-
-        let session = getSession();
+        const stored = localStorage.getItem('metalflow_user');
+        const session = stored ? JSON.parse(stored) : null;
         if (session) setCurrentUser(session);
 
         setLoadingMessage('Carregando materiais...');
@@ -91,19 +45,12 @@ function App() {
         }
         setMaterials(loadedMaterials);
 
-        setLoadingMessage('Carregando clientes e orçamentos...');
-        const allClients = await getClients();
+        setLoadingMessage('Carregando dados...');
+        const allClients    = await getClients();
         const allQuotations = await getQuotations();
 
-        session = getSession();
-
-        const filteredClients = DataAccessService.filterClients(allClients, allQuotations, session);
-        const filteredQuotations = DataAccessService.filterQuotations(allQuotations, session);
-
-        setClients(filteredClients);
-        setQuotations(filteredQuotations);
-
-        return unsubscribeSync;
+        setClients(DataAccessService.filterClients(allClients, allQuotations, session));
+        setQuotations(DataAccessService.filterQuotations(allQuotations, session));
       } catch (error) {
         console.error('❌ Erro ao inicializar:', error);
       } finally {
@@ -111,85 +58,69 @@ function App() {
       }
     };
 
-    let unsubscribe;
-    bootstrap().then(unsub => { unsubscribe = unsub; });
-
-    return () => {
-      if (unsubscribe) unsubscribe();
-    };
+    bootstrap();
   }, []);
 
-  const handleLogin = (user) => {
-    const multiUserService = MultiUserService.getInstance();
+  const handleLogin = async (user) => {
     setCurrentUser(user);
-    setCurrentTenant(user.tenantId);
-    setIsFirstAccess(false);
-    setCurrentPage('dashboard');
-
-    // Emitir evento de login para MultiUserService
-    multiUserService.emit('userLoggedIn', user);
+    try {
+      const allClients    = await getClients();
+      const allQuotations = await getQuotations();
+      setClients(DataAccessService.filterClients(allClients, allQuotations, user));
+      setQuotations(DataAccessService.filterQuotations(allQuotations, user));
+    } catch (e) {
+      console.warn('Erro ao recarregar dados pós-login:', e);
+    }
   };
 
   const handleLogout = async () => {
-    try {
-      const multiUserService = MultiUserService.getInstance();
-      await multiUserService.logout();
-    } catch (e) {
-      console.warn('Logout backend falhou, limpando sessão local', e);
-    }
-    clearSession();
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (_) {}
     localStorage.removeItem('metalflow_user');
     localStorage.removeItem('metalflow_session');
     setCurrentUser(null);
-    setCurrentTenant(null);
-    setCurrentPage('dashboard');
-  };
-
-  const handleNewQuotation = (client) => {
-    setSelectedClient(client);
-    setCurrentPage('quotation');
+    setClients([]);
+    setQuotations([]);
   };
 
   const handleClientAdded = async (data) => {
     try {
-      const multiUserService = MultiUserService.getInstance();
-
-      // Verificar permissão
-      if (!multiUserService.hasPermission('create', 'clients')) {
-        console.error('❌ Sem permissão para criar clientes');
-        setSuccessMessage('❌ Você não tem permissão para criar clientes');
-        setTimeout(() => setSuccessMessage(''), 3000);
-        return;
-      }
-
       setIsSaving(true);
-      console.log('📝 Salvando novo cliente...');
-      const start = performance.now();
-
-      // Adicionar cliente com ID automático
-      const clientWithId = {
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        ...data
-      };
-
+      const clientWithId = { id: Date.now().toString(), createdAt: new Date().toISOString(), ...data };
       await addClient(clientWithId);
-      const saveDuration = performance.now() - start;
-      console.log(`✅ Cliente salvo em ${Math.round(saveDuration)}ms`);
-
-      // Rastrear mudança para sincronização e audit log
-      multiUserService.trackChange('clients', clientWithId, 'create');
-
-      // Atualizar lista LOCALMENTE (não recarregar tudo)
-      const updateStart = performance.now();
       setClients(prev => [clientWithId, ...prev]);
-      const updateDuration = performance.now() - updateStart;
-      console.log(`✅ UI atualizada em ${Math.round(updateDuration)}ms`);
-
-      setSuccessMessage(`✓ Cliente ${data.name} adicionado com sucesso!`);
+      setSuccessMessage(`✓ Cliente ${data.name} adicionado!`);
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (error) {
       console.error('❌ Erro ao salvar cliente:', error);
+      setSuccessMessage('❌ Erro ao salvar cliente');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const reloadData = async () => {
+    try {
+      const allClients    = await getClients();
+      const allQuotations = await getQuotations();
+      setClients(DataAccessService.filterClients(allClients, allQuotations, currentUser));
+      setQuotations(DataAccessService.filterQuotations(allQuotations, currentUser));
+    } catch (e) {
+      console.warn('Erro ao recarregar dados:', e);
+    }
+  };
+
+  const handleDeleteClient = async (clientId) => {
+    try {
+      setIsSaving(true);
+      await deleteClient(clientId);
+      setClients(prev => prev.filter(c => c.id !== clientId));
+      setSuccessMessage('✓ Cliente removido!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Erro ao deletar cliente:', error);
+      setSuccessMessage('❌ Erro ao remover cliente');
+      setTimeout(() => setSuccessMessage(''), 3000);
     } finally {
       setIsSaving(false);
     }
@@ -197,33 +128,9 @@ function App() {
 
   const handleClientUpdated = async (updatedClient) => {
     try {
-      const multiUserService = MultiUserService.getInstance();
-
-      // Verificar permissão
-      if (!multiUserService.hasPermission('update', 'clients')) {
-        console.error('❌ Sem permissão para atualizar clientes');
-        setSuccessMessage('❌ Você não tem permissão para atualizar clientes');
-        setTimeout(() => setSuccessMessage(''), 3000);
-        return;
-      }
-
       setIsSaving(true);
-      console.log('📝 Atualizando cliente...');
-      const start = performance.now();
-
       await updateClient(updatedClient);
-      const saveDuration = performance.now() - start;
-      console.log(`✅ Cliente atualizado em ${Math.round(saveDuration)}ms`);
-
-      // Rastrear mudança para sincronização e audit log
-      multiUserService.trackChange('clients', updatedClient, 'update');
-
-      // Atualizar lista LOCALMENTE
-      const updateStart = performance.now();
       setClients(prev => prev.map(c => c.id === updatedClient.id ? updatedClient : c));
-      const updateDuration = performance.now() - updateStart;
-      console.log(`✅ UI atualizada em ${Math.round(updateDuration)}ms`);
-
       setEditingClient(null);
       setSuccessMessage(`✓ Cliente ${updatedClient.name} atualizado!`);
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -236,18 +143,7 @@ function App() {
 
   const handleQuotationSubmit = async (quotation) => {
     try {
-      const multiUserService = MultiUserService.getInstance();
       const isEditing = !!quotation.id;
-      const actionType = isEditing ? 'update' : 'create';
-
-      // Verificar permissão
-      if (!multiUserService.hasPermission(actionType, 'quotations')) {
-        console.error(`❌ Sem permissão para ${actionType === 'create' ? 'criar' : 'atualizar'} orçamentos`);
-        setSuccessMessage(`❌ Você não tem permissão para ${actionType === 'create' ? 'criar' : 'atualizar'} orçamentos`);
-        setTimeout(() => setSuccessMessage(''), 3000);
-        return;
-      }
-
       const number = quotation.number || generateQuotationCode();
       const newQuotation = {
         ...quotation,
@@ -258,70 +154,41 @@ function App() {
       };
 
       if (isEditing) {
-        // Atualizando orçamento existente
         await updateQuotation(newQuotation);
-        setQuotations(await getQuotations());
-
-        // Rastrear mudança para sincronização e audit log
-        multiUserService.trackChange('quotations', newQuotation, 'update');
-
-        const clientData = clients.find(c => c.id === quotation.clientId);
-        if (clientData) {
-          setTimeout(() => {
-            downloadQuotationPDF(newQuotation, clientData);
-          }, 500);
-        }
-        setSuccessMessage(`✓ Orçamento ${number} atualizado com sucesso! PDF gerado.`);
       } else {
-        // Criando novo orçamento
-        // Evita duplicatas verificando se orçamento com mesmo número já existe
-        const allQuotations = await getQuotations();
-        const exists = allQuotations.some(q => q.number === number);
-        if (exists) {
-          console.warn('Orçamento com número', number, 'já existe. Evitando duplicata.');
-          return;
-        }
-
+        const allQ = await getQuotations();
+        if (allQ.some(q => q.number === number)) return;
         await addQuotation(newQuotation);
-        setQuotations(await getQuotations());
-
-        // Rastrear mudança para sincronização e audit log
-        multiUserService.trackChange('quotations', newQuotation, 'create');
-
-        // Gera PDF do orçamento
-        const clientData = clients.find(c => c.id === quotation.clientId);
-        if (clientData) {
-          setTimeout(() => {
-            downloadQuotationPDF(newQuotation, clientData);
-          }, 500);
-        }
-
-        setSuccessMessage(`✓ Orçamento ${number} salvo com sucesso! PDF gerado.`);
       }
+
+      setQuotations(await getQuotations());
+
+      const clientData = clients.find(c => c.id === quotation.clientId);
+      if (clientData) {
+        setTimeout(() => downloadQuotationPDF(newQuotation, clientData), 500);
+      }
+
+      setSuccessMessage(`✓ Orçamento ${number} ${isEditing ? 'atualizado' : 'salvo'}! PDF gerado.`);
       setTimeout(() => setSuccessMessage(''), 4000);
     } catch (error) {
       console.error('Erro ao salvar orçamento:', error);
     }
   };
 
-
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#F4F5F7' }}>
         <div className="text-center space-y-6">
-          <div className="animate-pulse">
+          <div className="animate-pulse flex justify-center">
             <Logo size="lg" />
           </div>
-
           <div className="space-y-2">
             <div className="flex items-center justify-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
             <p className="text-gray-600 font-medium">{loadingMessage}</p>
-            <p className="text-gray-400 text-xs">Esto pode levar alguns segundos...</p>
           </div>
         </div>
       </div>
@@ -329,10 +196,9 @@ function App() {
   }
 
   if (!currentUser) {
-    return <LoginPage onLogin={handleLogin} isFirstAccess={isFirstAccess} />;
+    return <LoginPage onLogin={handleLogin} />;
   }
 
-  // Layout estilo Apple para operadores e admins
   return (
     <>
       <AppleStyleDashboard
@@ -345,8 +211,9 @@ function App() {
         onUpdateQuotation={handleQuotationSubmit}
         onAddClient={handleClientAdded}
         onUpdateClient={handleClientUpdated}
-        onDeleteClient={() => {}}
+        onDeleteClient={handleDeleteClient}
         onAddMaterial={addMaterial}
+        onReloadData={reloadData}
       />
       <SavingIndicator isVisible={isSaving} />
     </>

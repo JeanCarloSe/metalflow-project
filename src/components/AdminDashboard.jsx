@@ -14,7 +14,7 @@ const fmt = (v) => {
 
 const pct = (a, b) => (b > 0 ? ((a / b) * 100).toFixed(1) : '0.0');
 
-const COLORS_LIST = ['#0170B9', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899'];
+const COLORS_LIST = ['#0052CC', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#EC4899'];
 
 const KPICard = ({ label, value, sub, color, icon }) => (
   <div className="card-glass p-6 border-l-4" style={{ borderColor: color }}>
@@ -34,7 +34,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return (
     <div className="rounded-lg shadow-lg border bg-white p-3" style={{ borderColor: '#e5e7eb' }}>
       <p className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-1">{label || payload[0]?.payload?.name}</p>
-      <p className="text-base font-bold" style={{ color: payload[0]?.color || '#0170B9' }}>
+      <p className="text-base font-bold" style={{ color: payload[0]?.color || '#0052CC' }}>
         {typeof payload[0]?.value === 'number' && payload[0].value > 100 ? fmt(payload[0].value) : payload[0]?.value}
       </p>
     </div>
@@ -232,7 +232,7 @@ const AdminDashboard = () => {
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard label="Total de Orçamentos" value={stats.total} sub={`${stats.approved} aprovados`} color="#0170B9" icon="📝" />
+        <KPICard label="Total de Orçamentos" value={stats.total} sub={`${stats.approved} aprovados`} color="#0052CC" icon="📝" />
         <KPICard label="Valor Total" value={fmt(stats.totalValue)} sub={`${fmt(stats.approvedValue)} aprovados`} color="#10B981" icon="💰" />
         <KPICard label="Taxa de Conversão" value={`${stats.convRate.toFixed(1)}%`} sub={`${stats.approved}/${stats.total} orçamentos`} color="#8B5CF6" icon="🎯" />
         <KPICard label="Ticket Médio" value={fmt(stats.avgTicket)} sub={`${stats.totalWeight.toFixed(0)} kg total`} color="#F59E0B" icon="📊" />

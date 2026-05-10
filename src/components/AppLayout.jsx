@@ -33,7 +33,7 @@ const AppLayout = ({
       >
         <div className="max-w-6xl mx-auto px-4">
           {title && (
-            <h1 className="text-4xl font-bold mb-8" style={{ color: '#0170B9' }}>
+            <h1 className="text-4xl font-bold mb-8" style={{ color: '#0052CC' }}>
               {title}
             </h1>
           )}

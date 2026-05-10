@@ -38,9 +38,9 @@ const AdminQuotationManager = ({ currentUser }) => {
   return (
     <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
       <div className="space-y-6">
-      <div className="border-b-4 pb-4" style={{ borderColor: '#0170B9' }}>
-        <h3 className="title-prominent" style={{ color: '#0D47A1' }}>Gerenciar Orçamentos</h3>
-        <p className="text-sm font-semibold mt-2" style={{ color: '#0170B9' }}>Visualize e gerencie todos os orçamentos do sistema</p>
+      <div className="border-b-4 pb-4" style={{ borderColor: '#0052CC' }}>
+        <h3 className="title-prominent" style={{ color: '#003D99' }}>Gerenciar Orçamentos</h3>
+        <p className="text-sm font-semibold mt-2" style={{ color: '#0052CC' }}>Visualize e gerencie todos os orçamentos do sistema</p>
       </div>
 
       {/* Filtros */}

@@ -118,8 +118,8 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
       return;
     }
 
-    if (lines.some(l => !l.name.trim() || !l.materialId || l.services.length === 0 || !l.lengthMm || !l.widthMm || !l.thicknessMm)) {
-      alert('Preencha todos os campos das peças (nome, material, pelo menos 1 serviço, dimensões)');
+    if (lines.some(l => !l.name.trim() || !l.materialId || !l.lengthMm || !l.widthMm || !l.thicknessMm)) {
+      alert('Preencha todos os campos das peças (nome, material e dimensões)');
       return;
     }
 

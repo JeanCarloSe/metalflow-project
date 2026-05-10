@@ -3,7 +3,7 @@ import { generateClientReport, calculateMaterialMetrics, generateMonthlyTrend, e
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { QUOTATION_STATUS, getStatusLabel } from '../services/statusService';
 import DataAccessService from '../services/dataAccessService';
-import { getSession } from '../services/authService';
+const getSession = () => { try { const s = localStorage.getItem('metalflow_user'); return s ? JSON.parse(s) : null; } catch { return null; } };
 
 const AnalyticsReport = ({ quotations, clients }) => {
   const [exportFormat, setExportFormat] = useState('csv');
@@ -86,7 +86,7 @@ const AnalyticsReport = ({ quotations, clients }) => {
     <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
       <div className="space-y-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2" style={{ color: '#0170B9' }}>📊 Relatórios Avançados</h1>
+        <h1 className="text-4xl font-bold mb-2" style={{ color: '#0052CC' }}>📊 Relatórios Avançados</h1>
         <p className="text-lg text-gray-600">Análise detalhada e exportação de dados</p>
         {statusFilter && (
           <div className="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded flex items-center justify-between">
@@ -137,7 +137,7 @@ const AnalyticsReport = ({ quotations, clients }) => {
 
       {/* Trend Chart */}
       <div className="card-glass p-7">
-        <h3 className="text-xl font-bold mb-6" style={{ color: '#0170B9' }}>Tendência Mensal</h3>
+        <h3 className="text-xl font-bold mb-6" style={{ color: '#0052CC' }}>Tendência Mensal</h3>
         <div className="chart-container">
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={trendData}>
@@ -147,7 +147,7 @@ const AnalyticsReport = ({ quotations, clients }) => {
               <YAxis yAxisId="right" orientation="right" />
               <Tooltip />
               <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="total" stroke="#0170B9" name="Quantidade" strokeWidth={2} />
+              <Line yAxisId="left" type="monotone" dataKey="total" stroke="#0052CC" name="Quantidade" strokeWidth={2} />
               <Line yAxisId="left" type="monotone" dataKey="approved" stroke="#10b981" name="Aprovados" strokeWidth={2} />
               <Line yAxisId="right" type="monotone" dataKey="value" stroke="#f59e0b" name="Valor (R$)" strokeWidth={2} />
             </LineChart>
@@ -157,13 +157,13 @@ const AnalyticsReport = ({ quotations, clients }) => {
 
       {/* Detailed Table */}
       <div className="card-glass p-7">
-        <h3 className="text-xl font-bold mb-6" style={{ color: '#0170B9' }}>
+        <h3 className="text-xl font-bold mb-6" style={{ color: '#0052CC' }}>
           {selectedMetric === 'clients' ? '🏢 Análise por Cliente' : '📦 Análise por Material'}
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '2px solid #0170B9' }}>
+              <tr style={{ borderBottom: '2px solid #0052CC' }}>
                 {selectedMetric === 'clients' ? (
                   <>
                     <th className="text-left py-3 px-4 font-semibold">Cliente</th>

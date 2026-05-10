@@ -78,6 +78,8 @@ function quotationToApi(row, lines = [], clientName = null) {
     totalPrice:  row.total_price,
     totalWeight: row.total_weight,
     notes:       row.notes,
+    operatorId:  row.operator_id,
+    createdBy:   row.operator_id,
     lines:       lines,
     createdAt:   row.created_at,
     updatedAt:   row.updated_at,
@@ -256,10 +258,12 @@ async function handleQuotations(request, env, path, cors) {
         }
       }
 
+      const operatorId = b.operatorId || b.createdBy || (b.operator?.id) || null;
+
       await db.prepare(
         `INSERT INTO quotations (id, tenant_id, client_id, number, date, status,
-         total_price, total_weight, notes)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+         total_price, total_weight, notes, operator_id)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         id, TENANT,
         clientId,
@@ -268,7 +272,8 @@ async function handleQuotations(request, env, path, cors) {
         b.status || 'draft',
         b.total_price || b.totalPrice || 0,
         b.total_weight || b.totalWeight || 0,
-        b.notes || null
+        b.notes || null,
+        operatorId
       ).run();
 
       // Save lines if provided
@@ -323,9 +328,13 @@ async function handleQuotations(request, env, path, cors) {
       const clientId = b.client_id || b.clientId || null;
       const dateVal  = b.date || today();
 
+      const operatorIdUpd = b.operatorId || b.createdBy || (b.operator?.id) || null;
+
       await db.prepare(
         `UPDATE quotations SET client_id=?, number=?, date=?, status=?,
-         total_price=?, total_weight=?, notes=?, updated_at=CURRENT_TIMESTAMP
+         total_price=?, total_weight=?, notes=?,
+         operator_id=COALESCE(?, operator_id),
+         updated_at=CURRENT_TIMESTAMP
          WHERE id=? AND tenant_id=?`
       ).bind(
         clientId,
@@ -335,6 +344,7 @@ async function handleQuotations(request, env, path, cors) {
         b.total_price || b.totalPrice || 0,
         b.total_weight || b.totalWeight || 0,
         b.notes || null,
+        operatorIdUpd,
         id, TENANT
       ).run();
 
@@ -478,7 +488,7 @@ async function handleSync(request, env, path, cors) {
     return json({
       clients:    clients.results.map(clientToApi),
       materials:  materials.results.map(materialToApi),
-      quotations: quotations.results.map(quotationToApi),
+      quotations: quotations.results.map(q => quotationToApi(q)),
       lines:      lines.results.map(lineToApi),
       timestamp:  new Date().toISOString(),
     }, 200, cors);

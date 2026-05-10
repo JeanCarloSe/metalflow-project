@@ -50,7 +50,7 @@ const ReportPage = ({ quotations, currentOperator, clients, onClose, onQuotation
         transition={{ duration: 0.3 }}
       >
         <div className="px-8 py-4 flex justify-between items-center max-w-6xl mx-auto">
-          <h3 className="subtitle-prominent" style={{ color: '#0D47A1' }}>Relatório de Orçamentos</h3>
+          <h3 className="subtitle-prominent" style={{ color: '#003D99' }}>Relatório de Orçamentos</h3>
           <div className="flex gap-3">
             <motion.button
               onClick={handlePrint}

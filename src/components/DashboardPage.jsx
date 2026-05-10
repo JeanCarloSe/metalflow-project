@@ -7,22 +7,22 @@ import {
 } from 'recharts';
 
 const COLORS = {
-  primary: '#0170B9',
-  primaryDark: '#0D47A1',
-  primaryLight: '#42A5F5',
+  primary: '#0052CC',
+  primaryDark: '#003D99',
+  primaryLight: '#2684FF',
   secondary: '#D4AF37',
-  accent: '#3B82F6',
-  success: '#10B981',
-  warning: '#F59E0B',
-  danger: '#EF4444',
-  info: '#3B82F6',
+  accent: '#0052CC',
+  success: '#00875A',
+  warning: '#FF8B00',
+  danger: '#DE350B',
+  info: '#0052CC',
   gray1: '#F9FAFB',
-  gray2: '#F3F4F6',
-  gray3: '#6B7280',
-  gray4: '#1F2937',
-  chartBlue: '#006ED9',
-  chartGreen: '#00D084',
-  chartOrange: '#FF7A00',
+  gray2: '#F4F5F7',
+  gray3: '#42526E',
+  gray4: '#091E42',
+  chartBlue: '#0052CC',
+  chartGreen: '#00875A',
+  chartOrange: '#FF8B00',
 };
 
 const formatMoney = (val) => {
@@ -251,13 +251,13 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       .sort((a, b) => b.totalValue - a.totalValue)
       .slice(0, 5);
 
-    const totalQuotations = quotations.length;
+    const totalQuotations = accessibleQuotations.length;
     const statusChartData = Object.entries(QUOTATION_STATUS)
       .filter(([key]) => byStatus[key] > 0)
       .map(([key, status]) => ({
         name: status.label,
         value: byStatus[key],
-        percent: (byStatus[key] / totalQuotations) * 100,
+        percent: totalQuotations > 0 ? (byStatus[key] / totalQuotations) * 100 : 0,
         color: getStatusColor(key),
       }));
 
@@ -285,7 +285,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
     const today = new Date();
     for (let i = 5; i >= 0; i--) {
       const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      const monthQuotes = quotations.filter(q => {
+      const monthQuotes = accessibleQuotations.filter(q => {
         const qDate = new Date(q.date);
         return qDate.getFullYear() === month.getFullYear() &&
                qDate.getMonth() === month.getMonth();
@@ -346,7 +346,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         <button
           onClick={() => onNavigate?.('quotation')}
           className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
-          style={{ background: `linear-gradient(135deg, #0170B9 0%, #0D47A1 100%)` }}
+          style={{ background: `linear-gradient(135deg, var(--color-primary) 0%, #003D99 100%)` }}
         >
           <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
           <div className="relative z-10">
@@ -359,7 +359,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         <button
           onClick={() => onNavigate?.('analytics')}
           className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
-          style={{ background: `linear-gradient(135deg, #10B981 0%, #059669 100%)` }}
+          style={{ background: `linear-gradient(135deg, var(--color-success) 0%, #00875A 100%)` }}
         >
           <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
           <div className="relative z-10">
@@ -382,6 +382,19 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
           </div>
         </button>
 
+        <button
+          onClick={() => onNavigate?.('quotations')}
+          className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
+          style={{ background: `linear-gradient(135deg, #f59e0b 0%, #d97706 100%)` }}
+        >
+          <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
+          <div className="relative z-10">
+            <div className="text-5xl mb-4">📄</div>
+            <p className="font-black text-xl mb-2 text-white" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)' }}>Orçamentos</p>
+            <p className="text-sm font-semibold text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>{accessibleQuotations.length} registros</p>
+          </div>
+        </button>
+
       </div>
 
       {/* Top Stats */}
@@ -389,10 +402,10 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-primary)' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#0170B9' }}>Total de Orçamentos (Mês)</p>
-              <p className="text-6xl font-black mt-3" style={{ color: '#0D47A1', textShadow: '0 2px 4px rgba(13, 71, 161, 0.1)' }}>{stats.monthTotal}</p>
-              <p className="text-xs font-semibold mt-2" style={{ color: '#0170B9' }}>
-                Junho
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Total de Orçamentos (Mês)</p>
+              <p className="text-6xl font-black mt-3" style={{ color: '#003D99', textShadow: '0 2px 4px rgba(13, 71, 161, 0.1)' }}>{stats.monthTotal}</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: 'var(--color-primary)' }}>
+                {new Date().toLocaleString('pt-BR', { month: 'long' })}
               </p>
             </div>
             <div className="text-3xl">📊</div>
@@ -402,9 +415,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-success)' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#10B981' }}>Valor Total (Mês)</p>
-              <p className="text-5xl font-black mt-3" style={{ color: '#059669', textShadow: '0 2px 4px rgba(5, 150, 105, 0.1)' }}>R$ {(stats.monthValue / 1000).toFixed(1)}k</p>
-              <p className="text-xs font-semibold mt-2" style={{ color: '#10B981' }}>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-success)' }}>Valor Total (Mês)</p>
+              <p className="text-5xl font-black mt-3" style={{ color: '#00875A', textShadow: '0 2px 4px rgba(5, 150, 105, 0.1)' }}>R$ {(stats.monthValue / 1000).toFixed(1)}k</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: 'var(--color-success)' }}>
                 {stats.monthTotal > 0 ? `R$ ${(stats.monthValue / stats.monthTotal).toFixed(0)}/orç` : '—'}
               </p>
             </div>
@@ -415,9 +428,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-info)' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#3B82F6' }}>Peso Total (Mês)</p>
-              <p className="text-6xl font-black mt-3" style={{ color: '#2563EB', textShadow: '0 2px 4px rgba(37, 99, 235, 0.1)' }}>{stats.monthWeight.toFixed(0)}</p>
-              <p className="text-xs font-semibold mt-2" style={{ color: '#3B82F6' }}>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>Peso Total (Mês)</p>
+              <p className="text-6xl font-black mt-3" style={{ color: '#003D99', textShadow: '0 2px 4px rgba(37, 99, 235, 0.1)' }}>{stats.monthWeight.toFixed(0)}</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: 'var(--color-primary)' }}>
                 kg processados
               </p>
             </div>
@@ -428,9 +441,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         <div className="card-glass p-6 transition-all duration-200 hover:shadow-xl hover:scale-105 cursor-pointer border-l-4" style={{ borderColor: 'var(--color-warning)' }}>
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#F59E0B' }}>Clientes Ativos</p>
-              <p className="text-6xl font-black mt-3" style={{ color: '#D97706', textShadow: '0 2px 4px rgba(217, 119, 6, 0.1)' }}>{stats.uniqueClients}</p>
-              <p className="text-xs font-semibold mt-2" style={{ color: '#F59E0B' }}>
+              <p className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-warning)' }}>Clientes Ativos</p>
+              <p className="text-6xl font-black mt-3" style={{ color: '#FF8B00', textShadow: '0 2px 4px rgba(217, 119, 6, 0.1)' }}>{stats.uniqueClients}</p>
+              <p className="text-xs font-semibold mt-2" style={{ color: 'var(--color-warning)' }}>
                 {stats.uniqueClients > 0 ? `${(Object.values(stats.valueByStatus).reduce((a,b) => a+b, 0) / stats.uniqueClients / 1000).toFixed(1)}k/cliente` : '—'}
               </p>
             </div>
@@ -443,8 +456,8 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h3 className="text-2xl font-black mb-2" style={{ color: '#0D47A1' }}>Evolução Mensal de Orçamentos</h3>
-            <p className="text-sm font-semibold" style={{ color: '#0170B9' }}>Últimos 6 meses: valor total e quantidade de orçamentos</p>
+            <h3 className="text-2xl font-black mb-2" style={{ color: '#003D99' }}>Evolução Mensal de Orçamentos</h3>
+            <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>Últimos 6 meses: valor total e quantidade de orçamentos</p>
           </div>
           <button
             onClick={() => setDataModal({
@@ -507,7 +520,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         {/* Distribuição por Status */}
         <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-black" style={{ color: '#0D47A1' }}>Distribuição por Status</h3>
+            <h3 className="text-xl font-black" style={{ color: '#003D99' }}>Distribuição por Status</h3>
             <button
               onClick={() => setDataModal({
                 isOpen: true,
@@ -566,7 +579,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
         {/* Funil */}
         <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartGreen }}>
-          <h3 className="text-xl font-black mb-8" style={{ color: '#059669' }}>Funil de Conversão (Mês)</h3>
+          <h3 className="text-xl font-black mb-8" style={{ color: '#00875A' }}>Funil de Conversão (Mês)</h3>
           <div className="space-y-5">
             {stats.funnelData.map((stage, idx) => {
               const percentage = (stage.value / stats.funnelData[0].value) * 100;
@@ -595,7 +608,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
         {/* Top Clientes - Gráfico */}
         <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartOrange }}>
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-xl font-black" style={{ color: '#D97706' }}>Top 5 Clientes</h3>
+            <h3 className="text-xl font-black" style={{ color: '#FF8B00' }}>Top 5 Clientes</h3>
             <button
               onClick={() => setDataModal({
                 isOpen: true,
@@ -656,8 +669,8 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
       {/* Valor por Status - Full Width */}
       <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
         <div className="mb-8">
-          <h3 className="text-2xl font-black mb-2" style={{ color: '#0D47A1' }}>Análise de Valores por Status</h3>
-          <p className="text-sm font-semibold" style={{ color: '#0170B9' }}>Distribuição de valores em cada etapa da negociação</p>
+          <h3 className="text-2xl font-black mb-2" style={{ color: '#003D99' }}>Análise de Valores por Status</h3>
+          <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>Distribuição de valores em cada etapa da negociação</p>
         </div>
         {stats.valueChartData.length > 0 ? (
           <ResponsiveContainer width="100%" height={380}>
@@ -688,7 +701,7 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
       {/* Status Summary */}
       <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartOrange }}>
-        <h3 className="text-xl font-black mb-8" style={{ color: '#D97706' }}>Resumo de Status - Todos os Orçamentos</h3>
+        <h3 className="text-xl font-black mb-8" style={{ color: '#FF8B00' }}>Resumo de Status - Todos os Orçamentos</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-2 sm:gap-3 md:gap-4">
           {Object.entries(QUOTATION_STATUS).map(([key, status]) => {
             const count = stats.byStatus[key] || 0;
@@ -753,13 +766,13 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
       {/* Advanced Analytics Section */}
       <div className="space-y-6">
-        <h2 className="text-3xl font-black mt-8" style={{ color: '#0D47A1' }}>📈 Analytics Avançado</h2>
+        <h2 className="text-3xl font-black mt-8" style={{ color: '#003D99' }}>📈 Analytics Avançado</h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {/* Top Clientes */}
           <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-black" style={{ color: '#0D47A1' }}>🏢 Top Clientes</h3>
+              <h3 className="text-xl font-black" style={{ color: '#003D99' }}>🏢 Top Clientes</h3>
               <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(1, 112, 185, 0.1)', color: COLORS.primary }}>
                 Valor Total
               </span>
@@ -803,16 +816,82 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
 
       </div>
 
+      {/* Recent Quotations List */}
+      <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-black" style={{ color: '#003D99' }}>📋 Orçamentos Recentes</h3>
+          <button
+            onClick={() => onNavigate?.('quotation')}
+            className="px-4 py-2 text-sm font-semibold rounded-lg text-white"
+            style={{ backgroundColor: COLORS.primary }}
+          >
+            + Novo
+          </button>
+        </div>
+        {accessibleQuotations.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-4xl mb-3">📝</p>
+            <p className="font-semibold text-gray-500">Nenhum orçamento ainda</p>
+            <p className="text-sm text-gray-400 mt-1">Clique em "+ Novo" para criar o primeiro</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ borderBottom: '2px solid #e5e7eb' }}>
+                  <th className="text-left py-3 px-3 text-xs font-bold uppercase tracking-wider text-gray-500">Nº</th>
+                  <th className="text-left py-3 px-3 text-xs font-bold uppercase tracking-wider text-gray-500">Cliente</th>
+                  <th className="text-center py-3 px-3 text-xs font-bold uppercase tracking-wider text-gray-500">Status</th>
+                  <th className="text-right py-3 px-3 text-xs font-bold uppercase tracking-wider text-gray-500">Valor</th>
+                  <th className="text-right py-3 px-3 text-xs font-bold uppercase tracking-wider text-gray-500">Data</th>
+                  <th className="py-3 px-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...accessibleQuotations]
+                  .sort((a, b) => new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date))
+                  .slice(0, 8)
+                  .map((q) => (
+                    <tr
+                      key={q.id}
+                      className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors cursor-pointer"
+                      onClick={() => onQuotationClick?.(q)}
+                    >
+                      <td className="py-3 px-3 font-bold font-mono text-gray-900">{q.number || '—'}</td>
+                      <td className="py-3 px-3 text-gray-700">{q.clientName || '—'}</td>
+                      <td className="py-3 px-3 text-center">
+                        <span className="px-2 py-1 rounded-full text-xs font-bold" style={{
+                          backgroundColor: getStatusBg(q.status),
+                          color: getStatusColor(q.status),
+                        }}>
+                          {getStatusLabel(q.status)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-right font-bold font-mono" style={{ color: COLORS.primary }}>
+                        {formatMoney(parseFloat(q.totalPrice || 0))}
+                      </td>
+                      <td className="py-3 px-3 text-right text-xs text-gray-500">
+                        {q.date ? new Date(q.date).toLocaleDateString('pt-BR') : '—'}
+                      </td>
+                      <td className="py-3 px-3 text-center text-gray-400">›</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* AI Insights & Recommendations */}
       {insights && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
           {/* Insights Card */}
           <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartBlue }}>
             <div className="mb-6">
-              <h3 className="text-2xl font-black mb-2" style={{ color: '#0D47A1' }}>
+              <h3 className="text-2xl font-black mb-2" style={{ color: '#003D99' }}>
                 💡 Insights IA
               </h3>
-              <p className="text-sm font-semibold" style={{ color: '#0170B9' }}>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-primary)' }}>
                 Análise automática do seu desempenho
               </p>
             </div>
@@ -887,9 +966,9 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
                       backgroundColor: rec.type === 'low_conversion' ? '#FEF3C7' :
                                       rec.type === 'pending_follow_up' ? '#DBEAFE' :
                                       '#F0FDF4',
-                      borderLeftColor: rec.type === 'low_conversion' ? '#F59E0B' :
-                                      rec.type === 'pending_follow_up' ? '#3B82F6' :
-                                      '#10B981'
+                      borderLeftColor: rec.type === 'low_conversion' ? 'var(--color-warning)' :
+                                      rec.type === 'pending_follow_up' ? 'var(--color-primary)' :
+                                      'var(--color-success)'
                     }}
                   >
                     <p className="font-semibold text-sm mb-1" style={{

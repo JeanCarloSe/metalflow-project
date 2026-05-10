@@ -18,12 +18,12 @@ const Logo = ({ size = 'md', variant = 'default' }) => {
           {/* Fundo */}
           <defs>
             <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0170B9" />
+              <stop offset="0%" stopColor="#0052CC" />
               <stop offset="100%" stopColor="#0B5BA0" />
             </linearGradient>
             <linearGradient id="accentGradient" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="#42A5F5" />
-              <stop offset="100%" stopColor="#0170B9" />
+              <stop offset="100%" stopColor="#0052CC" />
             </linearGradient>
           </defs>
 
@@ -61,7 +61,7 @@ const Logo = ({ size = 'md', variant = 'default' }) => {
           <svg viewBox="0 0 100 100" className="w-full h-full" fill="none">
             <defs>
               <linearGradient id="logoGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0170B9" />
+                <stop offset="0%" stopColor="#0052CC" />
                 <stop offset="100%" stopColor="#0B5BA0" />
               </linearGradient>
             </defs>

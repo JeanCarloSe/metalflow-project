@@ -6,6 +6,7 @@ import AppleFeatures from './AppleFeatures';
 import AppleFooter from './AppleFooter';
 import DashboardPage from './DashboardPage';
 import QuotationBuilder from './QuotationBuilder';
+import QuotationsPage from './QuotationsPage';
 import ClientsPage from './ClientsPage';
 import ReportPage from './ReportPage';
 import AnalyticsReport from './AnalyticsReport';
@@ -25,6 +26,7 @@ const AppleStyleDashboard = ({
   onUpdateClient,
   onDeleteClient,
   onAddMaterial,
+  onReloadData,
   onAdminClick,
 }) => {
   const [currentPage, setCurrentPage] = useState('home');
@@ -91,7 +93,7 @@ const AppleStyleDashboard = ({
   // Se admin está ativo, renderizar apenas o painel admin
   if (showAdmin && currentUser?.role === 'admin') {
     return (
-      <div className="w-full min-h-screen bg-white flex flex-col">
+      <div className="w-full min-h-screen flex flex-col" style={{ background: 'transparent' }}>
         <AppleHeader
           currentUser={currentUser}
           onLogout={onLogout}
@@ -109,7 +111,7 @@ const AppleStyleDashboard = ({
   }
 
   return (
-    <div className="w-full min-h-screen bg-white">
+    <div className="w-full min-h-screen" style={{ background: 'transparent' }}>
       <AppleHeader
         currentUser={currentUser}
         onLogout={onLogout}
@@ -146,7 +148,7 @@ const AppleStyleDashboard = ({
             <DashboardPage
               quotations={quotations}
               clients={clients}
-              currentOperator={currentUser}
+              currentUser={currentUser}
               onNavigate={handleNavigate}
               onQuotationClick={(q) => {
                 setEditingQuotation(q);
@@ -159,6 +161,27 @@ const AppleStyleDashboard = ({
                 setEditingQuotation(null);
                 setCurrentPage('quotation');
               }}
+            />
+          </section>
+        )}
+
+        {currentPage === 'quotations' && (
+          <section className="min-h-screen pb-32">
+            <QuotationsPage
+              quotations={quotations}
+              clients={clients}
+              onEditQuotation={(q) => {
+                if (!q) {
+                  setEditingQuotation(null);
+                  setSelectedClient(null);
+                } else {
+                  setEditingQuotation(q);
+                  const client = clients.find(c => c.id === q.clientId);
+                  setSelectedClient(client || null);
+                }
+                setCurrentPage('quotation');
+              }}
+              onRefresh={onReloadData}
             />
           </section>
         )}
@@ -176,7 +199,7 @@ const AppleStyleDashboard = ({
                 }
                 setEditingQuotation(null);
                 setSelectedClient(null);
-                setCurrentPage('dashboard');
+                setCurrentPage('quotations');
               }}
               onChangeClient={() => setCurrentPage('clients')}
               currentUser={currentUser}
@@ -184,7 +207,7 @@ const AppleStyleDashboard = ({
               onEditComplete={() => {
                 setEditingQuotation(null);
                 setSelectedClient(null);
-                setCurrentPage('dashboard');
+                setCurrentPage('quotations');
               }}
             />
           </section>
@@ -194,6 +217,7 @@ const AppleStyleDashboard = ({
           <section className="min-h-screen py-16 pb-32">
             <ClientsPage
               clients={clients}
+              quotations={quotations}
               materials={materials}
               onNewQuotation={(client) => {
                 setSelectedClient(client);
@@ -208,7 +232,7 @@ const AppleStyleDashboard = ({
         )}
 
         {currentPage === 'analytics' && (
-          <section className="min-h-screen py-8 pb-32 bg-white">
+          <section className="min-h-screen py-8 pb-32">
             <AnalyticsReport
               quotations={quotations}
               clients={clients}

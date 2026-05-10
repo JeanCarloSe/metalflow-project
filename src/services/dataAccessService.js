@@ -32,19 +32,13 @@ class DataAccessService {
   }
 
   /**
-   * Filtrar clientes que o operador tem acesso
-   * Operadores veem apenas clientes dos seus orçamentos
-   * Admins veem todos
+   * Clientes são compartilhados entre todos os usuários
    */
   static filterClients(clients, quotations, currentUser) {
     if (!currentUser) return [];
+    return clients;
 
-    // Admins veem todos os clientes
-    if (currentUser.role === 'admin') {
-      return clients;
-    }
-
-    // Operadores veem apenas clientes com os quais criaram orçamentos
+    // Código abaixo mantido para referência (não executado)
     const accessibleQuotations = this.filterQuotations(quotations, currentUser);
     const clientIds = new Set(
       accessibleQuotations
