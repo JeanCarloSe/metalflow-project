@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
-import { getClients, addClient, updateClient, deleteClient } from '../services/storageService';
+import { getClients, addClient, updateClient, deleteClient } from '../services/d1Service';
 import { generateClientCode } from '../services/codeService';
 import { DetailedProfiler } from '../utils/detailedProfiler';
 
@@ -52,11 +52,6 @@ const AdminClientManager = ({ onClientSelect }) => {
       return;
     }
 
-    if (!formData.email.trim()) {
-      setError('Email é obrigatório');
-      DetailedProfiler.endSession('create-client');
-      return;
-    }
 
     DetailedProfiler.mark('create-client', 'validation-complete');
 
@@ -186,8 +181,8 @@ const AdminClientManager = ({ onClientSelect }) => {
                 className={inputCls}
               />
               <input
-                type="email"
-                placeholder="Email *"
+                type="text"
+                placeholder="Email"
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
                 className={inputCls}

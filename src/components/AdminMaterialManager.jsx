@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND } from '../services/themeService';
-import { getMaterials, addMaterial, updateMaterial, deleteMaterial } from '../services/storageService';
+import { getMaterials, addMaterial, updateMaterial, deleteMaterial } from '../services/d1Service';
 
 const AdminMaterialManager = () => {
   const [materials, setMaterials] = useState([]);

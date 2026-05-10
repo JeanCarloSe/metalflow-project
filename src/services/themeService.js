@@ -1,57 +1,64 @@
-// ── PALETA PREMIUM METALFLOW ──────────────────────────────────────────────────
+// ── PALETA METALFLOW — Precision Industrial CRM ───────────────────────────────
 
-// Cores primárias
-export const ASTON_BRAND = '#0170B9';        // Azul MetalFlow
-export const ASTON_DARK = '#0D47A1';          // Azul escuro
-export const ASTON_LIGHT = '#42A5F5';         // Azul claro
+// Cores primárias — Navy profissional
+export const ASTON_BRAND = '#0052CC';         // Azul MetalFlow (elétrico)
+export const ASTON_DARK = '#003D99';           // Navy profundo
+export const ASTON_LIGHT = '#2684FF';          // Azul claro
+export const ASTON_NAVY = '#091E42';           // Navy máximo
 
-// Aliases MetalFlow (manter compatibilidade)
+// Aliases MetalFlow (compatibilidade)
 export const METALFLOW_BRAND = ASTON_BRAND;
 export const METALFLOW_DARK = ASTON_DARK;
 export const METALFLOW_LIGHT = ASTON_LIGHT;
 
-// Cores secundárias
-export const PREMIUM_GOLD = '#D4AF37';        // Ouro premium
-export const PREMIUM_SILVER = '#C0C0C0';      // Prata
-export const PREMIUM_CHARCOAL = '#2C3E50';    // Cinza carvão
+// Accent — teal industrial (valores positivos, destaque técnico)
+export const ACCENT_TEAL = '#00B8A9';
+export const ACCENT_ELECTRIC = '#0065FF';
 
-// Cores de status
-export const STATUS_SUCCESS = '#10B981';      // Verde sucesso
-export const STATUS_ERROR = '#EF4444';        // Vermelho erro
-export const STATUS_WARNING = '#F59E0B';      // Âmbar aviso
-export const STATUS_INFO = '#3B82F6';         // Azul info
+// Cores secundárias
+export const PREMIUM_GOLD = '#FF8B00';        // Âmbar industrial (pending/aviso)
+export const PREMIUM_SILVER = '#97A0AF';      // Cinza slate
+export const PREMIUM_CHARCOAL = '#091E42';    // Navy escuro
+
+// Cores de status — Jira/Atlassian style
+export const STATUS_SUCCESS = '#00875A';      // Verde eucalipto
+export const STATUS_ERROR = '#DE350B';        // Vermelho industrial
+export const STATUS_WARNING = '#FF8B00';      // Âmbar
+export const STATUS_INFO = '#0052CC';         // Azul
 
 // Cores de texto
-export const TEXT_PRIMARY = '#1F2937';        // Texto principal
-export const TEXT_SECONDARY = '#6B7280';      // Texto secundário
-export const TEXT_LIGHT = '#F3F4F6';          // Texto em fundo escuro
-export const TEXT_MUTED = '#9CA3AF';          // Texto desativado
+export const TEXT_PRIMARY = '#091E42';        // Navy máximo
+export const TEXT_SECONDARY = '#42526E';      // Slate
+export const TEXT_LIGHT = '#FFFFFF';          // Branco
+export const TEXT_MUTED = '#7A869A';          // Cinza médio
 
 // Cores de background
-export const BG_PRIMARY = '#FFFFFF';          // Fundo branco
-export const BG_SECONDARY = '#F9FAFB';        // Fundo cinza claro
-export const BG_TERTIARY = '#F3F4F6';         // Fundo cinza mais claro
-export const BG_DARK = '#1F2937';             // Fundo escuro
+export const BG_PRIMARY = '#FFFFFF';
+export const BG_SECONDARY = '#F4F5F7';        // Cinza Jira
+export const BG_TERTIARY = '#EBECF0';         // Cinza mais escuro
+export const BG_DARK = '#091E42';             // Navy
 
 // Cores de borda
-export const BORDER_LIGHT = '#E5E7EB';        // Borda clara
-export const BORDER_MEDIUM = '#D1D5DB';       // Borda média
-export const BORDER_DARK = '#9CA3AF';         // Borda escura
+export const BORDER_LIGHT = '#DFE1E6';
+export const BORDER_MEDIUM = '#C1C7D0';
+export const BORDER_DARK = '#97A0AF';
 
-// Sombras
-export const SHADOW_SM = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
-export const SHADOW_MD = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-export const SHADOW_LG = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-export const SHADOW_XL = '0 20px 25px -5px rgba(0, 0, 0, 0.1)';
-export const SHADOW_PREMIUM = '0 20px 40px -10px rgba(1, 112, 185, 0.15)';
+// Sombras — Atlassian design system
+export const SHADOW_SM  = '0 1px 1px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31)';
+export const SHADOW_MD  = '0 4px 8px -2px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31)';
+export const SHADOW_LG  = '0 8px 16px -4px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31)';
+export const SHADOW_XL  = '0 12px 24px -6px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31)';
+export const SHADOW_PREMIUM = '0 20px 40px -10px rgba(0,52,204,0.20), 0 0 1px rgba(9,30,66,0.31)';
 
 // Paleta de tema
 export const THEME = {
   primary: ASTON_BRAND,
   primaryDark: ASTON_DARK,
   primaryLight: ASTON_LIGHT,
+  primaryNavy: ASTON_NAVY,
   secondary: PREMIUM_GOLD,
   tertiary: PREMIUM_CHARCOAL,
+  accentTeal: ACCENT_TEAL,
   success: STATUS_SUCCESS,
   error: STATUS_ERROR,
   warning: STATUS_WARNING,

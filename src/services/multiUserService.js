@@ -234,6 +234,7 @@ class MultiUserService {
         this.currentUser = JSON.parse(saved);
         this.currentTenant = this.currentUser?.tenantId;
         this.sessions.set(this.currentUser.id, JSON.parse(saved));
+        this.loadUserPermissions(this.currentUser.id);
       } catch (error) {
         console.error('❌ Erro ao carregar sessão:', error);
         localStorage.removeItem('metalflow_session');

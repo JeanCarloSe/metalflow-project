@@ -8,12 +8,14 @@ import AdminQuotationManager from './AdminQuotationManager';
 import AdminPriceManager from './AdminPriceManager';
 import DataManagementPanel from './DataManagementPanel';
 import CadHistoryPanel from './CadHistoryPanel';
+import AdminDashboard from './AdminDashboard';
 
 const AdminPage = ({ currentUser, onLogout }) => {
-  const [activeTab, setActiveTab] = useState('quotations');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedClientId, setSelectedClientId] = useState(null);
 
   const tabs = [
+    { id: 'dashboard', label: '📊 Dashboard', icon: '📊' },
     { id: 'quotations', label: '📋 Orçamentos', icon: '📋' },
     { id: 'services', label: '⚙️ Serviços', icon: '⚙️' },
     { id: 'materials', label: '📦 Materiais', icon: '📦' },
@@ -25,6 +27,7 @@ const AdminPage = ({ currentUser, onLogout }) => {
   ];
 
   const tabContent = {
+    dashboard: <AdminDashboard />,
     quotations: <AdminQuotationManager currentUser={currentUser} />,
     services: <AdminServiceManager />,
     materials: <AdminMaterialManager />,

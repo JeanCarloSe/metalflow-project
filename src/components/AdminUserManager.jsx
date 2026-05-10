@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND } from '../services/themeService';
-import { getAllUsers, createLocalUser } from '../services/authService';
-import { deleteUser } from '../services/storageService';
+
+const API = '/api';
+const apiGetUsers    = () => fetch(`${API}/users`).then(r => r.json());
+const apiCreateUser  = (data) => fetch(`${API}/users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then(r => r.json());
+const apiDeleteUser  = (id) => fetch(`${API}/users/${id}`, { method: 'DELETE' }).then(r => r.json());
 
 const AdminUserManager = () => {
   const [users, setUsers] = useState([]);
@@ -22,8 +25,8 @@ const AdminUserManager = () => {
 
   const loadUsers = async () => {
     try {
-      const usrs = await getAllUsers();
-      setUsers(usrs || []);
+      const usrs = await apiGetUsers();
+      setUsers(Array.isArray(usrs) ? usrs : []);
     } catch (err) {
       console.error('Erro ao carregar usuários:', err);
       setError('Erro ao carregar usuários');
@@ -60,8 +63,14 @@ const AdminUserManager = () => {
     }
 
     try {
-      const result = await createLocalUser(formData.login, formData.password, formData.name, formData.number, formData.role);
-      if (!result.ok) {
+      const result = await apiCreateUser({
+        login: formData.login,
+        password: formData.password,
+        name: formData.name,
+        number: formData.number,
+        role: formData.role,
+      });
+      if (result.error) {
         setError(result.error);
         return;
       }
@@ -87,9 +96,9 @@ const AdminUserManager = () => {
     setSuccess('');
 
     try {
-      const result = await deleteUser(userId);
-      if (!result.ok) {
-        setError(result.error || 'Erro ao deletar usuário');
+      const result = await apiDeleteUser(userId);
+      if (result.error) {
+        setError(result.error);
         return;
       }
       setSuccess(`Usuário "${userName}" foi deletado`);

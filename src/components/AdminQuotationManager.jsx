@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND, hexToRgba } from '../services/themeService';
-import { getQuotations, getClients } from '../services/storageService';
+import { getQuotations, getClients } from '../services/d1Service';
 
 const AdminQuotationManager = ({ currentUser }) => {
   const [quotations, setQuotations] = useState([]);

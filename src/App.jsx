@@ -16,9 +16,11 @@ import AnalyticsReport from './components/AnalyticsReport';
 import TenantAdmin from './components/TenantAdmin';
 import IntegrationsPanel from './components/IntegrationsPanel';
 import {
-  initDB, getMaterials, addMaterial, getClients, getQuotations,
-  addQuotation, addClient, cleanDuplicateQuotations, updateQuotation, updateClient,
-} from './services/storageService';
+  getClients, addClient, updateClient,
+  getQuotations, addQuotation, updateQuotation,
+  getMaterials, addMaterial, updateMaterial,
+  cleanDuplicateQuotations,
+} from './services/d1Service';
 import { initPersistence, enableTabSync, validateDatabase } from './services/persistenceService';
 import { initAutoBackup, stopAutoBackup, getBackupSummary } from './services/autoBackupService';
 import { downloadQuotationPDF } from './services/pdfService';
@@ -26,7 +28,6 @@ import { getSession, clearSession, hasAnyUser, createLocalUser } from './service
 import { generateQuotationCode } from './services/codeService';
 import { getStatusLabel, getStatusBg, getStatusColor } from './services/statusService';
 import { PerformanceMonitor } from './utils/performanceMonitor';
-import DatabaseConnection from './services/databaseConnection';
 import SyncService from './services/syncService';
 import MultiUserService from './services/multiUserService';
 import DataAccessService from './services/dataAccessService';
@@ -67,41 +68,14 @@ function App() {
   const [isSaving,          setIsSaving]          = useState(false);
 
   useEffect(() => {
-    // Inicializar Performance Monitor
-    const perfMonitor = PerformanceMonitor.getInstance();
-
     const bootstrap = async () => {
       try {
-        setLoadingMessage('Abrindo banco de dados...');
-        const dbOpId = perfMonitor.startOperation('initDB');
-        await initDB();
-        perfMonitor.endOperation(dbOpId);
-
-        // Inicializar conexão com health checks automáticos
-        const dbConnOpId = perfMonitor.startOperation('dbConnection');
-        const dbConnection = DatabaseConnection.getInstance();
-        await dbConnection.initialize();
-        perfMonitor.endOperation(dbConnOpId);
-
-        const persistOpId = perfMonitor.startOperation('initPersistence');
-        await initPersistence();
-        perfMonitor.endOperation(persistOpId);
-
-        // Validar saúde do banco
-        const validation = await validateDatabase();
-        if (!validation.isHealthy) {
-          console.warn('⚠️ Banco de dados com avisos:', validation.issues);
-        }
-
         setLoadingMessage('Verificando autenticação...');
         let anyUser = await hasAnyUser();
 
-        // Criar usuário padrão se não houver nenhum
         if (!anyUser) {
           const result = await createLocalUser('adm', 'adm', 'Administrador', 'ADM-001', 'admin');
-          if (result.ok) {
-            anyUser = true;
-          }
+          if (result.ok) anyUser = true;
         }
 
         setIsFirstAccess(!anyUser);
@@ -119,51 +93,15 @@ function App() {
 
         setLoadingMessage('Carregando clientes e orçamentos...');
         const allClients = await getClients();
-
-        // Remove duplicatas
-        await cleanDuplicateQuotations();
         const allQuotations = await getQuotations();
 
-        // Reatualizar session para garantir que temos a versão mais recente
         session = getSession();
 
-        // Filtrar dados baseado na role do usuário
-        const filteredClients = DataAccessService.filterClients(
-          allClients,
-          allQuotations,
-          session
-        );
+        const filteredClients = DataAccessService.filterClients(allClients, allQuotations, session);
         const filteredQuotations = DataAccessService.filterQuotations(allQuotations, session);
 
         setClients(filteredClients);
         setQuotations(filteredQuotations);
-
-        setLoadingMessage('Finalizando...');
-        // Habilitar sincronização entre abas
-        const unsubscribeSync = enableTabSync(async () => {
-          setMaterials(await getMaterials());
-
-          // Filtrar dados baseado na role do usuário
-          const currentSession = getSession();
-          const syncClients = await getClients();
-          const syncQuotations = await getQuotations();
-
-          const syncFilteredClients = DataAccessService.filterClients(
-            syncClients,
-            syncQuotations,
-            currentSession
-          );
-          const syncFilteredQuotations = DataAccessService.filterQuotations(
-            syncQuotations,
-            currentSession
-          );
-
-          setClients(syncFilteredClients);
-          setQuotations(syncFilteredQuotations);
-        });
-
-        // Iniciar auto-backup automático (a cada 30 minutos)
-        initAutoBackup();
 
         return unsubscribeSync;
       } catch (error) {
@@ -193,9 +131,15 @@ function App() {
   };
 
   const handleLogout = async () => {
-    const multiUserService = MultiUserService.getInstance();
-    await multiUserService.logout();
+    try {
+      const multiUserService = MultiUserService.getInstance();
+      await multiUserService.logout();
+    } catch (e) {
+      console.warn('Logout backend falhou, limpando sessão local', e);
+    }
     clearSession();
+    localStorage.removeItem('metalflow_user');
+    localStorage.removeItem('metalflow_session');
     setCurrentUser(null);
     setCurrentTenant(null);
     setCurrentPage('dashboard');
@@ -267,7 +211,6 @@ function App() {
       console.log('📝 Atualizando cliente...');
       const start = performance.now();
 
-      // Salvar no BD
       await updateClient(updatedClient);
       const saveDuration = performance.now() - start;
       console.log(`✅ Cliente atualizado em ${Math.round(saveDuration)}ms`);

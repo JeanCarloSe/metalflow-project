@@ -1,47 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Segoe+UI:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Cores primárias */
-  --color-primary: #0170B9;
-  --color-primary-dark: #0D47A1;
-  --color-primary-light: #42A5F5;
+  /* Cores primárias — Navy Profissional */
+  --color-primary: #0052CC;
+  --color-primary-dark: #003D99;
+  --color-primary-light: #2684FF;
+  --color-primary-navy: #091E42;
+
+  /* Accent elétrico para dados/destaques */
+  --color-accent-electric: #0065FF;
+  --color-accent-teal: #00B8A9;
+  --color-accent-gold: #FF8B00;
 
   /* Cores de status */
-  --color-success: #10B981;
-  --color-error: #EF4444;
-  --color-warning: #F59E0B;
-  --color-info: #3B82F6;
+  --color-success: #00875A;
+  --color-success-light: #E3FCEF;
+  --color-error: #DE350B;
+  --color-error-light: #FFEBE6;
+  --color-warning: #FF8B00;
+  --color-warning-light: #FFFAE6;
+  --color-info: #0052CC;
+  --color-info-light: #DEEBFF;
 
-  /* Background */
+  /* Background — superfícies profissionais */
   --color-bg-primary: #FFFFFF;
-  --color-bg-secondary: #F9FAFB;
-  --color-bg-tertiary: #F3F4F6;
-  --color-bg-dark: #1F2937;
+  --color-bg-secondary: #F4F5F7;
+  --color-bg-tertiary: #EBECF0;
+  --color-bg-dark: #091E42;
+  --color-bg-sidebar: #0A1628;
 
   /* Texto */
-  --color-text-primary: #1F2937;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text-primary: #091E42;
+  --color-text-secondary: #42526E;
+  --color-text-muted: #7A869A;
+  --color-text-inverse: #FFFFFF;
 
-  /* Bordas */
-  --color-border-light: #E5E7EB;
-  --color-border-medium: #D1D5DB;
-  --color-border-dark: #9CA3AF;
+  /* Bordas — definidas, não tímidas */
+  --color-border-light: #DFE1E6;
+  --color-border-medium: #C1C7D0;
+  --color-border-dark: #97A0AF;
 
   /* Acentos */
-  --color-accent: #0170B9;
-  --color-accent-light: #D4AF37;
+  --color-accent: #0052CC;
+  --color-accent-light: #DEEBFF;
+
+  /* Sombras profissionais */
+  --shadow-card: 0 1px 1px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31);
+  --shadow-card-hover: 0 4px 8px -2px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31);
+  --shadow-overlay: 0 8px 16px -4px rgba(9,30,66,0.25), 0 0 1px rgba(9,30,66,0.31);
+  --shadow-modal: 0 20px 40px -12px rgba(9,30,66,0.30), 0 0 1px rgba(9,30,66,0.31);
 }
 
 * {
-  font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Roboto', sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* Números e dados financeiros — fonte monoespaçada de precisão */
+.font-data, .data-value, .metric-value {
+  font-family: 'JetBrains Mono', 'Fira Mono', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
 }
 
 /* Escala tipográfica profissional (baseada em 16px) */
@@ -196,33 +221,34 @@ h1, h2, h3, h4, h5, h6 {
 .text-xs { font-size: var(--font-xs); font-weight: 500; line-height: var(--line-sm); }
 
 @layer components {
-  /* Cards Premium - Minimalista com Apple style */
+  /* Cards — Estilo CRM Profissional (Jira/Salesforce) */
   .card-premium {
-    @apply rounded-2xl border transition-all duration-300;
+    @apply rounded-lg border transition-all duration-200;
     background: #FFFFFF;
-    border-color: #E5E7EB;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.06);
+    border-color: var(--color-border-light);
+    box-shadow: var(--shadow-card);
   }
 
   .card-premium:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.1);
-    border-color: #D1D5DB;
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-border-medium);
+    transform: translateY(-1px);
   }
 
-  /* Glass Premium - Card com Glassmorphism */
+  /* Card Glass — Superfície elevada com blur sutil */
   .card-glass {
-    @apply rounded-2xl border transition-all duration-300;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px rgba(31, 41, 55, 0.1), 0 2px 4px rgba(0, 0, 0, 0.04);
+    @apply rounded-lg border transition-all duration-200;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-color: var(--color-border-light);
+    box-shadow: var(--shadow-card);
   }
 
   .card-glass:hover {
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 12px 40px rgba(31, 41, 55, 0.15), 0 4px 8px rgba(0, 0, 0, 0.06);
-    border-color: rgba(255, 255, 255, 0.7);
+    background: #FFFFFF;
+    box-shadow: var(--shadow-card-hover);
+    border-color: var(--color-border-medium);
   }
 
   .card-premium h1, .card-premium h2, .card-premium h3, .card-premium h4, .card-premium h5, .card-premium h6 {

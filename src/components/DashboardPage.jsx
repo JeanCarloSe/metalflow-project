@@ -382,18 +382,6 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
           </div>
         </button>
 
-        <button
-          onClick={() => onNavigate?.('materials')}
-          className="group relative overflow-hidden rounded-xl p-8 text-white shadow-lg transition-all hover:shadow-2xl hover:scale-105 hover:-translate-y-1"
-          style={{ background: `linear-gradient(135deg, #3B82F6 0%, #f97316 100%)` }}
-        >
-          <div className="absolute inset-0 opacity-10" style={{ background: 'radial-gradient(circle at top right, rgba(255,255,255,0.5), transparent)' }}></div>
-          <div className="relative z-10">
-            <div className="text-5xl mb-4">📦</div>
-            <p className="font-black text-xl mb-2 text-white" style={{ textShadow: '0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3)' }}>Materiais</p>
-            <p className="text-sm font-semibold text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.3)' }}>Gerenciar materiais</p>
-          </div>
-        </button>
       </div>
 
       {/* Top Stats */}
@@ -811,82 +799,8 @@ const DashboardPage = ({ quotations, clients, onNavigate, currentUser, onQuotati
             </div>
           </div>
 
-          {/* Top Materiais */}
-          <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartOrange }}>
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-black" style={{ color: '#D97706' }}>📦 Top Materiais</h3>
-              <span className="text-sm px-3 py-1 rounded-full" style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', color: COLORS.warning }}>
-                Por Valor
-              </span>
-            </div>
-            <div className="space-y-3">
-              {stats.topMaterials.map((mat, idx) => (
-                <div key={idx} className="p-4 rounded-lg border border-gray-200 hover:border-amber-300 transition-all">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-gray-900">{idx + 1}. {mat.name}</p>
-                    <span className="text-xs font-bold px-2 py-1 rounded bg-purple-100 text-purple-700">
-                      {mat.count} cotações
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs mb-3">
-                    <div>
-                      <p className="text-gray-600">Peso Total</p>
-                      <p className="font-semibold text-gray-900">{mat.totalWeight.toFixed(0)} kg</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">R$/kg</p>
-                      <p className="font-semibold text-blue-700">R$ {mat.valuePerKg}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">Conv.</p>
-                      <p className="font-semibold text-green-700">{mat.conversionRate}%</p>
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                    <p className="text-sm text-gray-600">Valor Total</p>
-                    <p className="font-bold text-lg" style={{ color: COLORS.warning }}>R$ {(mat.totalValue / 1000).toFixed(1)}k</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
-        {/* Peso vs Valor Analysis */}
-        <div className="card-glass p-7 border-t-4" style={{ borderColor: COLORS.chartGreen }}>
-          <div className="mb-6">
-            <h3 className="text-xl font-black mb-2" style={{ color: '#059669' }}>⚖️ Análise Peso vs Valor (ROI)</h3>
-            <p className="text-sm font-semibold" style={{ color: '#10B981' }}>
-              Quanto valor você gera por kg de material processado
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-            {stats.topMaterials.map((mat, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-lg border border-gray-200 text-center"
-                style={{
-                  backgroundColor: 'rgba(1, 112, 185, 0.05)',
-                  borderColor: `rgba(1, 112, 185, 0.2)`
-                }}
-              >
-                <p className="text-sm font-semibold text-gray-700 mb-3">{mat.name}</p>
-                <div className="space-y-2">
-                  <div>
-                    <p className="text-xs text-gray-600">ROI (R$/kg)</p>
-                    <p className="text-2xl font-bold" style={{ color: COLORS.primary }}>
-                      {mat.valuePerKg}
-                    </p>
-                  </div>
-                  <div className="text-xs">
-                    <p className="text-gray-600">{mat.totalWeight.toFixed(0)} kg</p>
-                    <p className="font-semibold text-gray-700">R$ {(mat.totalValue / 1000).toFixed(1)}k</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* AI Insights & Recommendations */}

@@ -224,31 +224,6 @@ const AppleStyleDashboard = ({
           </section>
         )}
 
-        {currentPage === 'materials' && (
-          <section className="min-h-screen py-16 pb-32">
-            <motion.div
-              className="max-w-6xl mx-auto px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <h2 className="text-4xl font-bold mb-8 text-gray-900">Gerenciar Materiais</h2>
-              <div className="bg-white rounded-2xl border border-gray-200 p-8">
-                <p className="text-gray-600 mb-4">Total de materiais: {materials?.length || 0}</p>
-                <button
-                  onClick={() => {
-                    const name = prompt('Nome do material:');
-                    if (name) {
-                      onAddMaterial({ name, costPrice: 0, sellPrice: 0 });
-                    }
-                  }}
-                  className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-full hover:shadow-lg transition-shadow"
-                >
-                  Adicionar Material
-                </button>
-              </div>
-            </motion.div>
-          </section>
-        )}
         </motion.main>
       </AnimatePresence>
 

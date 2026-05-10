@@ -1,103 +1,247 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+};
+
+const metrics = [
+  { value: '+37%', label: 'Conversão de orçamentos' },
+  { value: '4×', label: 'Velocidade de criação' },
+  { value: '100%', label: 'Rastreabilidade' },
+];
+
+const features = [
+  {
+    icon: <PipelineIcon />,
+    title: 'Pipeline visual',
+    desc: 'Acompanhe cada orçamento do rascunho ao fechamento em tempo real.',
+  },
+  {
+    icon: <PrecisionIcon />,
+    title: 'Cálculo industrial',
+    desc: 'Peso, material, serviços e margens calculados automaticamente por peça.',
+  },
+  {
+    icon: <DashboardIcon />,
+    title: 'Dashboards de gestão',
+    desc: 'KPIs, funil de vendas e performance por orcamentista para o gestor.',
+  },
+];
+
 const AppleHero = ({ onStartClick, onDemoClick }) => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: 'easeOut' },
-    },
-  };
-
   return (
-    <section className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white flex items-center justify-center px-3 sm:px-4 pt-12 sm:pt-16 md:pt-20">
+    <section
+      className="min-h-screen flex items-center justify-center px-4 pt-14 pb-16"
+      style={{
+        background: 'linear-gradient(160deg, #FFFFFF 0%, #F4F5F7 40%, #EBF0FF 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Grid decorativo de fundo — evocar precisão industrial */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage:
+            'linear-gradient(rgba(0,82,204,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,82,204,0.04) 1px, transparent 1px)',
+          backgroundSize: '40px 40px',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* Glow accent — canto superior direito */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: '-120px',
+          right: '-80px',
+          width: '480px',
+          height: '480px',
+          background: 'radial-gradient(circle, rgba(0,82,204,0.08) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }}
+      />
+
       <motion.div
-        className="text-center max-w-3xl"
-        variants={containerVariants}
+        className="relative z-10 max-w-5xl w-full"
+        variants={stagger}
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
+        animate="visible"
       >
-        {/* Subtitle */}
-        <motion.p variants={itemVariants} className="text-sm font-semibold text-blue-600 tracking-wide mb-4">
-          SISTEMA DE ORÇAMENTOS INTELIGENTE
-        </motion.p>
-
-        {/* Main Title */}
-        <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-          Orçamentos{' '}
-          <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            Profissionais
-          </span>
-          <br />
-          em Segundos
-        </motion.h1>
-
-        {/* Description */}
-        <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
-          Crie orçamentos precisos, gerencie clientes e acompanhe vendas com a plataforma mais intuitiva do mercado.
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-12">
-          <motion.button
-            onClick={onStartClick}
-            whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(59, 130, 246, 0.3)' }}
-            whileTap={{ scale: 0.95 }}
-            className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-sm sm:text-base rounded-lg hover:shadow-lg transition-shadow cursor-pointer"
+        {/* Badge de categoria */}
+        <motion.div variants={fadeUp} className="mb-6 flex items-center gap-3">
+          <div
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded text-xs font-bold uppercase tracking-widest"
+            style={{
+              backgroundColor: '#DEEBFF',
+              color: '#0052CC',
+              border: '1px solid #B3D4FF',
+            }}
           >
-            Começar Agora
-          </motion.button>
-          <motion.button
-            onClick={onDemoClick}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 border-2 border-gray-300 text-gray-900 font-semibold text-sm sm:text-base rounded-lg hover:border-gray-400 transition-colors cursor-pointer"
-          >
-            Ver Demo
-          </motion.button>
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ backgroundColor: '#0052CC' }}
+            />
+            Plataforma de Gestão de Orçamentos
+          </div>
         </motion.div>
 
-        {/* Floating Cards Animation */}
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mt-8 sm:mt-12"
+        {/* Headline */}
+        <motion.h1
+          variants={fadeUp}
+          className="mb-5 leading-none"
+          style={{
+            fontSize: 'clamp(2.4rem, 5vw, 3.75rem)',
+            fontWeight: 800,
+            color: '#091E42',
+            letterSpacing: '-0.04em',
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
+          }}
         >
-          {[
-            { delay: 0, icon: '📊', label: 'Dashboard' },
-            { delay: 0.2, icon: '💼', label: 'Clientes' },
-            { delay: 0.4, icon: '🎯', label: 'Orçamentos' },
-          ].map((card) => (
+          Orçamentos industriais
+          <br />
+          com{' '}
+          <span
+            style={{
+              background: 'linear-gradient(90deg, #0052CC 0%, #0065FF 50%, #00B8A9 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            precisão e velocidade
+          </span>
+        </motion.h1>
+
+        {/* Subtítulo */}
+        <motion.p
+          variants={fadeUp}
+          className="mb-8 max-w-2xl"
+          style={{
+            fontSize: '1.125rem',
+            color: '#42526E',
+            lineHeight: 1.65,
+            fontWeight: 400,
+          }}
+        >
+          Do corte a laser ao oxicorte — calcule, gerencie e feche orçamentos de
+          conformação metálica com controle total de materiais, serviços e margens.
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 mb-14">
+          <button
+            onClick={onStartClick}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-bold text-white transition-all duration-150"
+            style={{
+              backgroundColor: '#0052CC',
+              boxShadow: '0 2px 8px rgba(0,82,204,0.35)',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#003D99';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,82,204,0.45)';
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#0052CC';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,82,204,0.35)';
+              e.currentTarget.style.transform = 'none';
+            }}
+          >
+            Criar primeiro orçamento
+            <ArrowRightIcon />
+          </button>
+          <button
+            onClick={onDemoClick}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-sm font-bold transition-all duration-150"
+            style={{
+              color: '#0052CC',
+              backgroundColor: '#FFFFFF',
+              border: '1.5px solid #0052CC',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.backgroundColor = '#DEEBFF';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.backgroundColor = '#FFFFFF';
+            }}
+          >
+            Ver dashboard
+          </button>
+        </motion.div>
+
+        {/* Métricas */}
+        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-6 mb-14 max-w-xl">
+          {metrics.map((m) => (
+            <div key={m.label}>
+              <p
+                className="font-extrabold"
+                style={{
+                  fontSize: '1.75rem',
+                  color: '#0052CC',
+                  fontFamily: "'JetBrains Mono', monospace",
+                  letterSpacing: '-0.03em',
+                }}
+              >
+                {m.value}
+              </p>
+              <p
+                className="text-xs font-semibold mt-0.5"
+                style={{ color: '#7A869A', lineHeight: 1.3 }}
+              >
+                {m.label}
+              </p>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Feature cards — industriais, sem emojis */}
+        <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {features.map((f, i) => (
             <motion.div
-              key={card.label}
-              className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-2xl sm:rounded-3xl shadow-lg flex flex-col items-center justify-center cursor-pointer border border-gray-100"
-              animate={{
-                y: [0, -20, 0],
-                rotate: [0, 5, 0],
+              key={f.title}
+              className="rounded-lg p-5 border transition-all duration-200"
+              style={{
+                backgroundColor: '#FFFFFF',
+                borderColor: '#DFE1E6',
+                boxShadow: '0 1px 2px rgba(9,30,66,0.12)',
               }}
-              transition={{
-                duration: 6,
-                delay: card.delay,
-                repeat: Infinity,
-                ease: 'easeInOut',
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55 + i * 0.1, duration: 0.4, ease: 'easeOut' }}
+              whileHover={{
+                y: -2,
+                boxShadow: '0 4px 12px rgba(9,30,66,0.15)',
+                borderColor: '#B3D4FF',
               }}
-              whileHover={{ scale: 1.1, boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)' }}
             >
-              <span className="text-4xl mb-2">{card.icon}</span>
-              <p className="text-sm font-semibold text-gray-700">{card.label}</p>
+              <div
+                className="w-9 h-9 rounded-md flex items-center justify-center mb-3"
+                style={{ backgroundColor: '#DEEBFF', color: '#0052CC' }}
+              >
+                {f.icon}
+              </div>
+              <p
+                className="font-bold mb-1.5 text-sm"
+                style={{ color: '#091E42' }}
+              >
+                {f.title}
+              </p>
+              <p
+                className="text-xs leading-relaxed"
+                style={{ color: '#42526E' }}
+              >
+                {f.desc}
+              </p>
             </motion.div>
           ))}
         </motion.div>
@@ -105,5 +249,40 @@ const AppleHero = ({ onStartClick, onDemoClick }) => {
     </section>
   );
 };
+
+// ── Ícones ─────────────────────────────────────────────────────────────────────
+
+const ArrowRightIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M2.5 7h9M8 3.5L11.5 7 8 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const PipelineIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <circle cx="3" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
+    <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
+    <circle cx="15" cy="9" r="2" stroke="currentColor" strokeWidth="1.4" />
+    <path d="M5 9h2M11 9h2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <path d="M3 4v2M9 4v2M15 4v2M3 12v2M9 12v2M15 12v2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const PrecisionIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <path d="M4 14L9 3L14 14" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M6 10.5h6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    <path d="M9 3V1.5M4 14H2.5M14 14H15.5" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" />
+  </svg>
+);
+
+const DashboardIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+    <rect x="1.5" y="1.5" width="6.5" height="8" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="10" y="1.5" width="6.5" height="4" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="10" y="7.5" width="6.5" height="9" rx="1" stroke="currentColor" strokeWidth="1.3" />
+    <rect x="1.5" y="11.5" width="6.5" height="5" rx="1" stroke="currentColor" strokeWidth="1.3" />
+  </svg>
+);
 
 export default AppleHero;

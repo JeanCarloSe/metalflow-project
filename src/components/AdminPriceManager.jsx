@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ASTON_BRAND } from '../services/themeService';
-import { getMaterials, updateMaterial } from '../services/storageService';
+import { getMaterials, updateMaterial } from '../services/d1Service';
 import { getMarketPrices, setMarketPrice, getPriceHistory } from '../services/priceService';
 import { fetchAllPrices, getPriceFetchState } from '../services/priceFetchService';
 

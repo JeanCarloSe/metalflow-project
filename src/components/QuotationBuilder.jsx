@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { hexToRgba, darken, ASTON_BRAND, THEME } from '../services/themeService';
 import QuotationLineItem from './QuotationLineItem';
-import { SERVICE_PRICES } from '../services/serviceService';
+import { SERVICE_PRICES, loadServicesFromAPI } from '../services/serviceService';
 import { generateQuotationCode } from '../services/codeService';
 import { QUOTATION_STATUS, getStatusLabel, getStatusBg, getStatusColor } from '../services/statusService';
 import DxfImportDialog from './DxfImportDialog';
@@ -25,6 +25,11 @@ const QuotationBuilder = ({ materials, selectedClient, onSubmit, onChangeClient,
   const [lines, setLines] = useState(initialQuotation?.lines || []);
   const [quotationNumber, setQuotationNumber] = useState(initialQuotation?.number || null);
   const [status, setStatus] = useState(initialQuotation?.status || 'em-andamento');
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    loadServicesFromAPI().then(() => forceUpdate(n => n + 1));
+  }, []);
   const [showDxfImport, setShowDxfImport] = useState(false);
   const [cadFileId, setCadFileId] = useState(initialQuotation?.cadFileId || null);
   const [cadFileName, setCadFileName] = useState(initialQuotation?.cadFileName || null);

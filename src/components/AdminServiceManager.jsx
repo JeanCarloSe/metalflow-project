@@ -9,67 +9,42 @@ const AdminServiceManager = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  useEffect(() => {
-    setServices(getAllServices());
-  }, []);
+  useEffect(() => { loadList(); }, []);
+
+  const loadList = async () => {
+    const list = await getAllServices();
+    setServices(list);
+  };
 
   const inputCls = 'w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all';
 
-  const handleAddService = () => {
-    setError('');
-    setSuccess('');
-
-    if (!newService.name.trim()) {
-      setError('Nome do serviço é obrigatório');
-      return;
-    }
-    if (!newService.costPerKg || parseFloat(newService.costPerKg) <= 0) {
-      setError('Custo deve ser maior que zero');
-      return;
-    }
-
-    const result = addService(newService.name, newService.costPerKg, newService.sellPrice || null, newService.marginPercent, newService.description);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-
+  const handleAddService = async () => {
+    setError(''); setSuccess('');
+    if (!newService.name.trim()) { setError('Nome do serviço é obrigatório'); return; }
+    if (!newService.costPerKg || parseFloat(newService.costPerKg) <= 0) { setError('Custo deve ser maior que zero'); return; }
+    const result = await addService(newService.name, newService.costPerKg, newService.sellPrice || null, newService.marginPercent, newService.description);
+    if (!result.ok) { setError(result.error); return; }
     setSuccess(`Serviço "${newService.name}" adicionado`);
     setNewService({ name: '', costPerKg: '', sellPrice: '', marginPercent: 50, description: '' });
-    setServices(getAllServices());
+    await loadList();
   };
 
-  const handleUpdateService = (oldName, newCost, newSellPrice, newMargin, newDesc) => {
-    setError('');
-    setSuccess('');
-
-    if (!newCost || parseFloat(newCost) <= 0) {
-      setError('Custo deve ser maior que zero');
-      return;
-    }
-
-    const result = updateService(oldName, newCost, newSellPrice || null, newMargin, newDesc);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-
-    setSuccess(`Serviço "${oldName}" atualizado`);
+  const handleUpdateService = async (svc, newCost, newSellPrice, newMargin, newDesc) => {
+    setError(''); setSuccess('');
+    if (!newCost || parseFloat(newCost) <= 0) { setError('Custo deve ser maior que zero'); return; }
+    const result = await updateService(svc.id, svc.name, newCost, newSellPrice || null, newMargin, newDesc);
+    if (!result.ok) { setError(result.error); return; }
+    setSuccess(`Serviço "${svc.name}" atualizado`);
     setEditingId(null);
-    setServices(getAllServices());
+    await loadList();
   };
 
-  const handleDeleteService = (name) => {
-    if (!window.confirm(`Remover serviço "${name}"?`)) return;
-
-    const result = deleteService(name);
-    if (!result.ok) {
-      setError(result.error);
-      return;
-    }
-
-    setSuccess(`Serviço "${name}" removido`);
-    setServices(getAllServices());
+  const handleDeleteService = async (svc) => {
+    if (!window.confirm(`Remover serviço "${svc.name}"?`)) return;
+    const result = await deleteService(svc.id);
+    if (!result.ok) { setError(result.error); return; }
+    setSuccess(`Serviço "${svc.name}" removido`);
+    await loadList();
   };
 
   return (
@@ -218,7 +193,7 @@ const AdminServiceManager = () => {
                         const newSell = document.getElementById(`sell-${service.id}`).value;
                         const newMargin = document.getElementById(`margin-${service.id}`).value;
                         const newDesc = document.getElementById(`desc-${service.id}`).value;
-                        handleUpdateService(service.name, newCost, newSell, newMargin, newDesc);
+                        handleUpdateService(service, newCost, newSell, newMargin, newDesc);
                       }}
                       className="px-3 py-1.5 text-xs text-green-400 hover:text-green-300 border border-green-500/40 rounded hover:bg-green-950/40 transition-all"
                     >
@@ -265,7 +240,7 @@ const AdminServiceManager = () => {
                       ✏ Editar
                     </button>
                     <button
-                      onClick={() => handleDeleteService(service.name)}
+                      onClick={() => handleDeleteService(service)}
                       className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 border border-red-500/40 rounded hover:bg-red-950/40 transition-all"
                     >
                       ✕ Remover

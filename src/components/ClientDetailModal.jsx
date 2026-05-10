@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { hexToRgba, ASTON_BRAND } from '../services/themeService';
-import { updateClient } from '../services/storageService';
+import { updateClient } from '../services/d1Service';
 
 const ROLES = ['Comprador', 'Responsável', 'Engenharia', 'Comercial', 'Outro'];
 
