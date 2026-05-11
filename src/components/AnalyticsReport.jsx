@@ -1,239 +1,243 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { generateClientReport, calculateMaterialMetrics, generateMonthlyTrend, exportToCSV, calculatePerformanceScore } from '../services/analyticsService';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { QUOTATION_STATUS, getStatusLabel } from '../services/statusService';
+import { generateClientReport, calculateMaterialMetrics, generateMonthlyTrend, exportToCSV } from '../services/analyticsService';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { getStatusLabel } from '../services/statusService';
 import DataAccessService from '../services/dataAccessService';
+
 const getSession = () => { try { const s = localStorage.getItem('metalflow_user'); return s ? JSON.parse(s) : null; } catch { return null; } };
 
+const PRIMARY = '#0052CC';
+
+const fmt = (val) => {
+  const n = parseFloat(val || 0);
+  if (n >= 1000000) return `R$ ${(n / 1000000).toFixed(2)}M`;
+  if (n >= 1000) return `R$ ${(n / 1000).toFixed(1)}k`;
+  return `R$ ${n.toFixed(2)}`;
+};
+
 const AnalyticsReport = ({ quotations, clients }) => {
-  const [exportFormat, setExportFormat] = useState('csv');
   const [selectedMetric, setSelectedMetric] = useState('clients');
   const [statusFilter, setStatusFilter] = useState(null);
 
-  // Carregar filtro do localStorage
   useEffect(() => {
     const filter = localStorage.getItem('quotationStatusFilter');
     if (filter) {
       setStatusFilter(filter);
-      localStorage.removeItem('quotationStatusFilter'); // Limpar após usar
+      localStorage.removeItem('quotationStatusFilter');
     }
   }, []);
 
-  // Filtrar quotations baseado na role do usuário
   const accessibleQuotations = useMemo(() => {
     const currentUser = getSession();
     return DataAccessService.filterQuotations(quotations, currentUser);
   }, [quotations]);
 
-  const analytics = useMemo(() => {
-    // Filtrar quotations por status se houver filtro ativo
-    const filteredQuotations = statusFilter
-      ? accessibleQuotations.filter(q => q.status === statusFilter)
-      : accessibleQuotations;
+  const filtered = useMemo(() =>
+    statusFilter ? accessibleQuotations.filter(q => q.status === statusFilter) : accessibleQuotations,
+    [accessibleQuotations, statusFilter]
+  );
 
-    const clientReport = generateClientReport(filteredQuotations, clients);
-    const materialMetrics = calculateMaterialMetrics(filteredQuotations);
-    const monthlyTrend = generateMonthlyTrend(filteredQuotations);
+  const analytics = useMemo(() => ({
+    clientReport: generateClientReport(filtered, clients),
+    materialMetrics: calculateMaterialMetrics(filtered),
+    monthlyTrend: generateMonthlyTrend(filtered),
+  }), [filtered, clients]);
 
-    return {
-      clientReport,
-      materialMetrics,
-      monthlyTrend,
-    };
-  }, [accessibleQuotations, clients, statusFilter]);
+  const trendData = Object.entries(analytics.monthlyTrend).map(([month, data]) => ({ month, ...data }));
 
-  const trendData = Object.entries(analytics.monthlyTrend).map(([month, data]) => ({
-    month,
-    ...data,
-  }));
+  const clientRows = Object.values(analytics.clientReport).sort((a, b) => b.totalValue - a.totalValue).slice(0, 10);
+  const materialRows = analytics.materialMetrics.sort((a, b) => b.totalValue - a.totalValue).slice(0, 10);
+
+  const totalValue = filtered.reduce((s, q) => s + parseFloat(q.totalPrice || 0), 0);
+  const approvedCount = filtered.filter(q => q.status === 'aprovado').length;
+  const approvedValue = filtered.filter(q => q.status === 'aprovado').reduce((s, q) => s + parseFloat(q.totalPrice || 0), 0);
+  const convRate = filtered.length > 0 ? ((approvedCount / filtered.length) * 100).toFixed(0) : 0;
 
   const handleExport = () => {
-    let data;
-    let filename;
-
     if (selectedMetric === 'clients') {
-      data = Object.values(analytics.clientReport).map(c => ({
+      const data = clientRows.map(c => ({
         'Cliente': c.name,
         'Orçamentos': c.totalQuotations,
         'Aprovados': c.approved,
-        'Reprovados': c.rejected,
-        'Pendentes': c.pending,
         'Taxa Conversão': `${((c.approved / c.totalQuotations) * 100).toFixed(1)}%`,
         'Valor Total': `R$ ${c.totalValue.toFixed(2)}`,
         'Valor Médio': `R$ ${(c.totalValue / c.totalQuotations).toFixed(2)}`,
       }));
-      filename = 'relatorio-clientes.csv';
+      exportToCSV(data, 'relatorio-clientes.csv');
     } else {
-      data = analytics.materialMetrics.map(m => ({
+      const data = materialRows.map(m => ({
         'Material': m.name,
         'Quotações': m.quotationCount,
         'Aprovadas': m.approvedCount,
         'Taxa Conversão': `${m.conversionRate}%`,
-        'Peso Total (kg)': m.totalWeight.toFixed(2),
         'Valor Total': `R$ ${m.totalValue.toFixed(2)}`,
         'Preço Médio': `R$ ${m.avgPrice}`,
-        'Preço Mín': `R$ ${m.minPrice}`,
-        'Preço Máx': `R$ ${m.maxPrice}`,
         'Volatilidade': `${m.priceVolatility}%`,
       }));
-      filename = 'relatorio-materiais.csv';
+      exportToCSV(data, 'relatorio-materiais.csv');
     }
-
-    exportToCSV(data, filename);
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 space-y-4 sm:space-y-6 md:space-y-8">
-      <div className="space-y-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2" style={{ color: '#0052CC' }}>📊 Relatórios Avançados</h1>
-        <p className="text-lg text-gray-600">Análise detalhada e exportação de dados</p>
-        {statusFilter && (
-          <div className="mt-4 p-3 bg-blue-50 border-l-4 border-blue-500 rounded flex items-center justify-between">
-            <span className="text-sm">
-              <strong>Filtro ativo:</strong> Exibindo apenas orçamentos <strong>{getStatusLabel(statusFilter)}</strong>
-            </span>
+    <div className="max-w-6xl mx-auto px-4 space-y-6 py-8">
+
+      {/* Header — mesmo padrão QuotationsPage */}
+      <div className="flex justify-between items-end border-b-4 pb-4" style={{ borderColor: PRIMARY }}>
+        <div>
+          <h1 className="text-4xl font-bold" style={{ color: PRIMARY }}>Relatórios</h1>
+          <p className="text-base font-semibold mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+            {filtered.length} orçamentos analisados
+            {statusFilter && <span> · filtro: <strong>{getStatusLabel(statusFilter)}</strong></span>}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {statusFilter && (
             <button
               onClick={() => setStatusFilter(null)}
-              className="text-sm px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+              className="px-3 py-2 text-xs font-bold rounded-lg border transition-all"
+              style={{ color: PRIMARY, borderColor: `${PRIMARY}40`, backgroundColor: `${PRIMARY}08` }}
             >
               ✕ Limpar filtro
             </button>
-          </div>
-        )}
-      </div>
-
-      {/* Metric Selector & Export */}
-      <div className="card-glass p-6 flex items-center justify-between gap-2 sm:gap-3 md:gap-4 flex-wrap">
-        <div className="flex gap-2 sm:gap-3 md:gap-4">
+          )}
           <button
-            onClick={() => setSelectedMetric('clients')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              selectedMetric === 'clients'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
+            onClick={handleExport}
+            className="px-5 py-2 text-white font-semibold rounded-lg shadow-md hover:brightness-110 transition-all text-sm"
+            style={{ backgroundColor: '#00875A' }}
           >
-            🏢 Clientes
-          </button>
-          <button
-            onClick={() => setSelectedMetric('materials')}
-            className={`px-4 py-2 rounded-lg font-medium transition-all ${
-              selectedMetric === 'materials'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            📦 Materiais
+            ↓ Exportar CSV
           </button>
         </div>
-        <button
-          onClick={handleExport}
-          className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all"
-        >
-          📥 Exportar CSV
-        </button>
+      </div>
+
+      {/* KPI strip — mesmo padrão QuotationsPage */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Total', value: filtered.length, sub: 'orçamentos', color: PRIMARY, bg: '#DEEBFF' },
+          { label: 'Valor Total', value: fmt(totalValue), sub: 'pipeline', color: '#00875A', bg: '#E3FCEF' },
+          { label: 'Aprovados', value: fmt(approvedValue), sub: 'ganhos', color: '#00875A', bg: '#E3FCEF' },
+          { label: 'Conversão', value: `${convRate}%`, sub: 'taxa geral', color: '#FF8B00', bg: '#FFFAE6' },
+        ].map((kpi, i) => (
+          <div key={i} className="rounded-xl p-4 border" style={{ backgroundColor: kpi.bg, borderColor: `${kpi.color}30` }}>
+            <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: kpi.color }}>{kpi.label}</p>
+            <p className="text-2xl font-black" style={{ color: kpi.color }}>{kpi.value}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: `${kpi.color}99` }}>{kpi.sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Metric selector chips — mesmo padrão status chips */}
+      <div className="flex gap-2">
+        {[
+          { id: 'clients', label: 'Clientes' },
+          { id: 'materials', label: 'Materiais' },
+        ].map(m => (
+          <button
+            key={m.id}
+            onClick={() => setSelectedMetric(m.id)}
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all border ${selectedMetric === m.id ? 'text-white border-transparent' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-400'}`}
+            style={selectedMetric === m.id ? { backgroundColor: PRIMARY } : {}}
+          >
+            {m.label}
+          </button>
+        ))}
       </div>
 
       {/* Trend Chart */}
-      <div className="card-glass p-7">
-        <h3 className="text-xl font-bold mb-6" style={{ color: '#0052CC' }}>Tendência Mensal</h3>
-        <div className="chart-container">
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={trendData}>
-              <CartesianGrid strokeDasharray="4 4" stroke="#e5e7eb" />
-              <XAxis dataKey="month" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
-              <Legend />
-              <Line yAxisId="left" type="monotone" dataKey="total" stroke="#0052CC" name="Quantidade" strokeWidth={2} />
-              <Line yAxisId="left" type="monotone" dataKey="approved" stroke="#10b981" name="Aprovados" strokeWidth={2} />
-              <Line yAxisId="right" type="monotone" dataKey="value" stroke="#f59e0b" name="Valor (R$)" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="card-glass rounded-xl p-6">
+        <h3 className="text-sm font-bold uppercase tracking-wider mb-5" style={{ color: 'var(--color-text-muted)' }}>
+          Tendência Mensal
+        </h3>
+        <ResponsiveContainer width="100%" height={260}>
+          <LineChart data={trendData} margin={{ top: 4, right: 16, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="4 4" stroke="#F4F5F7" />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#7A869A' }} />
+            <YAxis yAxisId="left" tick={{ fontSize: 11, fill: '#7A869A' }} />
+            <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: '#7A869A' }} />
+            <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid #DFE1E6', fontSize: 12 }} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Line yAxisId="left" type="monotone" dataKey="total" stroke={PRIMARY} name="Quantidade" strokeWidth={2} dot={false} />
+            <Line yAxisId="left" type="monotone" dataKey="approved" stroke="#00875A" name="Aprovados" strokeWidth={2} dot={false} />
+            <Line yAxisId="right" type="monotone" dataKey="value" stroke="#FF8B00" name="Valor (R$)" strokeWidth={2} dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
 
-      {/* Detailed Table */}
-      <div className="card-glass p-7">
-        <h3 className="text-xl font-bold mb-6" style={{ color: '#0052CC' }}>
-          {selectedMetric === 'clients' ? '🏢 Análise por Cliente' : '📦 Análise por Material'}
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ borderBottom: '2px solid #0052CC' }}>
-                {selectedMetric === 'clients' ? (
-                  <>
-                    <th className="text-left py-3 px-4 font-semibold">Cliente</th>
-                    <th className="text-center py-3 px-4 font-semibold">Orçamentos</th>
-                    <th className="text-center py-3 px-4 font-semibold">Aprovados</th>
-                    <th className="text-center py-3 px-4 font-semibold">Taxa Conv.</th>
-                    <th className="text-right py-3 px-4 font-semibold">Valor Total</th>
-                    <th className="text-right py-3 px-4 font-semibold">Valor Médio</th>
-                  </>
-                ) : (
-                  <>
-                    <th className="text-left py-3 px-4 font-semibold">Material</th>
-                    <th className="text-center py-3 px-4 font-semibold">Quotações</th>
-                    <th className="text-center py-3 px-4 font-semibold">Aprovadas</th>
-                    <th className="text-center py-3 px-4 font-semibold">Taxa Conv.</th>
-                    <th className="text-right py-3 px-4 font-semibold">Preço Médio</th>
-                    <th className="text-right py-3 px-4 font-semibold">Volatilidade</th>
-                  </>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {selectedMetric === 'clients'
-                ? Object.values(analytics.clientReport)
-                    .sort((a, b) => b.totalValue - a.totalValue)
-                    .slice(0, 10)
-                    .map((client, idx) => (
-                      <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                        <td className="py-3 px-4 font-medium">{client.name}</td>
-                        <td className="py-3 px-4 text-center">{client.totalQuotations}</td>
-                        <td className="py-3 px-4 text-center text-green-700 font-semibold">{client.approved}</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{
-                            backgroundColor: `rgba(16, 185, 129, 0.1)`,
-                            color: '#10b981'
-                          }}>
-                            {((client.approved / client.totalQuotations) * 100).toFixed(0)}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right font-semibold">R$ {(client.totalValue / 1000).toFixed(1)}k</td>
-                        <td className="py-3 px-4 text-right">R$ {(client.totalValue / client.totalQuotations).toFixed(0)}</td>
-                      </tr>
-                    ))
-                : analytics.materialMetrics
-                    .sort((a, b) => b.totalValue - a.totalValue)
-                    .slice(0, 10)
-                    .map((mat, idx) => (
-                      <tr key={idx} className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                        <td className="py-3 px-4 font-medium">{mat.name}</td>
-                        <td className="py-3 px-4 text-center">{mat.quotationCount}</td>
-                        <td className="py-3 px-4 text-center text-green-700 font-semibold">{mat.approvedCount}</td>
-                        <td className="py-3 px-4 text-center">
-                          <span className="px-2 py-1 rounded-full text-xs font-semibold" style={{
-                            backgroundColor: `rgba(245, 158, 11, 0.1)`,
-                            color: '#f59e0b'
-                          }}>
-                            {mat.conversionRate}%
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right font-semibold">R$ {mat.avgPrice}</td>
-                        <td className="py-3 px-4 text-right" style={{ color: parseFloat(mat.priceVolatility) > 20 ? '#ef4444' : '#10b981' }}>
-                          {mat.priceVolatility}%
-                        </td>
-                      </tr>
-                    ))}
-            </tbody>
-          </table>
+      {/* Detail Table — mesmo padrão QuotationsPage */}
+      <div className="card-glass rounded-xl overflow-hidden">
+        <div className="px-5 py-3 border-b" style={{ borderColor: '#F4F5F7', backgroundColor: `${PRIMARY}05` }}>
+          <p className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>
+            {selectedMetric === 'clients' ? 'Análise por Cliente' : 'Análise por Material'}
+          </p>
         </div>
+        <table className="w-full text-sm">
+          <thead>
+            <tr style={{ borderBottom: '2px solid #DFE1E6', backgroundColor: `${PRIMARY}03` }}>
+              {selectedMetric === 'clients' ? (
+                <>
+                  <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Cliente</th>
+                  <th className="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Orçamentos</th>
+                  <th className="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Aprovados</th>
+                  <th className="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Conversão</th>
+                  <th className="text-right py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Valor Total</th>
+                  <th className="text-right py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Valor Médio</th>
+                </>
+              ) : (
+                <>
+                  <th className="text-left py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Material</th>
+                  <th className="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Quotações</th>
+                  <th className="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Aprovadas</th>
+                  <th className="text-center py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Conversão</th>
+                  <th className="text-right py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Preço Médio</th>
+                  <th className="text-right py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-text-muted)' }}>Volatilidade</th>
+                </>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {selectedMetric === 'clients'
+              ? clientRows.map((c, idx) => (
+                  <tr key={idx} className="hover:bg-blue-50/40 transition-colors" style={{ borderBottom: idx < clientRows.length - 1 ? '1px solid #F4F5F7' : 'none' }}>
+                    <td className="py-3 px-4 font-medium text-gray-900 max-w-[180px] truncate">{c.name}</td>
+                    <td className="py-3 px-4 text-center font-mono text-gray-600">{c.totalQuotations}</td>
+                    <td className="py-3 px-4 text-center font-mono font-semibold" style={{ color: '#00875A' }}>{c.approved}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="px-2 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: '#E3FCEF', color: '#00875A' }}>
+                        {c.totalQuotations > 0 ? ((c.approved / c.totalQuotations) * 100).toFixed(0) : 0}%
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-bold font-mono" style={{ color: PRIMARY }}>{fmt(c.totalValue)}</td>
+                    <td className="py-3 px-4 text-right font-mono text-gray-500">{fmt(c.totalQuotations > 0 ? c.totalValue / c.totalQuotations : 0)}</td>
+                  </tr>
+                ))
+              : materialRows.map((m, idx) => (
+                  <tr key={idx} className="hover:bg-blue-50/40 transition-colors" style={{ borderBottom: idx < materialRows.length - 1 ? '1px solid #F4F5F7' : 'none' }}>
+                    <td className="py-3 px-4 font-medium text-gray-900 max-w-[180px] truncate">{m.name}</td>
+                    <td className="py-3 px-4 text-center font-mono text-gray-600">{m.quotationCount}</td>
+                    <td className="py-3 px-4 text-center font-mono font-semibold" style={{ color: '#00875A' }}>{m.approvedCount}</td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="px-2 py-1 rounded-full text-xs font-bold" style={{ backgroundColor: '#FFFAE6', color: '#FF8B00' }}>
+                        {m.conversionRate}%
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-bold font-mono" style={{ color: PRIMARY }}>R$ {m.avgPrice}</td>
+                    <td className="py-3 px-4 text-right font-mono font-semibold" style={{ color: parseFloat(m.priceVolatility) > 20 ? '#DE350B' : '#00875A' }}>
+                      {m.priceVolatility}%
+                    </td>
+                  </tr>
+                ))
+            }
+            {(selectedMetric === 'clients' ? clientRows : materialRows).length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-16 text-center text-gray-400 font-medium">
+                  Nenhum dado disponível
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-      </div>
+
     </div>
   );
 };
