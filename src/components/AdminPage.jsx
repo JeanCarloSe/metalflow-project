@@ -6,13 +6,10 @@ import AdminClientManager from './AdminClientManager';
 import AdminUserManager from './AdminUserManager';
 import AdminQuotationManager from './AdminQuotationManager';
 import AdminPriceManager from './AdminPriceManager';
-import DataManagementPanel from './DataManagementPanel';
-import CadHistoryPanel from './CadHistoryPanel';
 import AdminDashboard from './AdminDashboard';
 
 const AdminPage = ({ currentUser, onLogout }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedClientId, setSelectedClientId] = useState(null);
 
   const tabs = [
     { id: 'dashboard', label: '📊 Dashboard', icon: '📊' },
@@ -22,8 +19,6 @@ const AdminPage = ({ currentUser, onLogout }) => {
     { id: 'clients', label: '🏢 Clientes', icon: '🏢' },
     { id: 'users', label: '👥 Usuários', icon: '👥' },
     { id: 'prices', label: '💰 Preços', icon: '💰' },
-    { id: 'cads', label: '📁 CADs', icon: '📁' },
-    { id: 'data', label: '🗄️ Dados', icon: '🗄️' },
   ];
 
   const tabContent = {
@@ -31,11 +26,9 @@ const AdminPage = ({ currentUser, onLogout }) => {
     quotations: <AdminQuotationManager currentUser={currentUser} />,
     services: <AdminServiceManager />,
     materials: <AdminMaterialManager />,
-    clients: <AdminClientManager onClientSelect={setSelectedClientId} />,
+    clients: <AdminClientManager />,
     users: <AdminUserManager />,
     prices: <AdminPriceManager />,
-    cads: <CadHistoryPanel selectedClientId={selectedClientId} />,
-    data: <DataManagementPanel currentUser={currentUser} />
   };
 
   return (
