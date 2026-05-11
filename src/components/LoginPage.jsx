@@ -2,11 +2,8 @@ import React, { useState } from 'react';
 import { MetalFlowLogoWithText } from './MetalFlowLogo';
 
 const LoginPage = ({ onLogin }) => {
-  const [mode,     setMode]     = useState('login');
   const [login,    setLogin]    = useState('');
   const [password, setPassword] = useState('');
-  const [name,     setName]     = useState('');
-  const [role,     setRole]     = useState('operator');
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
 
@@ -14,35 +11,19 @@ const LoginPage = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     if (!login.trim() || !password) { setError('Preencha login e senha.'); return; }
-    if (mode === 'create' && !name.trim()) { setError('Informe seu nome.'); return; }
     setLoading(true);
     try {
-      if (mode === 'login') {
-        const res = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ login: login.trim(), password }),
-        });
-        const data = await res.json();
-        if (res.ok && data.user) {
-          localStorage.setItem('metalflow_user', JSON.stringify(data.user));
-          onLogin(data.user);
-        } else {
-          setError(data.error || 'Credenciais inválidas.');
-        }
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ login: login.trim(), password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        localStorage.setItem('metalflow_user', JSON.stringify(data.user));
+        onLogin(data.user);
       } else {
-        const res = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ login: login.trim(), password, name, role }),
-        });
-        const data = await res.json();
-        if (res.ok && data.user) {
-          localStorage.setItem('metalflow_user', JSON.stringify(data.user));
-          onLogin(data.user);
-        } else {
-          setError(data.error || 'Erro ao criar usuário.');
-        }
+        setError(data.error || 'Credenciais inválidas.');
       }
     } catch {
       setError('Erro de conexão. Tente novamente.');
@@ -177,51 +158,19 @@ const LoginPage = ({ onLogin }) => {
           {/* Card */}
           <div className="bg-white rounded-2xl shadow-xl border overflow-hidden" style={{ borderColor: 'var(--color-border-light)', boxShadow: '0 20px 60px rgba(9,30,66,0.12)' }}>
 
-            {/* Tabs */}
-            <div className="flex border-b" style={{ borderColor: 'var(--color-border-light)' }}>
-              {[{ id: 'login', label: 'Entrar' }, { id: 'create', label: 'Criar conta' }].map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => { setMode(t.id); setError(''); }}
-                  className="flex-1 py-3.5 text-sm font-bold transition-all"
-                  style={mode === t.id
-                    ? { color: '#0052CC', borderBottom: '2.5px solid #0052CC', marginBottom: '-1px', backgroundColor: 'rgba(0,82,204,0.02)' }
-                    : { color: 'var(--color-text-muted)' }
-                  }
-                >
-                  {t.label}
-                </button>
-              ))}
+            {/* Header */}
+            <div className="px-7 pt-6 pb-2">
+              <h2 className="text-lg font-black" style={{ color: '#091E42' }}>Acesso ao sistema</h2>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>Entre com suas credenciais fornecidas pelo administrador</p>
             </div>
 
             <form onSubmit={handleSubmit} className="p-7 space-y-4">
-              {mode === 'create' && (
-                <>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-                      Nome completo
-                    </label>
-                    <input type="text" value={name} onChange={e => setName(e.target.value)}
-                      placeholder="Seu nome" className={inp} autoFocus />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-                      Perfil de acesso
-                    </label>
-                    <select value={role} onChange={e => setRole(e.target.value)} className={inp}>
-                      <option value="operator">Orçamentista</option>
-                      <option value="admin">Administrador</option>
-                    </select>
-                  </div>
-                </>
-              )}
-
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--color-text-secondary)' }}>
                   Usuário
                 </label>
                 <input type="text" value={login} onChange={e => setLogin(e.target.value)}
-                  placeholder="usuario" className={inp} autoFocus={mode === 'login'} autoComplete="username" />
+                  placeholder="usuario" className={inp} autoFocus autoComplete="username" />
               </div>
 
               <div>
@@ -250,7 +199,7 @@ const LoginPage = ({ onLogin }) => {
                 onMouseEnter={e => !loading && (e.currentTarget.style.filter = 'brightness(1.08)')}
                 onMouseLeave={e => (e.currentTarget.style.filter = 'none')}
               >
-                {loading ? '⏳ Aguarde...' : mode === 'login' ? 'Entrar no sistema' : 'Criar minha conta'}
+                {loading ? '⏳ Aguarde...' : 'Entrar no sistema'}
               </button>
 
             </form>
